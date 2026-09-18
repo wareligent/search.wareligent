@@ -8,7 +8,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* লং-প্রেস ডিলিট পপ-আপ মোডাল স্টাইল */
         .delete-modal-overlay {
             position: fixed;
             top: 0;
@@ -67,7 +66,7 @@
             color: #ffffff;
         }
 
-        /* রেজাল্ট কার্ডের সুন্দর স্টাইল */
+        /* রেজাল্ট কার্ড স্টাইল */
         .result-card {
             background: var(--card-bg, #ffffff);
             border: 1px solid var(--border-color, #e5e7eb);
@@ -193,9 +192,6 @@
     </div>
 
     <script>
-        // --- SERPER API KEY INTEGRATION ---
-        const SERPER_API_KEY = "665dceb36be9bbdc386617809014603c5180cb99";
-
         // --- SUPABASE INTEGRATION ---
         const SUPABASE_URL = "https://xveccsbdrysuiwyuvodw.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_HkyRE170ylT0kkdZxbwUSQ_ihHrS_Ra";
@@ -215,10 +211,7 @@
                     .order('search_count', { ascending: false })
                     .limit(7);
 
-                if (error) {
-                    console.error("Search History Fetch Error:", error.message);
-                    return;
-                }
+                if (error) return;
 
                 trendingGrid.innerHTML = '';
 
@@ -236,7 +229,6 @@
                             <span class="trend-text">${item.keyword}</span>
                         `;
 
-                        // LONG PRESS DELETE
                         let pressTimer;
                         let isLongPress = false;
 
@@ -248,9 +240,7 @@
                             }, 600);
                         };
 
-                        const cancelPress = () => {
-                            clearTimeout(pressTimer);
-                        };
+                        const cancelPress = () => clearTimeout(pressTimer);
 
                         trendItem.addEventListener('touchstart', startPress);
                         trendItem.addEventListener('touchend', cancelPress);
@@ -272,7 +262,7 @@
                     });
                 }
             } catch (err) {
-                console.error("Failed to load search history:", err);
+                console.error(err);
             }
         }
 
@@ -301,38 +291,29 @@
                     document.getElementById('deleteModalOverlay').style.display = 'none';
                     targetDeleteId = null;
                     loadTrendingTopics();
-                } else {
-                    console.error("Delete Error:", error.message);
                 }
             } catch (err) {
-                console.error("Delete exception:", err);
+                console.error(err);
             }
         });
 
-        // --- DATABASE INSERT & COUNT UPDATE FUNCTION ---
+        // --- DATABASE SAVE ---
         async function saveSearchWordToDatabase(word) {
             if (!word) return;
             const cleanWord = word.trim().toLowerCase();
-
             if (!cleanWord || cleanWord.length < 2) return;
 
             try {
-                const { data, error } = await supabaseClient
+                const { data } = await supabaseClient
                     .from("search_suggestions")
                     .select("id, search_count")
                     .eq("keyword", cleanWord)
                     .maybeSingle();
 
-                if (error) {
-                    console.error("Supabase Select Error:", error.message);
-                    return;
-                }
-
                 if (data) {
-                    const newCount = (data.search_count || 1) + 1;
                     await supabaseClient
                         .from("search_suggestions")
-                        .update({ search_count: newCount })
+                        .update({ search_count: (data.search_count || 1) + 1 })
                         .eq("id", data.id);
                 } else {
                     await supabaseClient
@@ -340,7 +321,7 @@
                         .insert([{ keyword: cleanWord, search_count: 1 }]);
                 }
             } catch (err) {
-                console.error("Database Save Exception:", err);
+                console.error(err);
             }
         }
 
@@ -358,7 +339,6 @@
         let selectedIndex = -1;
         let debounceTimer;
 
-        // SECTION 1: Page Load & Theme Switcher
         document.addEventListener('DOMContentLoaded', loadTrendingTopics);
 
         themeToggleBtn.addEventListener('click', () => {
@@ -367,7 +347,6 @@
             themeIcon.textContent = document.body.classList.contains('dark-theme') ? '☀️' : '🌙';
         });
 
-        // SECTION 2: Input & Clear Button Handling
         searchInput.addEventListener('input', function() {
             const query = this.value.trim();
             clearBtn.style.display = query ? 'block' : 'none';
@@ -393,38 +372,7 @@
             trendingBox.style.display = 'block';
         });
 
-        // SECTION 3: Keyboard Navigation
-        searchInput.addEventListener('keydown', (e) => {
-            const items = suggestionsList.querySelectorAll('li');
-            if (e.key === 'ArrowDown') {
-                e.preventDefault();
-                if (items.length > 0) {
-                    selectedIndex = (selectedIndex + 1) % items.length;
-                    updateSelection(items);
-                }
-            } else if (e.key === 'ArrowUp') {
-                e.preventDefault();
-                if (items.length > 0) {
-                    selectedIndex = (selectedIndex - 1 + items.length) % items.length;
-                    updateSelection(items);
-                }
-            } else if (e.key === 'Enter') {
-                executeSearch();
-            }
-        });
-
-        function updateSelection(items) {
-            items.forEach((item, index) => {
-                if (index === selectedIndex) {
-                    item.classList.add('selected');
-                    searchInput.value = item.dataset.val;
-                } else {
-                    item.classList.remove('selected');
-                }
-            });
-        }
-
-        // SECTION 4: Real-time Auto-Suggest API
+        // AUTO-SUGGEST
         function fetchSuggestions(query) {
             const oldScript = document.getElementById('jsonp-suggestions');
             if (oldScript) oldScript.remove();
@@ -437,7 +385,6 @@
             const script = document.createElement('script');
             script.id = 'jsonp-suggestions';
             script.src = `https://suggestqueries.google.com/complete/search?client=chrome&q=${encodeURIComponent(query)}&callback=handleGoogleSuggestions`;
-            script.onerror = () => renderSuggestions([]);
             
             document.body.appendChild(script);
         }
@@ -459,7 +406,7 @@
             });
         }
 
-        // SECTION 5: Voice Search
+        // VOICE SEARCH
         if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             const recognition = new SpeechRecognition();
@@ -479,7 +426,7 @@
             recognition.onend = () => { voiceBtn.style.color = ''; };
         }
 
-        // SECTION 6: SERPER API-BASED IN-PAGE SEARCH EXECUTION
+        // --- WORKING IN-PAGE SEARCH ENGINE ---
         async function executeSearch(queryStr) {
             const query = (typeof queryStr === 'string' && queryStr.trim() !== '') ? queryStr.trim() : searchInput.value.trim();
             suggestionsList.innerHTML = '';
@@ -489,7 +436,7 @@
             await saveSearchWordToDatabase(query);
             loadTrendingTopics(); 
 
-            // ওয়েবসাইট লিংক বা ডোমেন চেক
+            // ওয়েবসাইট লিংক ডিটেকশন
             const isDomain = /^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/.*)?$/.test(query);
             const hasProtocol = /^https?:\/\//i.test(query);
 
@@ -504,48 +451,66 @@
             resultsWrapper.innerHTML = `<p style="color: var(--text-secondary, #6b7280); text-align: center; padding: 30px;">Searching for "${query}"...</p>`;
 
             try {
-                // Serper API দিয়ে সরাসরি রেজাল্ট ফেচ করা
-                const response = await fetch("https://google.serper.dev/search", {
-                    method: "POST",
-                    headers: {
-                        "X-API-KEY": SERPER_API_KEY,
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({ q: query })
-                });
-
+                // CORS বাইপাস করে সার্চ রেজাল্ট আনা
+                const targetUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
+                const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`);
                 const data = await response.json();
+
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(data.contents, 'text/html');
+                const results = doc.querySelectorAll('.result');
+
                 resultsWrapper.innerHTML = '';
 
-                // অর্গানিক রেজাল্ট দেখানো
-                if (data.organic && data.organic.length > 0) {
-                    data.organic.forEach(item => {
-                        let domain = "";
-                        try {
-                            domain = new URL(item.link).hostname;
-                        } catch (e) {
-                            domain = item.link;
-                        }
+                if (results.length > 0) {
+                    results.forEach((res, i) => {
+                        if (i > 10) return; // সেরা ১০টি রেজাল্ট দেখাবে
 
-                        const card = document.createElement('div');
-                        card.className = 'result-card';
-                        card.innerHTML = `
-                            <div class="result-header">
-                                <img src="https://www.google.com/s2/favicons?domain=${domain}&sz=32" class="site-icon" alt="">
-                                <span class="site-url">${domain}</span>
-                            </div>
-                            <a href="${item.link}" target="_blank" class="result-title">${item.title}</a>
-                            <p class="result-snippet">${item.snippet || ''}</p>
-                        `;
-                        resultsWrapper.appendChild(card);
+                        const titleEl = res.querySelector('.result__title a');
+                        const snippetEl = res.querySelector('.result__snippet');
+                        const urlEl = res.querySelector('.result__url');
+
+                        if (titleEl) {
+                            let title = titleEl.innerText;
+                            let rawUrl = titleEl.getAttribute('href');
+                            
+                            // আসল লিংক বের করা
+                            let cleanUrl = rawUrl;
+                            if (rawUrl.includes('uddg=')) {
+                                cleanUrl = decodeURIComponent(rawUrl.split('uddg=')[1].split('&')[0]);
+                            }
+
+                            let domain = "";
+                            try {
+                                domain = new URL(cleanUrl).hostname;
+                            } catch (e) {
+                                domain = cleanUrl;
+                            }
+
+                            const snippet = snippetEl ? snippetEl.innerText : '';
+
+                            const card = document.createElement('div');
+                            card.className = 'result-card';
+                            card.innerHTML = `
+                                <div class="result-header">
+                                    <img src="https://www.google.com/s2/favicons?domain=${domain}&sz=32" class="site-icon" alt="">
+                                    <span class="site-url">${domain}</span>
+                                </div>
+                                <a href="${cleanUrl}" target="_blank" class="result-title">${title}</a>
+                                <p class="result-snippet">${snippet}</p>
+                            `;
+                            resultsWrapper.appendChild(card);
+                        }
                     });
-                } else {
+                }
+
+                if (resultsWrapper.innerHTML === '') {
                     resultsWrapper.innerHTML = `<p style="color: var(--text-secondary, #6b7280); text-align: center; padding: 20px;">No results found for "${query}".</p>`;
                 }
 
             } catch (err) {
-                console.error("Search Fetch Error:", err);
-                resultsWrapper.innerHTML = `<p style="color: #ef4444; text-align: center; padding: 20px;">Failed to fetch search results. Please try again later.</p>`;
+                console.error("Search Error:", err);
+                resultsWrapper.innerHTML = `<p style="color: #ef4444; text-align: center; padding: 20px;">Failed to fetch search results. Please try again.</p>`;
             }
         }
     </script>
