@@ -272,6 +272,16 @@
             color: var(--text-primary);
         }
 
+        /* Search Response Time Styling */
+        .search-perf-meta {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            padding: 8px 0;
+            margin-bottom: 8px;
+            border-bottom: 1px solid var(--border-color);
+            display: none; /* শুরুতে লুকানো থাকবে */
+        }
+
         /* Search Results Cards */
         .results-container {
             display: flex;
@@ -487,6 +497,9 @@
                 </div>
                 <div class="trending-grid" id="trendingGrid"></div>
             </section>
+
+            <!-- Search meta information (Time & Results count) -->
+            <div id="searchPerfMeta" class="search-perf-meta"></div>
 
             <div id="resultsWrapper" class="results-container"></div>
             
@@ -752,6 +765,7 @@
         const voiceBtn = document.getElementById('voiceBtn');
         const loadMoreContainer = document.getElementById('loadMoreContainer');
         const loadMoreBtn = document.getElementById('loadMoreBtn');
+        const searchPerfMeta = document.getElementById('searchPerfMeta');
 
         let debounceTimer;
 
@@ -781,6 +795,7 @@
             clearBtn.style.display = 'none';
             suggestionsList.innerHTML = '';
             resultsWrapper.innerHTML = '';
+            searchPerfMeta.style.display = 'none'; // meta তথ্য লুকিয়ে ফেলি
             loadMoreContainer.style.display = 'none';
             categoryTabs.style.display = 'none';
             trendingBox.style.display = 'block';
@@ -865,6 +880,7 @@
 
         async function renderCategoryResults(query, type) {
             loadMoreContainer.style.display = 'none'; // অন্যান্য ট্যাবের জন্য Load More থাকবে না
+            searchPerfMeta.style.display = 'none'; // অন্যান্য ট্যাবের জন্য meta থাকবে না
 
             if (type === "all") {
                 currentPage = 0;
@@ -933,7 +949,7 @@
             }
         }
 
-        // --- Execute Search with Pagination Logic ---
+        // --- Execute Search with Pagination Logic & Performance Time ---
         async function executeSearch(queryStr, saveToHistory = true, isLoadMore = false) {
             const query = (typeof queryStr === 'string' && queryStr.trim() !== '') ? queryStr.trim() : searchInput.value.trim();
             suggestionsList.innerHTML = '';
@@ -944,6 +960,7 @@
 
             if (!isLoadMore) {
                 currentPage = 0; // নতুন সার্চ করলে পেজ আবার ০ থেকে শুরু হবে
+                searchPerfMeta.style.display = 'none'; // পুরানো meta লুকিয়ে ফেলি
             }
 
             if (saveToHistory && !isLoadMore) {
@@ -966,6 +983,9 @@
                 loadMoreBtn.textContent = 'Loading...';
             }
 
+            // ১. টাইমার শুরু করা
+            const startTime = performance.now();
+
             try {
                 const from = currentPage * PAGE_SIZE;
                 const to = from + PAGE_SIZE - 1;
@@ -979,8 +999,20 @@
 
                 if (error) throw error;
 
+                // ২. সার্চ শেষ হওয়ার সময় রেকর্ড করা এবং স্পিড হিসাব করা
+                const endTime = performance.now();
+                const timeTakenSeconds = ((endTime - startTime) / 1000).toFixed(2); // মিলিসেকেন্ড থেকে সেকেন্ডে রূপান্তর এবং দশমিকের পর ২ ঘর রাখা
+
                 if (!isLoadMore) {
                     resultsWrapper.innerHTML = '';
+                    
+                    // ৩. UI-তে meta তথ্য দেখানো
+                    if (count > 0) {
+                        searchPerfMeta.textContent = `About ${count} results found in ${timeTakenSeconds} seconds.`;
+                        searchPerfMeta.style.display = 'block';
+                    } else {
+                        searchPerfMeta.style.display = 'none';
+                    }
                 }
 
                 if (searchResults && searchResults.length > 0) {
@@ -1029,6 +1061,7 @@
                     resultsWrapper.innerHTML = `<p style="color: #ef4444; text-align: center; padding: 20px;">Error occurred while searching.</p>`;
                 }
                 loadMoreContainer.style.display = 'none';
+                searchPerfMeta.style.display = 'none';
             }
         }
 
