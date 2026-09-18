@@ -7,7 +7,19 @@
     <!-- Supabase Official SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="style.css">
+    
+    <!-- Google Custom Search Script -->
+    <script async src="https://cse.google.com/cse.js?cx=82969b928c0a947ce"></script>
+
     <style>
+        /* Google Custom Search Box and Results Styling */
+        .google-search-container {
+            width: 100%;
+            max-width: 650px;
+            margin: 20px auto;
+        }
+
+        /* Long Press Delete Modal Styling */
         .delete-modal-overlay {
             position: fixed;
             top: 0;
@@ -65,68 +77,11 @@
             background: #ef4444;
             color: #ffffff;
         }
-
-        /* রেজাল্ট কার্ড স্টাইল */
-        .result-card {
-            background: var(--card-bg, #ffffff);
-            border: 1px solid var(--border-color, #e5e7eb);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 16px;
-            text-align: left;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .result-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        }
-
-        .result-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 6px;
-        }
-
-        .site-icon {
-            width: 18px;
-            height: 18px;
-            border-radius: 4px;
-        }
-
-        .site-url {
-            font-size: 0.85rem;
-            color: #6b7280;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .result-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #2563eb;
-            text-decoration: none;
-            display: block;
-            margin-bottom: 6px;
-        }
-
-        .result-title:hover {
-            text-decoration: underline;
-        }
-
-        .result-snippet {
-            font-size: 0.9rem;
-            color: #4b5563;
-            line-height: 1.5;
-            margin: 0;
-        }
     </style>
 </head>
 <body class="light-theme">
     <div class="wrapper">
-        <!-- হেডার -->
+        <!-- Header -->
         <header class="navbar">
             <div class="nav-brand">wareligent<span>.search</span></div>
             <div class="nav-actions">
@@ -137,50 +92,33 @@
         </header>
 
         <main class="content-area">
-            <!-- ব্র্যান্ড লোগো -->
+            <!-- Brand Logo -->
             <div class="brand-container">
                 <h1 class="main-logo">wareligent</h1>
                 <p class="sub-text">Search the web intelligently</p>
             </div>
 
-            <!-- সার্চ বক্স -->
-            <div class="search-section">
-                <div class="search-bar">
-                    <span class="search-icon">🔍</span>
-                    <input type="text" id="searchInput" placeholder="Search the web..." autocomplete="off">
-                    <button id="clearBtn" class="action-btn" style="display: none;">✕</button>
-                    <button id="voiceBtn" class="action-btn" title="Voice Search">🎙️</button>
-                </div>
-                <ul id="suggestionsList" class="suggestions-box"></ul>
+            <!-- Google Custom Search Widget -->
+            <div class="google-search-container">
+                <div class="gcse-search"></div>
             </div>
 
-            <!-- ফিল্টার ক্যাটাগরি -->
-            <div class="category-tabs" id="categoryTabs" style="display: none;">
-                <button class="tab-chip active">All</button>
-                <button class="tab-chip">Images</button>
-                <button class="tab-chip">News</button>
-                <button class="tab-chip">Videos</button>
-            </div>
-
-            <!-- সার্চ হিস্ট্রি -->
+            <!-- Search History / Trending Topics -->
             <section class="trending-box" id="trendingBox">
                 <div class="trending-header">
                     <span>🕒 Search History</span>
                 </div>
                 <div class="trending-grid" id="trendingGrid"></div>
             </section>
-
-            <!-- সার্চ রেজাল্ট কন্টেইনার -->
-            <div id="resultsWrapper" class="results-container"></div>
         </main>
 
-        <!-- ফুটার সেকশন -->
+        <!-- Footer -->
         <footer class="footer-container">
             <p>&copy; 2026 Wareligent. All rights reserved. | <a href="https://about-wareligent.vercel.app" target="_blank" rel="noopener noreferrer">ABOUT US</a></p>
         </footer>
     </div>
 
-    <!-- ডিলিট কনফার্মেশন মোডাল -->
+    <!-- Delete Confirmation Modal -->
     <div id="deleteModalOverlay" class="delete-modal-overlay" style="display: none;">
         <div class="delete-modal">
             <p id="deleteModalText">Delete this item from history?</p>
@@ -253,9 +191,14 @@
                         trendItem.addEventListener('click', function(e) {
                             if (isLongPress) return;
                             const query = this.dataset.query;
-                            searchInput.value = query;
-                            clearBtn.style.display = 'block';
-                            executeSearch(query);
+                            
+                            // Google Search Element এ সার্চ টার্ম সেট করে সার্চ চালানো
+                            const gInput = document.querySelector('input.gsc-input');
+                            const gBtn = document.querySelector('button.gsc-search-button');
+                            if (gInput && gBtn) {
+                                gInput.value = query;
+                                gBtn.click();
+                            }
                         });
 
                         trendingGrid.appendChild(trendItem);
@@ -297,47 +240,9 @@
             }
         });
 
-        // --- DATABASE SAVE ---
-        async function saveSearchWordToDatabase(word) {
-            if (!word) return;
-            const cleanWord = word.trim().toLowerCase();
-            if (!cleanWord || cleanWord.length < 2) return;
-
-            try {
-                const { data } = await supabaseClient
-                    .from("search_suggestions")
-                    .select("id, search_count")
-                    .eq("keyword", cleanWord)
-                    .maybeSingle();
-
-                if (data) {
-                    await supabaseClient
-                        .from("search_suggestions")
-                        .update({ search_count: (data.search_count || 1) + 1 })
-                        .eq("id", data.id);
-                } else {
-                    await supabaseClient
-                        .from("search_suggestions")
-                        .insert([{ keyword: cleanWord, search_count: 1 }]);
-                }
-            } catch (err) {
-                console.error(err);
-            }
-        }
-
-        // --- DOM ELEMENTS ---
-        const searchInput = document.getElementById('searchInput');
-        const suggestionsList = document.getElementById('suggestionsList');
-        const resultsWrapper = document.getElementById('resultsWrapper');
-        const trendingBox = document.getElementById('trendingBox');
-        const categoryTabs = document.getElementById('categoryTabs');
+        // --- DOM & THEME TOGGLE ---
         const themeToggleBtn = document.getElementById('themeToggleBtn');
         const themeIcon = document.getElementById('themeIcon');
-        const clearBtn = document.getElementById('clearBtn');
-        const voiceBtn = document.getElementById('voiceBtn');
-
-        let selectedIndex = -1;
-        let debounceTimer;
 
         document.addEventListener('DOMContentLoaded', loadTrendingTopics);
 
@@ -346,164 +251,6 @@
             document.body.classList.toggle('light-theme');
             themeIcon.textContent = document.body.classList.contains('dark-theme') ? '☀️' : '🌙';
         });
-
-        searchInput.addEventListener('input', function() {
-            const query = this.value.trim();
-            clearBtn.style.display = query ? 'block' : 'none';
-            selectedIndex = -1;
-
-            if (!query) {
-                suggestionsList.innerHTML = '';
-                return;
-            }
-
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(() => {
-                fetchSuggestions(query);
-            }, 200);
-        });
-
-        clearBtn.addEventListener('click', () => {
-            searchInput.value = '';
-            clearBtn.style.display = 'none';
-            suggestionsList.innerHTML = '';
-            resultsWrapper.innerHTML = '';
-            categoryTabs.style.display = 'none';
-            trendingBox.style.display = 'block';
-        });
-
-        // AUTO-SUGGEST
-        function fetchSuggestions(query) {
-            const oldScript = document.getElementById('jsonp-suggestions');
-            if (oldScript) oldScript.remove();
-
-            window.handleGoogleSuggestions = function(data) {
-                const suggestions = (data && data[1]) ? data[1] : [];
-                renderSuggestions(suggestions);
-            };
-
-            const script = document.createElement('script');
-            script.id = 'jsonp-suggestions';
-            script.src = `https://suggestqueries.google.com/complete/search?client=chrome&q=${encodeURIComponent(query)}&callback=handleGoogleSuggestions`;
-            
-            document.body.appendChild(script);
-        }
-
-        function renderSuggestions(suggestions) {
-            suggestionsList.innerHTML = '';
-            if (suggestions.length === 0) return;
-
-            suggestions.slice(0, 5).forEach((term) => {
-                const li = document.createElement('li');
-                li.dataset.val = term;
-                li.innerHTML = `<span>🔍</span> ${term}`;
-                li.onclick = () => {
-                    searchInput.value = term;
-                    suggestionsList.innerHTML = '';
-                    executeSearch(term);
-                };
-                suggestionsList.appendChild(li);
-            });
-        }
-
-        // VOICE SEARCH
-        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            const recognition = new SpeechRecognition();
-
-            voiceBtn.addEventListener('click', () => {
-                recognition.start();
-                voiceBtn.style.color = '#ef4444';
-            });
-
-            recognition.onresult = (e) => {
-                const transcript = e.results[0][0].transcript;
-                searchInput.value = transcript;
-                voiceBtn.style.color = '';
-                executeSearch(transcript);
-            };
-
-            recognition.onend = () => { voiceBtn.style.color = ''; };
-        }
-
-        // --- WORKING GOOGLE CUSTOM SEARCH INTEGRATION ---
-        async function executeSearch(queryStr) {
-            const query = (typeof queryStr === 'string' && queryStr.trim() !== '') ? queryStr.trim() : searchInput.value.trim();
-            suggestionsList.innerHTML = '';
-            
-            if (!query) return;
-
-            await saveSearchWordToDatabase(query);
-            loadTrendingTopics(); 
-
-            // ওয়েবসাইট লিংক ডিটেকশন
-            const isDomain = /^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/.*)?$/.test(query);
-            const hasProtocol = /^https?:\/\//i.test(query);
-
-            if (isDomain || hasProtocol) {
-                const finalUrl = hasProtocol ? query : `https://${query}`;
-                window.location.href = finalUrl;
-                return;
-            }
-
-            trendingBox.style.display = 'none';
-            categoryTabs.style.display = 'flex';
-            resultsWrapper.innerHTML = `<p style="color: var(--text-secondary, #6b7280); text-align: center; padding: 30px;">Searching for "${query}"...</p>`;
-
-            try {
-                // GOOGLE CUSTOM SEARCH API
-                const GOOGLE_API_KEY = "AIzaSyD0123456789_EXAMPLE_KEY"; // আপনার API Key
-                const GOOGLE_CX = "0123456789_EXAMPLE_CX";            // আপনার Search Engine ID
-
-                // স্ক্রিপ্ট ট্যাগ ব্যবহার করে JSONP ফেচ (CORS ব্লক এড়ানোর জন্য)
-                const scriptId = 'google-search-script';
-                const oldScript = document.getElementById(scriptId);
-                if (oldScript) oldScript.remove();
-
-                window.handleGoogleResults = function(data) {
-                    resultsWrapper.innerHTML = '';
-
-                    if (data.items && data.items.length > 0) {
-                        data.items.forEach(item => {
-                            let domain = "";
-                            try {
-                                domain = new URL(item.link).hostname;
-                            } catch (e) {
-                                domain = item.link;
-                            }
-
-                            const card = document.createElement('div');
-                            card.className = 'result-card';
-                            card.innerHTML = `
-                                <div class="result-header">
-                                    <img src="https://www.google.com/s2/favicons?domain=${domain}&sz=32" class="site-icon" alt="">
-                                    <span class="site-url">${domain}</span>
-                                </div>
-                                <a href="${item.link}" target="_blank" class="result-title">${item.title}</a>
-                                <p class="result-snippet">${item.snippet || ''}</p>
-                            `;
-                            resultsWrapper.appendChild(card);
-                        });
-                    } else {
-                        resultsWrapper.innerHTML = `<p style="color: var(--text-secondary, #6b7280); text-align: center; padding: 20px;">No results found for "${query}".</p>`;
-                    }
-                };
-
-                const script = document.createElement('script');
-                script.id = scriptId;
-                script.src = `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_API_KEY}&cx=${GOOGLE_CX}&q=${encodeURIComponent(query)}&callback=handleGoogleResults`;
-                
-                script.onerror = function() {
-                    resultsWrapper.innerHTML = `<p style="color: #ef4444; text-align: center; padding: 20px;">Failed to load search results. Please check your network or API Key.</p>`;
-                };
-
-                document.body.appendChild(script);
-
-            } catch (err) {
-                console.error("Search Error:", err);
-                resultsWrapper.innerHTML = `<p style="color: #ef4444; text-align: center; padding: 20px;">Failed to fetch search results. Please try again.</p>`;
-            }
-        }
     </script>
 </body>
 </html>
