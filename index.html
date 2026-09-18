@@ -14,8 +14,7 @@
             --text-secondary: #64748b;
             --border-color: #e2e8f0;
             --accent-color: #2563eb;
-            --highlight-bg: #fef08a;
-            --highlight-text: #854d0e;
+            --highlight-text: #0f172a; /* সাধারণ থিমে বোল্ড টেক্সট রঙ */
             --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
             --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
             --shadow-lg: 0 10px 25px -5px rgba(0,0,0,0.1);
@@ -28,8 +27,7 @@
             --text-secondary: #94a3b8;
             --border-color: #334155;
             --accent-color: #3b82f6;
-            --highlight-bg: #854d0e;
-            --highlight-text: #fef08a;
+            --highlight-text: #ffffff; /* ডার্ক থিমে বোল্ড টেক্সট রঙ */
             --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
             --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
             --shadow-lg: 0 10px 25px -5px rgba(0,0,0,0.5);
@@ -286,13 +284,12 @@
             display: none;
         }
 
-        /* Highlight Style */
+        /* Clean Google-style Highlight (Only Bold, No Yellow Background) */
         mark.highlight {
-            background-color: var(--highlight-bg);
+            background-color: transparent;
             color: var(--highlight-text);
             font-weight: 700;
-            padding: 0 2px;
-            border-radius: 3px;
+            padding: 0;
         }
 
         /* Search Results Cards */
@@ -511,7 +508,7 @@
                 <div class="trending-grid" id="trendingGrid"></div>
             </section>
 
-            <!-- Search meta information (Time & Results count) -->
+            <!-- Search meta information -->
             <div id="searchPerfMeta" class="search-perf-meta"></div>
 
             <div id="resultsWrapper" class="results-container"></div>
@@ -581,7 +578,7 @@
         let currentPage = 0;
         const PAGE_SIZE = 5;
 
-        // --- Keyword Highlighting Function ---
+        // --- Clean Keyword Highlighting (Bold only) ---
         function highlightText(text, keyword) {
             if (!text || !keyword) return text || '';
             const regex = new RegExp(`(${keyword.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
@@ -943,7 +940,6 @@
                     resultsWrapper.innerHTML = '';
                     if (data.query && data.query.search.length > 0) {
                         data.query.search.forEach(item => {
-                            const highlightedTitle = highlightText(item.title, query);
                             const cleanSnippet = item.snippet.replace(/<\/?[^>]+(>|$)/g, "");
                             const highlightedSnippet = highlightText(cleanSnippet, query);
 
@@ -951,7 +947,7 @@
                             card.className = 'result-card';
                             card.innerHTML = `
                                 <div class="result-header"><span class="site-url">wikipedia.org</span></div>
-                                <a class="result-title" target="_blank" href="https://en.wikipedia.org/wiki/${encodeURIComponent(item.title)}">${highlightedTitle}</a>
+                                <a class="result-title" target="_blank" href="https://en.wikipedia.org/wiki/${encodeURIComponent(item.title)}">${item.title}</a>
                                 <p class="result-snippet">${highlightedSnippet}...</p>
                             `;
                             resultsWrapper.appendChild(card);
@@ -1042,8 +1038,7 @@
                         let domain = "";
                         try { domain = new URL(targetUrl).hostname; } catch (e) { domain = targetUrl; }
 
-                        // হাইলাইট প্রয়োগ করা হচ্ছে
-                        const highlightedTitle = highlightText(site.title, cleanQuery);
+                        // শুধু বিবরণে (Snippet) হাইলাইট প্রয়োগ
                         const highlightedDescription = highlightText(site.description || '', cleanQuery);
 
                         const card = document.createElement('div');
@@ -1053,7 +1048,7 @@
                                 <img src="https://www.google.com/s2/favicons?domain=${domain}&sz=32" class="site-icon" alt="">
                                 <span class="site-url">${domain}</span>
                             </div>
-                            <a href="${targetUrl}" target="_blank" class="result-title">${highlightedTitle}</a>
+                            <a href="${targetUrl}" target="_blank" class="result-title">${site.title}</a>
                             <p class="result-snippet">${highlightedDescription}</p>
                         `;
                         resultsWrapper.appendChild(card);
