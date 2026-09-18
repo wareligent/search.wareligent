@@ -426,7 +426,7 @@
             recognition.onend = () => { voiceBtn.style.color = ''; };
         }
 
-        // --- WORKING IN-PAGE SEARCH ENGINE ---
+        // --- WORKING GOOGLE CUSTOM SEARCH INTEGRATION ---
         async function executeSearch(queryStr) {
             const query = (typeof queryStr === 'string' && queryStr.trim() !== '') ? queryStr.trim() : searchInput.value.trim();
             suggestionsList.innerHTML = '';
@@ -451,43 +451,26 @@
             resultsWrapper.innerHTML = `<p style="color: var(--text-secondary, #6b7280); text-align: center; padding: 30px;">Searching for "${query}"...</p>`;
 
             try {
-                // CORS বাইপাস করে সার্চ রেজাল্ট আনা
-                const targetUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
-                const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`);
-                const data = await response.json();
+                // GOOGLE CUSTOM SEARCH API
+                const GOOGLE_API_KEY = "AIzaSyD0123456789_EXAMPLE_KEY"; // আপনার API Key
+                const GOOGLE_CX = "0123456789_EXAMPLE_CX";            // আপনার Search Engine ID
 
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(data.contents, 'text/html');
-                const results = doc.querySelectorAll('.result');
+                // স্ক্রিপ্ট ট্যাগ ব্যবহার করে JSONP ফেচ (CORS ব্লক এড়ানোর জন্য)
+                const scriptId = 'google-search-script';
+                const oldScript = document.getElementById(scriptId);
+                if (oldScript) oldScript.remove();
 
-                resultsWrapper.innerHTML = '';
+                window.handleGoogleResults = function(data) {
+                    resultsWrapper.innerHTML = '';
 
-                if (results.length > 0) {
-                    results.forEach((res, i) => {
-                        if (i > 10) return; // সেরা ১০টি রেজাল্ট দেখাবে
-
-                        const titleEl = res.querySelector('.result__title a');
-                        const snippetEl = res.querySelector('.result__snippet');
-                        const urlEl = res.querySelector('.result__url');
-
-                        if (titleEl) {
-                            let title = titleEl.innerText;
-                            let rawUrl = titleEl.getAttribute('href');
-                            
-                            // আসল লিংক বের করা
-                            let cleanUrl = rawUrl;
-                            if (rawUrl.includes('uddg=')) {
-                                cleanUrl = decodeURIComponent(rawUrl.split('uddg=')[1].split('&')[0]);
-                            }
-
+                    if (data.items && data.items.length > 0) {
+                        data.items.forEach(item => {
                             let domain = "";
                             try {
-                                domain = new URL(cleanUrl).hostname;
+                                domain = new URL(item.link).hostname;
                             } catch (e) {
-                                domain = cleanUrl;
+                                domain = item.link;
                             }
-
-                            const snippet = snippetEl ? snippetEl.innerText : '';
 
                             const card = document.createElement('div');
                             card.className = 'result-card';
@@ -496,17 +479,25 @@
                                     <img src="https://www.google.com/s2/favicons?domain=${domain}&sz=32" class="site-icon" alt="">
                                     <span class="site-url">${domain}</span>
                                 </div>
-                                <a href="${cleanUrl}" target="_blank" class="result-title">${title}</a>
-                                <p class="result-snippet">${snippet}</p>
+                                <a href="${item.link}" target="_blank" class="result-title">${item.title}</a>
+                                <p class="result-snippet">${item.snippet || ''}</p>
                             `;
                             resultsWrapper.appendChild(card);
-                        }
-                    });
-                }
+                        });
+                    } else {
+                        resultsWrapper.innerHTML = `<p style="color: var(--text-secondary, #6b7280); text-align: center; padding: 20px;">No results found for "${query}".</p>`;
+                    }
+                };
 
-                if (resultsWrapper.innerHTML === '') {
-                    resultsWrapper.innerHTML = `<p style="color: var(--text-secondary, #6b7280); text-align: center; padding: 20px;">No results found for "${query}".</p>`;
-                }
+                const script = document.createElement('script');
+                script.id = scriptId;
+                script.src = `https://www.googleapis.com/customsearch/v1?key=${GOOGLE_API_KEY}&cx=${GOOGLE_CX}&q=${encodeURIComponent(query)}&callback=handleGoogleResults`;
+                
+                script.onerror = function() {
+                    resultsWrapper.innerHTML = `<p style="color: #ef4444; text-align: center; padding: 20px;">Failed to load search results. Please check your network or API Key.</p>`;
+                };
+
+                document.body.appendChild(script);
 
             } catch (err) {
                 console.error("Search Error:", err);
