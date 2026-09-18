@@ -422,99 +422,69 @@
             recognition.onend = () => { voiceBtn.style.color = ''; };
         }
 
-        // --- IN-PAGE SEARCH FUNCTION ---
+        // --- SUPABASE DATABASE SEARCH FUNCTION ---
         async function executeSearch(queryStr) {
             const query = (typeof queryStr === 'string' && queryStr.trim() !== '') ? queryStr.trim() : searchInput.value.trim();
             suggestionsList.innerHTML = '';
             
             if (!query) return;
 
-            await saveSearchWordToDatabase(query);
+            const cleanQuery = query.trim().toLowerCase();
+
+            await saveSearchWordToDatabase(cleanQuery);
             loadTrendingTopics();
 
-            // ইউআরএল (URL) হলে সরাসরি রিডাইরেক্ট
-            const isDomain = /^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/.*)?$/.test(query);
-            const hasProtocol = /^https?:\/\//i.test(query);
-
-            if (isDomain || hasProtocol) {
-                const finalUrl = hasProtocol ? query : `https://${query}`;
-                window.location.href = finalUrl;
-                return;
-            }
-
-            // ওয়েবসাইটেই রেজাল্ট দেখানোর সেটআপ
             trendingBox.style.display = 'none';
             categoryTabs.style.display = 'flex';
             resultsWrapper.innerHTML = `<p style="color: var(--text-secondary, #6b7280); text-align: center; padding: 30px;">Searching for "${query}"...</p>`;
 
             try {
-                // DuckDuckGo API (JSONP ব্যবহার করে CORS সমস্যা এড়িয়ে ওয়েবসাইটেই ডাটা দেখানো)
-                const scriptId = 'ddg-search-script';
-                const oldScript = document.getElementById(scriptId);
-                if (oldScript) oldScript.remove();
+                // Supabase 'websites' টেবিল থেকে ডাটা খোঁজা
+                const { data: searchResults, error } = await supabaseClient
+                    .from('websites')
+                    .select('*')
+                    .or(`title.ilike.%${cleanQuery}%,keywords.ilike.%${cleanQuery}%,description.ilike.%${cleanQuery}%`);
 
-                window.handleDDGResults = function(data) {
-                    resultsWrapper.innerHTML = '';
+                if (error) throw error;
 
-                    let results = [];
+                resultsWrapper.innerHTML = '';
 
-                    if (data.AbstractText) {
-                        results.push({
-                            title: data.Heading,
-                            link: data.AbstractURL,
-                            snippet: data.AbstractText
-                        });
-                    }
+                // ডাটাবেজে তথ্য পাওয়া গেলে তা দেখানো
+                if (searchResults && searchResults.length > 0) {
+                    searchResults.forEach(site => {
+                        let domain = "";
+                        try {
+                            domain = new URL(site.url).hostname;
+                        } catch (e) {
+                            domain = site.url;
+                        }
 
-                    if (data.RelatedTopics && data.RelatedTopics.length > 0) {
-                        data.RelatedTopics.forEach(item => {
-                            if (item.Text && item.FirstURL) {
-                                results.push({
-                                    title: item.Text.split(' - ')[0] || item.Text,
-                                    link: item.FirstURL,
-                                    snippet: item.Text
-                                });
-                            }
-                        });
-                    }
-
-                    if (results.length > 0) {
-                        results.forEach(item => {
-                            let domain = "";
-                            try { domain = new URL(item.link).hostname; } catch(e) { domain = item.link; }
-
-                            const card = document.createElement('div');
-                            card.className = 'result-card';
-                            card.innerHTML = `
-                                <div class="result-header">
-                                    <img src="https://www.google.com/s2/favicons?domain=${domain}&sz=32" class="site-icon" alt="">
-                                    <span class="site-url">${domain}</span>
-                                </div>
-                                <a href="${item.link}" target="_blank" class="result-title">${item.title}</a>
-                                <p class="result-snippet">${item.snippet}</p>
-                            `;
-                            resultsWrapper.appendChild(card);
-                        });
-                    } else {
-                        // যদি Instant Answer ডাটা না পাওয়া যায়, তবে সুন্দর বাটন দিয়ে ওয়েব লিংক দেখানো
-                        resultsWrapper.innerHTML = `
-                            <div class="result-card" style="text-align: center; padding: 25px;">
-                                <h3 style="margin-bottom: 10px; color: #1f2937;">Search Result for "${query}"</h3>
-                                <p style="color: #6b7280; margin-bottom: 15px;">Click below to open full web results:</p>
-                                <a href="https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}" target="_blank" style="display: inline-block; background: #4f46e5; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600;">Open Results for "${query}"</a>
+                        const card = document.createElement('div');
+                        card.className = 'result-card';
+                        card.innerHTML = `
+                            <div class="result-header">
+                                <img src="https://www.google.com/s2/favicons?domain=${domain}&sz=32" class="site-icon" alt="">
+                                <span class="site-url">${domain}</span>
                             </div>
+                            <a href="${site.url}" target="_blank" class="result-title">${site.title}</a>
+                            <p class="result-snippet">${site.description}</p>
                         `;
-                    }
-                };
-
-                const script = document.createElement('script');
-                script.id = scriptId;
-                script.src = `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&callback=handleDDGResults`;
-                document.body.appendChild(script);
-
+                        resultsWrapper.appendChild(card);
+                    });
+                } else {
+                    // ডাটাবেজে না পাওয়া গেলে গুগল সার্চ ব্যাকআপ
+                    resultsWrapper.innerHTML = `
+                        <div class="result-card" style="text-align: center; padding: 25px;">
+                            <p style="color: #6b7280; margin-bottom: 12px;">"${query}" এর তথ্য আমাদের ডাটাবেজে পাওয়া যায়নি।</p>
+                            <a href="https://www.google.com/search?q=${encodeURIComponent(query)}" target="_blank" style="display: inline-block; background: #4f46e5; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+                                গুগলে সার্চ করুন
+                            </a>
+                        </div>
+                    `;
+                }
             } catch (err) {
-                console.error(err);
-                resultsWrapper.innerHTML = `<p style="color: #ef4444; text-align: center; padding: 20px;">Failed to fetch search results.</p>`;
+                console.error("Search Error:", err);
+                resultsWrapper.innerHTML = `<p style="color: #ef4444; text-align: center; padding: 20px;">সার্চ করতে সমস্যা হয়েছে।</p>`;
             }
         }
     </script>
