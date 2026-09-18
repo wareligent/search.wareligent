@@ -350,23 +350,39 @@
 
                 if (searchResults && searchResults.length > 0) {
                     searchResults.forEach(site => {
+                        // URL সঠিক করার লজিক (https:// যুক্ত না থাকলে যোগ করবে)
+                        let targetUrl = site.url ? site.url.trim() : '';
+                        if (targetUrl && !targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
+                            targetUrl = 'https://' + targetUrl;
+                        }
+
                         let domain = "";
                         try {
-                            domain = new URL(site.url).hostname;
+                            domain = new URL(targetUrl).hostname;
                         } catch (e) {
-                            domain = site.url;
+                            domain = targetUrl;
                         }
 
                         const card = document.createElement('div');
                         card.className = 'result-card';
+                        card.style.cursor = 'pointer';
+                        
                         card.innerHTML = `
                             <div class="result-header">
                                 <img src="https://www.google.com/s2/favicons?domain=${domain}&sz=32" class="site-icon" alt="">
                                 <span class="site-url">${domain}</span>
                             </div>
-                            <a href="${site.url}" target="_blank" class="result-title">${site.title}</a>
-                            <p class="result-snippet">${site.description}</p>
+                            <a href="${targetUrl}" target="_blank" class="result-title" onclick="event.stopPropagation();">${site.title}</a>
+                            <p class="result-snippet">${site.description || ''}</p>
                         `;
+
+                        // পুরো কার্ডে ক্লিক করলেও যাতে নতুন ট্যাবে লিঙ্ক ওপেন হয়
+                        card.addEventListener('click', () => {
+                            if (targetUrl) {
+                                window.open(targetUrl, '_blank');
+                            }
+                        });
+
                         resultsWrapper.appendChild(card);
                     });
                 } else {
