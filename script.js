@@ -8,8 +8,8 @@ async function saveSearchWordToDatabase(word) {
     if (!word) return;
     const cleanWord = word.trim().toLowerCase();
 
-    // ফিল্টার: খালি, ডোমেইন নাম (.) বা ২ অক্ষরের ছোট কিওয়ার্ড বাদ যাবে
-    if (!cleanWord || cleanWord.length < 2 || cleanWord.includes('.')) {
+    // ফিল্টার: খালি বা ২ অক্ষরের ছোট কিওয়ার্ড বাদ যাবে
+    if (!cleanWord || cleanWord.length < 2) {
         return;
     }
 
@@ -171,7 +171,7 @@ if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
     recognition.onend = () => { voiceBtn.style.color = ''; };
 }
 
-// 7. Search Execution, Database Saving and Smart Website Redirection
+// 7. Search Execution (In-Page Results - No Redirect)
 async function executeSearch(queryStr) {
     const query = (typeof queryStr === 'string' && queryStr.trim() !== '') ? queryStr.trim() : searchInput.value.trim();
     suggestionsList.innerHTML = '';
@@ -181,81 +181,49 @@ async function executeSearch(queryStr) {
     // ১. সুপাবেস ডাটাবেজে কিউয়ার্ড সেভ করা
     await saveSearchWordToDatabase(query);
 
-    // ২. চেক করা ইউজার সরাসরি ডোমেইন নাম বা URL লিখেছেন কি না (যেমন: facebook.com, http://example.com)
+    // ২. UI প্রিপারেশন
+    trendingBox.style.display = 'none';
+    categoryTabs.style.display = 'flex';
+    resultsWrapper.innerHTML = `<p style="color: var(--text-secondary); text-align: center; padding: 30px;">Searching for "${query}"...</p>`;
+
+    // ৩. লিংক ও ডোমেইন প্রসেসিং
     const isDomain = /^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/.*)?$/.test(query);
     const hasProtocol = /^https?:\/\//i.test(query);
 
+    let targetUrl = query;
     if (isDomain || hasProtocol) {
-        let finalUrl = query;
-        if (!hasProtocol) {
-            finalUrl = `https://${query}`;
-        }
-        window.open(finalUrl, '_blank');
-        return;
+        targetUrl = hasProtocol ? query : `https://${query}`;
+    } else {
+        targetUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
     }
 
-    // ৩. সাধারণ সার্চ কিওয়ার্ড প্রসেসিং
-    trendingBox.style.display = 'none';
-    categoryTabs.style.display = 'flex';
-    resultsWrapper.innerHTML = `<p style="color: var(--text-secondary); text-align: center; padding: 20px;">Searching for "${query}"...</p>`;
-
-    const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
-
     try {
-        const res = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&origin=*`);
-        const data = await res.json();
-        resultsWrapper.innerHTML = '';
+        let hostname = "";
+        try {
+            hostname = new URL(targetUrl).hostname;
+        } catch(e) {
+            hostname = query;
+        }
 
-        // ইনস্ট্যান্ট অ্যান্সার / উইকিপিডিয়া কার্ড
-        if (data.AbstractText) {
-            const card = document.createElement('div');
-            card.className = 'result-card';
-            card.innerHTML = `
+        // সরাসরি ইন-পেজ রেজাল্ট কার্ড তৈরি
+        resultsWrapper.innerHTML = `
+            <div class="result-card">
                 <div class="result-header">
-                    <img src="https://www.google.com/s2/favicons?domain=${new URL(data.AbstractURL).hostname}&sz=32" class="site-icon" alt="">
-                    <span class="site-url">${data.AbstractSource || 'Instant Answer'}</span>
+                    <img src="https://www.google.com/s2/favicons?domain=${hostname}&sz=32" class="site-icon" alt="">
+                    <span class="site-url">${hostname}</span>
                 </div>
-                <a href="${data.AbstractURL}" target="_blank" class="result-title">${data.Heading || query}</a>
-                <p class="result-snippet">${data.AbstractText}</p>
-            `;
-            resultsWrapper.appendChild(card);
-        }
-
-        // সম্পর্কিত টপিক বা ওয়েবসাইট লিংক কার্ড
-        if (data.RelatedTopics && data.RelatedTopics.length > 0) {
-            data.RelatedTopics.slice(0, 5).forEach(topic => {
-                if (topic.Text && topic.FirstURL) {
-                    const domain = new URL(topic.FirstURL).hostname;
-                    const card = document.createElement('div');
-                    card.className = 'result-card';
-                    card.innerHTML = `
-                        <div class="result-header">
-                            <img src="https://www.google.com/s2/favicons?domain=${domain}&sz=32" class="site-icon" alt="">
-                            <span class="site-url">${domain}</span>
-                        </div>
-                        <a href="${topic.FirstURL}" target="_blank" class="result-title">${topic.Text.split(' - ')[0]}</a>
-                        <p class="result-snippet">${topic.Text}</p>
-                    `;
-                    resultsWrapper.appendChild(card);
-                }
-            });
-        }
-
-        if (resultsWrapper.innerHTML === '') {
-            resultsWrapper.innerHTML = `
-                <p style="color: var(--text-secondary); text-align: center; padding: 20px;">
-                    No instant overview available. <br>
-                    <a href="${googleSearchUrl}" target="_blank" style="color: var(--accent-color); text-decoration: underline;">
-                        Click here to search on Google
-                    </a>
-                </p>`;
-        }
+                <a href="${targetUrl}" target="_blank" class="result-title">${query}</a>
+                <p class="result-snippet">Official web entry for <b>${query}</b>. Click to open destination in a new tab.</p>
+            </div>
+        `;
     } catch (err) {
         resultsWrapper.innerHTML = `
-            <p style="color: var(--text-secondary); text-align: center; padding: 20px;">
-                <a href="${googleSearchUrl}" target="_blank" style="color: var(--accent-color); text-decoration: underline;">
-                    Search "${query}" on Google
+            <div class="result-card" style="text-align: center; padding: 20px;">
+                <p style="color: var(--text-secondary);">No direct page found.</p>
+                <a href="https://www.google.com/search?q=${encodeURIComponent(query)}" target="_blank" style="color: var(--accent-color); font-weight: 600;">
+                    Search "${query}" on Web
                 </a>
-            </p>`;
+            </div>
+        `;
     }
 }
