@@ -8,7 +8,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="style.css">
     <style>
-        /* মোডাল ও রেজাল্ট কার্ড স্টাইল */
         .delete-modal-overlay {
             position: fixed;
             top: 0;
@@ -66,63 +65,6 @@
             background: #ef4444;
             color: #ffffff;
         }
-
-        /* কাস্টম সার্চ রেজাল্ট কার্ড স্টাইল */
-        .result-card {
-            background: var(--card-bg, #ffffff);
-            border: 1px solid var(--border-color, #e5e7eb);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 16px;
-            text-align: left;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .result-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        }
-
-        .result-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 6px;
-        }
-
-        .site-icon {
-            width: 18px;
-            height: 18px;
-            border-radius: 4px;
-        }
-
-        .site-url {
-            font-size: 0.85rem;
-            color: #6b7280;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .result-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #2563eb;
-            text-decoration: none;
-            display: block;
-            margin-bottom: 6px;
-        }
-
-        .result-title:hover {
-            text-decoration: underline;
-        }
-
-        .result-snippet {
-            font-size: 0.9rem;
-            color: #4b5563;
-            line-height: 1.5;
-            margin: 0;
-        }
     </style>
 </head>
 <body class="light-theme">
@@ -144,7 +86,7 @@
                 <p class="sub-text">Search the web intelligently</p>
             </div>
 
-            <!-- আপনার নিজস্ব সুন্দর সার্চ বক্স -->
+            <!-- আপনার নিজস্ব সার্চ বক্স -->
             <div class="search-section">
                 <div class="search-bar">
                     <span class="search-icon">🔍</span>
@@ -155,14 +97,6 @@
                 <ul id="suggestionsList" class="suggestions-box"></ul>
             </div>
 
-            <!-- ফিল্টার ক্যাটাগরি -->
-            <div class="category-tabs" id="categoryTabs" style="display: none;">
-                <button class="tab-chip active">All</button>
-                <button class="tab-chip">Images</button>
-                <button class="tab-chip">News</button>
-                <button class="tab-chip">Videos</button>
-            </div>
-
             <!-- সার্চ হিস্ট্রি -->
             <section class="trending-box" id="trendingBox">
                 <div class="trending-header">
@@ -170,9 +104,6 @@
                 </div>
                 <div class="trending-grid" id="trendingGrid"></div>
             </section>
-
-            <!-- সার্চ রেজাল্ট কন্টেইনার -->
-            <div id="resultsWrapper" class="results-container"></div>
         </main>
 
         <!-- ফুটার -->
@@ -193,17 +124,12 @@
     </div>
 
     <script>
-        // --- GOOGLE CUSTOM SEARCH CX ID ---
-        const GOOGLE_CX = "82969b928c0a947ce";
-
-        // --- SUPABASE INTEGRATION ---
         const SUPABASE_URL = "https://xveccsbdrysuiwyuvodw.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_HkyRE170ylT0kkdZxbwUSQ_ihHrS_Ra";
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let targetDeleteId = null;
 
-        // --- FETCH SEARCH HISTORY WITH LONG PRESS DELETE ---
         async function loadTrendingTopics() {
             const trendingGrid = document.getElementById('trendingGrid');
             if (!trendingGrid) return;
@@ -270,7 +196,6 @@
             }
         }
 
-        // --- DELETE MODAL CONTROLS ---
         function showDeleteModal(id, keyword) {
             targetDeleteId = id;
             document.getElementById('deleteModalText').innerHTML = `Delete "<strong>${keyword}</strong>" from history?`;
@@ -301,7 +226,6 @@
             }
         });
 
-        // --- DATABASE SAVE ---
         async function saveSearchWordToDatabase(word) {
             if (!word) return;
             const cleanWord = word.trim().toLowerCase();
@@ -329,18 +253,14 @@
             }
         }
 
-        // --- DOM ELEMENTS ---
         const searchInput = document.getElementById('searchInput');
         const suggestionsList = document.getElementById('suggestionsList');
-        const resultsWrapper = document.getElementById('resultsWrapper');
         const trendingBox = document.getElementById('trendingBox');
-        const categoryTabs = document.getElementById('categoryTabs');
         const themeToggleBtn = document.getElementById('themeToggleBtn');
         const themeIcon = document.getElementById('themeIcon');
         const clearBtn = document.getElementById('clearBtn');
         const voiceBtn = document.getElementById('voiceBtn');
 
-        let selectedIndex = -1;
         let debounceTimer;
 
         document.addEventListener('DOMContentLoaded', loadTrendingTopics);
@@ -351,11 +271,9 @@
             themeIcon.textContent = document.body.classList.contains('dark-theme') ? '☀️' : '🌙';
         });
 
-        // INPUT AND CLEAR BUTTON
         searchInput.addEventListener('input', function() {
             const query = this.value.trim();
             clearBtn.style.display = query ? 'block' : 'none';
-            selectedIndex = -1;
 
             if (!query) {
                 suggestionsList.innerHTML = '';
@@ -372,19 +290,14 @@
             searchInput.value = '';
             clearBtn.style.display = 'none';
             suggestionsList.innerHTML = '';
-            resultsWrapper.innerHTML = '';
-            categoryTabs.style.display = 'none';
-            trendingBox.style.display = 'block';
         });
 
-        // ENTER KEY SEARCH
         searchInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 executeSearch();
             }
         });
 
-        // AUTO-SUGGEST
         function fetchSuggestions(query) {
             const oldScript = document.getElementById('jsonp-suggestions');
             if (oldScript) oldScript.remove();
@@ -418,7 +331,6 @@
             });
         }
 
-        // VOICE SEARCH
         if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             const recognition = new SpeechRecognition();
@@ -438,7 +350,7 @@
             recognition.onend = () => { voiceBtn.style.color = ''; };
         }
 
-        // --- IN-PAGE GOOGLE JSONP SEARCH FUNCTION ---
+        // --- DIRECT SEARCH FUNCTION ---
         async function executeSearch(queryStr) {
             const query = (typeof queryStr === 'string' && queryStr.trim() !== '') ? queryStr.trim() : searchInput.value.trim();
             suggestionsList.innerHTML = '';
@@ -446,65 +358,17 @@
             if (!query) return;
 
             await saveSearchWordToDatabase(query);
-            loadTrendingTopics(); 
 
-            // ওয়েবসাইট লিংক ডিটেকশন
             const isDomain = /^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/.*)?$/.test(query);
             const hasProtocol = /^https?:\/\//i.test(query);
 
             if (isDomain || hasProtocol) {
                 const finalUrl = hasProtocol ? query : `https://${query}`;
                 window.location.href = finalUrl;
-                return;
+            } else {
+                // গুগল সার্চ পেজে সরাসরি পাঠাবে কিন্তু ইউজার আপনার ইন্টারফেস ব্যবহার করবে
+                window.location.href = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
             }
-
-            trendingBox.style.display = 'none';
-            categoryTabs.style.display = 'flex';
-            resultsWrapper.innerHTML = `<p style="color: var(--text-secondary, #6b7280); text-align: center; padding: 30px;">Searching for "${query}"...</p>`;
-
-            // JSONP কল (CORS এড়িয়ে সরাসরি ডাটা আনার জন্য)
-            const scriptId = 'google-cse-script';
-            const oldScript = document.getElementById(scriptId);
-            if (oldScript) oldScript.remove();
-
-            window.handleSearchResults = function(data) {
-                resultsWrapper.innerHTML = '';
-
-                if (data.items && data.items.length > 0) {
-                    data.items.forEach(item => {
-                        let domain = "";
-                        try {
-                            domain = new URL(item.link).hostname;
-                        } catch (e) {
-                            domain = item.link;
-                        }
-
-                        const card = document.createElement('div');
-                        card.className = 'result-card';
-                        card.innerHTML = `
-                            <div class="result-header">
-                                <img src="https://www.google.com/s2/favicons?domain=${domain}&sz=32" class="site-icon" alt="">
-                                <span class="site-url">${domain}</span>
-                            </div>
-                            <a href="${item.link}" target="_blank" class="result-title">${item.title}</a>
-                            <p class="result-snippet">${item.snippet || ''}</p>
-                        `;
-                        resultsWrapper.appendChild(card);
-                    });
-                } else {
-                    resultsWrapper.innerHTML = `<p style="color: var(--text-secondary, #6b7280); text-align: center; padding: 20px;">No results found for "${query}".</p>`;
-                }
-            };
-
-            const script = document.createElement('script');
-            script.id = scriptId;
-            script.src = `https://www.googleapis.com/customsearch/v1?cx=${GOOGLE_CX}&q=${encodeURIComponent(query)}&callback=handleSearchResults`;
-            
-            script.onerror = function() {
-                resultsWrapper.innerHTML = `<p style="color: #ef4444; text-align: center; padding: 20px;">Unable to fetch results. Please check your Search Engine settings.</p>`;
-            };
-
-            document.body.appendChild(script);
         }
     </script>
 </body>
