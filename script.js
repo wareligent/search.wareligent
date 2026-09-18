@@ -171,58 +171,72 @@ if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
     recognition.onend = () => { voiceBtn.style.color = ''; };
 }
 
-// 7. Search Execution (In-Page Results - No Redirect)
+// 7. Search Execution (Database First)
 async function executeSearch(queryStr) {
     const query = (typeof queryStr === 'string' && queryStr.trim() !== '') ? queryStr.trim() : searchInput.value.trim();
     suggestionsList.innerHTML = '';
     
     if (!query) return;
 
+    const cleanQuery = query.trim().toLowerCase();
+
     // ১. সুপাবেস ডাটাবেজে কিউয়ার্ড সেভ করা
-    await saveSearchWordToDatabase(query);
+    await saveSearchWordToDatabase(cleanQuery);
 
     // ২. UI প্রিপারেশন
     trendingBox.style.display = 'none';
     categoryTabs.style.display = 'flex';
     resultsWrapper.innerHTML = `<p style="color: var(--text-secondary); text-align: center; padding: 30px;">Searching for "${query}"...</p>`;
 
-    // ৩. লিংক ও ডোমেইন প্রসেসিং
-    const isDomain = /^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/.*)?$/.test(query);
-    const hasProtocol = /^https?:\/\//i.test(query);
-
-    let targetUrl = query;
-    if (isDomain || hasProtocol) {
-        targetUrl = hasProtocol ? query : `https://${query}`;
-    } else {
-        targetUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
-    }
-
     try {
-        let hostname = "";
-        try {
-            hostname = new URL(targetUrl).hostname;
-        } catch(e) {
-            hostname = query;
-        }
+        // ৩. Supabase 'websites' টেবিল থেকে ডাটা খোঁজা
+        const { data: searchResults, error } = await supabaseClient
+            .from('websites')
+            .select('*')
+            .or(`title.ilike.%${cleanQuery}%,keywords.ilike.%${cleanQuery}%,description.ilike.%${cleanQuery}%`);
 
-        // সরাসরি ইন-পেজ রেজাল্ট কার্ড তৈরি
-        resultsWrapper.innerHTML = `
-            <div class="result-card">
-                <div class="result-header">
-                    <img src="https://www.google.com/s2/favicons?domain=${hostname}&sz=32" class="site-icon" alt="">
-                    <span class="site-url">${hostname}</span>
+        if (error) throw error;
+
+        resultsWrapper.innerHTML = '';
+
+        // ৪. ডাটাবেজে তথ্য পাওয়া গেলে তা দেখানো
+        if (searchResults && searchResults.length > 0) {
+            searchResults.forEach(site => {
+                let domain = "";
+                try {
+                    domain = new URL(site.url).hostname;
+                } catch (e) {
+                    domain = site.url;
+                }
+
+                const card = document.createElement('div');
+                card.className = 'result-card';
+                card.innerHTML = `
+                    <div class="result-header">
+                        <img src="https://www.google.com/s2/favicons?domain=${domain}&sz=32" class="site-icon" alt="">
+                        <span class="site-url">${domain}</span>
+                    </div>
+                    <a href="${site.url}" target="_blank" class="result-title">${site.title}</a>
+                    <p class="result-snippet">${site.description}</p>
+                `;
+                resultsWrapper.appendChild(card);
+            });
+        } else {
+            // ৫. ডাটাবেজে না পাওয়া গেলে ব্যাকআপ রেজাল্ট
+            resultsWrapper.innerHTML = `
+                <div class="result-card" style="text-align: center; padding: 25px;">
+                    <p style="color: var(--text-secondary); margin-bottom: 12px;">"${query}" সংক্রান্ত কোনো লিঙ্ক আমাদের ডাটাবেজে পাওয়া যায়নি।</p>
+                    <a href="https://www.google.com/search?q=${encodeURIComponent(query)}" target="_blank" style="display: inline-block; background: #4f46e5; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+                        গুগলে সার্চ করুন
+                    </a>
                 </div>
-                <a href="${targetUrl}" target="_blank" class="result-title">${query}</a>
-                <p class="result-snippet">Official web entry for <b>${query}</b>. Click to open destination in a new tab.</p>
-            </div>
-        `;
+            `;
+        }
     } catch (err) {
+        console.error("Search Error:", err);
         resultsWrapper.innerHTML = `
             <div class="result-card" style="text-align: center; padding: 20px;">
-                <p style="color: var(--text-secondary);">No direct page found.</p>
-                <a href="https://www.google.com/search?q=${encodeURIComponent(query)}" target="_blank" style="color: var(--accent-color); font-weight: 600;">
-                    Search "${query}" on Web
-                </a>
+                <p style="color: #ef4444;">সার্চ করতে সমস্যা হয়েছে।</p>
             </div>
         `;
     }
