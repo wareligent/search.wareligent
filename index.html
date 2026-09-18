@@ -40,10 +40,10 @@
 
             <!-- ফিল্টার ট্যাবস -->
             <div class="category-tabs" id="categoryTabs" style="display: none;">
-                <button class="tab-chip active">All</button>
-                <button class="tab-chip">Images</button>
-                <button class="tab-chip">News</button>
-                <button class="tab-chip">Videos</button>
+                <button class="tab-chip active" data-type="all">All</button>
+                <button class="tab-chip" data-type="images">Images</button>
+                <button class="tab-chip" data-type="news">News</button>
+                <button class="tab-chip" data-type="videos">Videos</button>
             </div>
 
             <!-- সার্চ হিস্ট্রি / ট্রেন্ডিং -->
@@ -81,6 +81,8 @@
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let targetDeleteId = null;
+        let currentSearchQuery = "";
+        let currentSearchCategory = "all";
 
         // ১. হিস্ট্রি লোড করার ফাংশন (সর্বশেষ সার্চ করা ৭টি দেখাবে)
         async function loadTrendingTopics() {
@@ -262,6 +264,8 @@
             resultsWrapper.innerHTML = '';
             categoryTabs.style.display = 'none';
             trendingBox.style.display = 'block';
+            currentSearchQuery = "";
+            resetCategoryTabs();
         });
 
         searchInput.addEventListener('keydown', (e) => {
@@ -322,20 +326,86 @@
             recognition.onend = () => { voiceBtn.style.color = ''; };
         }
 
+        // --- Category Tabs Event Listener ---
+        const tabChips = document.querySelectorAll('.tab-chip');
+        tabChips.forEach(chip => {
+            chip.addEventListener('click', function() {
+                const type = this.dataset.type;
+                tabChips.forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+                currentSearchCategory = type;
+
+                if (currentSearchQuery) {
+                    renderCategoryResults(currentSearchQuery, type);
+                }
+            });
+        });
+
+        function resetCategoryTabs() {
+            currentSearchCategory = "all";
+            tabChips.forEach(c => {
+                if (c.dataset.type === "all") c.classList.add('active');
+                else c.classList.remove('active');
+            });
+        }
+
+        function renderCategoryResults(query, type) {
+            if (type === "all") {
+                executeSearch(query, false);
+            } else if (type === "images") {
+                resultsWrapper.innerHTML = `
+                    <div class="result-card" style="text-align: center; padding: 25px;">
+                        <p style="color: var(--text-secondary); margin-bottom: 12px;">"${query}" এর ছবি খুঁজুন গুগলে:</p>
+                        <a href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(query)}" target="_blank" style="display: inline-block; background: var(--accent-color); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+                            🖼️ Google Images এ দেখুন
+                        </a>
+                    </div>
+                `;
+            } else if (type === "news") {
+                resultsWrapper.innerHTML = `
+                    <div class="result-card" style="text-align: center; padding: 25px;">
+                        <p style="color: var(--text-secondary); margin-bottom: 12px;">"${query}" এর সাম্প্রতিক খবর পড়ুন:</p>
+                        <a href="https://www.google.com/search?tbm=nws&q=${encodeURIComponent(query)}" target="_blank" style="display: inline-block; background: var(--accent-color); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+                            📰 Google News এ পড়ুন
+                        </a>
+                    </div>
+                `;
+            } else if (type === "videos") {
+                resultsWrapper.innerHTML = `
+                    <div class="result-card" style="text-align: center; padding: 25px;">
+                        <p style="color: var(--text-secondary); margin-bottom: 12px;">"${query}" সম্পর্কিত ভিডিও দেখুন:</p>
+                        <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(query)}" target="_blank" style="display: inline-block; background: #ff0000; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+                            ▶️ YouTube এ ভিডিও দেখুন
+                        </a>
+                    </div>
+                `;
+            }
+        }
+
         // --- SUPABASE DATABASE SEARCH FUNCTION ---
-        async function executeSearch(queryStr) {
+        async function executeSearch(queryStr, saveToHistory = true) {
             const query = (typeof queryStr === 'string' && queryStr.trim() !== '') ? queryStr.trim() : searchInput.value.trim();
             suggestionsList.innerHTML = '';
             
             if (!query) return;
 
             const cleanQuery = query.trim().toLowerCase();
+            currentSearchQuery = cleanQuery;
 
-            await saveSearchWordToDatabase(cleanQuery);
-            loadTrendingTopics();
+            if (saveToHistory) {
+                await saveSearchWordToDatabase(cleanQuery);
+                loadTrendingTopics();
+                resetCategoryTabs();
+            }
 
             trendingBox.style.display = 'none';
             categoryTabs.style.display = 'flex';
+
+            if (currentSearchCategory !== "all") {
+                renderCategoryResults(cleanQuery, currentSearchCategory);
+                return;
+            }
+
             resultsWrapper.innerHTML = `<p style="color: var(--text-secondary, #6b7280); text-align: center; padding: 30px;">Searching for "${query}"...</p>`;
 
             try {
@@ -350,7 +420,6 @@
 
                 if (searchResults && searchResults.length > 0) {
                     searchResults.forEach(site => {
-                        // URL সঠিক করার লজিক (https:// যুক্ত না থাকলে যোগ করবে)
                         let targetUrl = site.url ? site.url.trim() : '';
                         if (targetUrl && !targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
                             targetUrl = 'https://' + targetUrl;
@@ -376,7 +445,6 @@
                             <p class="result-snippet">${site.description || ''}</p>
                         `;
 
-                        // পুরো কার্ডে ক্লিক করলেও যাতে নতুন ট্যাবে লিঙ্ক ওপেন হয়
                         card.addEventListener('click', () => {
                             if (targetUrl) {
                                 window.open(targetUrl, '_blank');
