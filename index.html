@@ -394,7 +394,7 @@
             });
         }
 
-        // --- ইন-পেজ ছবি, ভিডিও ও নিউজ লোড ফাংশন ---
+        // --- ইন-পেজ ছবি, ভিডিও ও নিউজ লোড ফাংশন (আপডেটেড) ---
         async function renderCategoryResults(query, type) {
             if (type === "all") {
                 executeSearch(query, false);
@@ -402,26 +402,40 @@
                 resultsWrapper.innerHTML = `<p style="color: var(--text-secondary); text-align: center; padding: 20px;">Loading images...</p>`;
                 
                 try {
-                    const response = await fetch(`https://picsum.photos/v2/list?page=1&limit=9`);
+                    // উইকিমিডিয়া কমন্স এপিআই দিয়ে সঠিক ছবি আনা
+                    const response = await fetch(`https://commons.wikimedia.org/w/api.php?action=query&generator=search&prop=pageimages&piprop=thumbnail&pithumbsize=400&gsrsearch=${encodeURIComponent(query)}&gsrlimit=12&format=json&origin=*`);
                     const data = await response.json();
                     
+                    resultsWrapper.innerHTML = '';
                     const mediaGrid = document.createElement('div');
                     mediaGrid.className = 'media-grid';
 
-                    data.forEach((img, idx) => {
-                        const card = document.createElement('div');
-                        card.className = 'media-card';
-                        const imageUrl = `https://picsum.photos/id/${img.id}/400/300`;
-                        card.innerHTML = `
-                            <img src="${imageUrl}" alt="${query}">
-                            <div class="media-title">📷 ${query} - Image ${idx + 1}</div>
-                        `;
-                        card.onclick = () => window.open(imageUrl, '_blank');
-                        mediaGrid.appendChild(card);
-                    });
+                    if (data.query && data.query.pages) {
+                        const pages = Object.values(data.query.pages);
+                        let count = 0;
 
-                    resultsWrapper.innerHTML = '';
-                    resultsWrapper.appendChild(mediaGrid);
+                        pages.forEach(page => {
+                            if (page.thumbnail && page.thumbnail.source) {
+                                count++;
+                                const card = document.createElement('div');
+                                card.className = 'media-card';
+                                card.innerHTML = `
+                                    <img src="${page.thumbnail.source}" alt="${page.title}">
+                                    <div class="media-title">${page.title.replace("File:", "")}</div>
+                                `;
+                                card.onclick = () => window.open(page.thumbnail.source, '_blank');
+                                mediaGrid.appendChild(card);
+                            }
+                        });
+
+                        if (count > 0) {
+                            resultsWrapper.appendChild(mediaGrid);
+                        } else {
+                            resultsWrapper.innerHTML = `<p style="text-align: center; padding: 20px;">No images found for "${query}"</p>`;
+                        }
+                    } else {
+                        resultsWrapper.innerHTML = `<p style="text-align: center; padding: 20px;">No images found for "${query}"</p>`;
+                    }
                 } catch(e) {
                     resultsWrapper.innerHTML = `<p style="text-align: center; padding: 20px;">Failed to load images.</p>`;
                 }
@@ -458,8 +472,17 @@
 
             } else if (type === "videos") {
                 resultsWrapper.innerHTML = `
-                    <div class="video-box">
-                        <iframe src="https://www.youtube-nocookie.com/embed?listType=search&list=${encodeURIComponent(query)}" allowfullscreen></iframe>
+                    <div class="video-box" style="margin-top: 15px; border-radius: 12px; overflow: hidden; background: #000; position: relative; padding-bottom: 56.25%; height: 0;">
+                        <iframe 
+                            style="position: absolute; top:0; left:0; width:100%; height:100%; border:0;" 
+                            src="https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(query)}" 
+                            allowfullscreen>
+                        </iframe>
+                    </div>
+                    <div style="text-align: center; margin-top: 12px;">
+                        <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(query)}" target="_blank" style="display: inline-block; background: #ff0000; color: #fff; padding: 8px 16px; border-radius: 6px; font-weight: 600; text-decoration: none; font-size: 14px;">
+                            ▶ YouTube-এ সরাসরি ভিডিও দেখতে চাপুন
+                        </a>
                     </div>
                 `;
             }
