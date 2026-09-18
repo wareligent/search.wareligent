@@ -320,6 +320,31 @@
             line-height: 1.4;
         }
 
+        /* Load More Button Style */
+        .load-more-container {
+            text-align: center;
+            margin-top: 16px;
+            margin-bottom: 10px;
+        }
+
+        .load-more-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--accent-color);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.2s ease;
+        }
+
+        .load-more-btn:hover {
+            background: var(--border-color);
+            box-shadow: var(--shadow-md);
+        }
+
         /* Media Grid & Video Elements */
         .media-grid {
             display: grid;
@@ -464,6 +489,11 @@
             </section>
 
             <div id="resultsWrapper" class="results-container"></div>
+            
+            <!-- Load More Container -->
+            <div id="loadMoreContainer" class="load-more-container" style="display: none;">
+                <button id="loadMoreBtn" class="load-more-btn">Load More Results</button>
+            </div>
         </main>
 
         <footer class="footer-container">
@@ -520,6 +550,10 @@
         let currentSearchQuery = "";
         let currentSearchCategory = "all";
         let currentUser = null;
+
+        // --- Pagination Variables ---
+        let currentPage = 0;
+        const PAGE_SIZE = 5; // প্রতিবারে কতোটি করে রেজাল্ট দেখাবে
 
         async function checkUserSession() {
             const { data: { session } } = await supabaseClient.auth.getSession();
@@ -716,6 +750,8 @@
         const themeIcon = document.getElementById('themeIcon');
         const clearBtn = document.getElementById('clearBtn');
         const voiceBtn = document.getElementById('voiceBtn');
+        const loadMoreContainer = document.getElementById('loadMoreContainer');
+        const loadMoreBtn = document.getElementById('loadMoreBtn');
 
         let debounceTimer;
 
@@ -745,9 +781,11 @@
             clearBtn.style.display = 'none';
             suggestionsList.innerHTML = '';
             resultsWrapper.innerHTML = '';
+            loadMoreContainer.style.display = 'none';
             categoryTabs.style.display = 'none';
             trendingBox.style.display = 'block';
             currentSearchQuery = "";
+            currentPage = 0;
             resetCategoryTabs();
         });
 
@@ -826,7 +864,10 @@
         }
 
         async function renderCategoryResults(query, type) {
+            loadMoreContainer.style.display = 'none'; // অন্যান্য ট্যাবের জন্য Load More থাকবে না
+
             if (type === "all") {
+                currentPage = 0;
                 executeSearch(query, false);
             } else if (type === "images") {
                 resultsWrapper.innerHTML = `<p style="color: var(--text-secondary); text-align: center; padding: 20px;">Loading images...</p>`;
@@ -892,7 +933,8 @@
             }
         }
 
-        async function executeSearch(queryStr, saveToHistory = true) {
+        // --- Execute Search with Pagination Logic ---
+        async function executeSearch(queryStr, saveToHistory = true, isLoadMore = false) {
             const query = (typeof queryStr === 'string' && queryStr.trim() !== '') ? queryStr.trim() : searchInput.value.trim();
             suggestionsList.innerHTML = '';
             if (!query) return;
@@ -900,7 +942,11 @@
             const cleanQuery = query.trim().toLowerCase();
             currentSearchQuery = cleanQuery;
 
-            if (saveToHistory) {
+            if (!isLoadMore) {
+                currentPage = 0; // নতুন সার্চ করলে পেজ আবার ০ থেকে শুরু হবে
+            }
+
+            if (saveToHistory && !isLoadMore) {
                 await saveSearchWordToDatabase(cleanQuery);
                 loadTrendingTopics();
                 resetCategoryTabs();
@@ -914,16 +960,28 @@
                 return;
             }
 
-            resultsWrapper.innerHTML = `<p style="color: var(--text-secondary); text-align: center; padding: 20px;">Searching for "${query}"...</p>`;
+            if (!isLoadMore) {
+                resultsWrapper.innerHTML = `<p style="color: var(--text-secondary); text-align: center; padding: 20px;">Searching for "${query}"...</p>`;
+            } else {
+                loadMoreBtn.textContent = 'Loading...';
+            }
 
             try {
-                const { data: searchResults, error } = await supabaseClient
+                const from = currentPage * PAGE_SIZE;
+                const to = from + PAGE_SIZE - 1;
+
+                // Supabase range query for Pagination
+                const { data: searchResults, error, count } = await supabaseClient
                     .from('websites')
-                    .select('*')
-                    .or(`title.ilike.%${cleanQuery}%,keywords.ilike.%${cleanQuery}%,description.ilike.%${cleanQuery}%`);
+                    .select('*', { count: 'exact' })
+                    .or(`title.ilike.%${cleanQuery}%,keywords.ilike.%${cleanQuery}%,description.ilike.%${cleanQuery}%`)
+                    .range(from, to);
 
                 if (error) throw error;
-                resultsWrapper.innerHTML = '';
+
+                if (!isLoadMore) {
+                    resultsWrapper.innerHTML = '';
+                }
 
                 if (searchResults && searchResults.length > 0) {
                     searchResults.forEach(site => {
@@ -945,19 +1003,40 @@
                         `;
                         resultsWrapper.appendChild(card);
                     });
+
+                    // চেক করব আরও ডাটা আছে কিনা
+                    if (from + searchResults.length < count) {
+                        loadMoreContainer.style.display = 'block';
+                        loadMoreBtn.textContent = 'Load More Results';
+                    } else {
+                        loadMoreContainer.style.display = 'none';
+                    }
+
                 } else {
-                    resultsWrapper.innerHTML = `
-                        <div class="result-card" style="text-align: center; padding: 20px;">
-                            <p style="color: var(--text-secondary); margin-bottom: 10px;">No results found in database.</p>
-                            <a href="https://www.google.com/search?q=${encodeURIComponent(query)}" target="_blank" style="display: inline-block; background: var(--accent-color); color: white; padding: 8px 16px; border-radius: 16px; text-decoration: none; font-weight: 600; font-size: 0.9rem;">Search on Google</a>
-                        </div>
-                    `;
+                    if (!isLoadMore) {
+                        resultsWrapper.innerHTML = `
+                            <div class="result-card" style="text-align: center; padding: 20px;">
+                                <p style="color: var(--text-secondary); margin-bottom: 10px;">No results found in database.</p>
+                                <a href="https://www.google.com/search?q=${encodeURIComponent(query)}" target="_blank" style="display: inline-block; background: var(--accent-color); color: white; padding: 8px 16px; border-radius: 16px; text-decoration: none; font-weight: 600; font-size: 0.9rem;">Search on Google</a>
+                            </div>
+                        `;
+                    }
+                    loadMoreContainer.style.display = 'none';
                 }
             } catch (err) {
                 console.error(err);
-                resultsWrapper.innerHTML = `<p style="color: #ef4444; text-align: center; padding: 20px;">Error occurred while searching.</p>`;
+                if (!isLoadMore) {
+                    resultsWrapper.innerHTML = `<p style="color: #ef4444; text-align: center; padding: 20px;">Error occurred while searching.</p>`;
+                }
+                loadMoreContainer.style.display = 'none';
             }
         }
+
+        // Load More Event Listener
+        loadMoreBtn.addEventListener('click', () => {
+            currentPage++;
+            executeSearch(currentSearchQuery, false, true);
+        });
     </script>
 </body>
 </html>
