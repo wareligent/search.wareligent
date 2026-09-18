@@ -82,6 +82,7 @@
 
         let targetDeleteId = null;
 
+        // ১. হিস্ট্রি লোড করার ফাংশন (সর্বশেষ সার্চ করা ৭টি দেখাবে)
         async function loadTrendingTopics() {
             const trendingGrid = document.getElementById('trendingGrid');
             if (!trendingGrid) return;
@@ -89,8 +90,8 @@
             try {
                 const { data, error } = await supabaseClient
                     .from('search_suggestions')
-                    .select('id, keyword, search_count')
-                    .order('search_count', { ascending: false })
+                    .select('id, keyword')
+                    .order('created_at', { ascending: false })
                     .limit(7);
 
                 if (error) return;
@@ -178,6 +179,7 @@
             }
         });
 
+        // ২. ডাটাবেজে সেভ করা এবং লিমিট ৭টি রাখার ফাংশন
         async function saveSearchWordToDatabase(word) {
             if (!word) return;
             const cleanWord = word.trim().toLowerCase();
@@ -186,19 +188,32 @@
             try {
                 const { data } = await supabaseClient
                     .from("search_suggestions")
-                    .select("id, search_count")
+                    .select("id")
                     .eq("keyword", cleanWord)
                     .maybeSingle();
 
                 if (data) {
                     await supabaseClient
                         .from("search_suggestions")
-                        .update({ search_count: (data.search_count || 1) + 1 })
+                        .update({ created_at: new Date().toISOString() })
                         .eq("id", data.id);
                 } else {
                     await supabaseClient
                         .from("search_suggestions")
-                        .insert([{ keyword: cleanWord, search_count: 1 }]);
+                        .insert([{ keyword: cleanWord, created_at: new Date().toISOString() }]);
+                }
+
+                const { data: allHistory } = await supabaseClient
+                    .from("search_suggestions")
+                    .select("id")
+                    .order("created_at", { ascending: false });
+
+                if (allHistory && allHistory.length > 7) {
+                    const idsToDelete = allHistory.slice(7).map(item => item.id);
+                    await supabaseClient
+                        .from("search_suggestions")
+                        .delete()
+                        .in("id", idsToDelete);
                 }
             } catch (err) {
                 console.error(err);
@@ -324,7 +339,6 @@
             resultsWrapper.innerHTML = `<p style="color: var(--text-secondary, #6b7280); text-align: center; padding: 30px;">Searching for "${query}"...</p>`;
 
             try {
-                // Supabase 'websites' টেবিল থেকে ডাটা সার্চ করা
                 const { data: searchResults, error } = await supabaseClient
                     .from('websites')
                     .select('*')
@@ -356,7 +370,6 @@
                         resultsWrapper.appendChild(card);
                     });
                 } else {
-                    // ডাটাবেজে ডাটা না থাকলে গুগল ব্যাকআপ সার্চ
                     resultsWrapper.innerHTML = `
                         <div class="result-card" style="text-align: center; padding: 25px;">
                             <p style="color: var(--text-secondary); margin-bottom: 12px;">"${query}" এর তথ্য আমাদের ডাটাবেজে পাওয়া যায়নি।</p>
