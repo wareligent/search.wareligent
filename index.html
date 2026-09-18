@@ -51,24 +51,8 @@
                 <div class="trending-header">
                     <span>🔥 Trending Topics</span>
                 </div>
-                <div class="trending-grid" id="trendingGrid">
-                    <div class="trend-item" data-query="Artificial Intelligence 2026">
-                        <span class="trend-no">01</span>
-                        <span class="trend-text">Artificial Intelligence</span>
-                    </div>
-                    <div class="trend-item" data-query="Latest Tech News">
-                        <span class="trend-no">02</span>
-                        <span class="trend-text">Latest Tech Updates</span>
-                    </div>
-                    <div class="trend-item" data-query="Global Space Exploration">
-                        <span class="trend-no">03</span>
-                        <span class="trend-text">Space Exploration</span>
-                    </div>
-                    <div class="trend-item" data-query="Web Development Trends">
-                        <span class="trend-no">04</span>
-                        <span class="trend-text">Web Development</span>
-                    </div>
-                </div>
+                <!-- Supabase থেকে সেরা ৭টি ডাইনামিকালি লোড হবে -->
+                <div class="trending-grid" id="trendingGrid"></div>
             </section>
 
             <!-- সার্চ রেজাল্ট কন্টেইনার -->
@@ -86,6 +70,53 @@
         const SUPABASE_URL = "https://xveccsbdrysuiwyuvodw.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_HkyRE170ylT0kkdZxbwUSQ_ihHrS_Ra";
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // --- FETCH TOP 7 TRENDING KEYWORDS ---
+        async function loadTrendingTopics() {
+            const trendingGrid = document.getElementById('trendingGrid');
+            if (!trendingGrid) return;
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('search_suggestions')
+                    .select('keyword, search_count')
+                    .order('search_count', { ascending: false })
+                    .limit(7);
+
+                if (error) {
+                    console.error("Trending Fetch Error:", error.message);
+                    return;
+                }
+
+                if (data && data.length > 0) {
+                    trendingGrid.innerHTML = ''; // ক্লিয়ার পুরনো ডাটা
+
+                    data.forEach((item, index) => {
+                        const trendItem = document.createElement('div');
+                        trendItem.className = 'trend-item';
+                        trendItem.dataset.query = item.keyword;
+
+                        const numberFormatted = String(index + 1).padStart(2, '0');
+
+                        trendItem.innerHTML = `
+                            <span class="trend-no">${numberFormatted}</span>
+                            <span class="trend-text">${item.keyword}</span>
+                        `;
+
+                        trendItem.addEventListener('click', function() {
+                            const query = this.dataset.query;
+                            searchInput.value = query;
+                            clearBtn.style.display = 'block';
+                            executeSearch(query);
+                        });
+
+                        trendingGrid.appendChild(trendItem);
+                    });
+                }
+            } catch (err) {
+                console.error("Failed to load trending topics:", err);
+            }
+        }
 
         // --- DATABASE INSERT & COUNT UPDATE FUNCTION ---
         async function saveSearchWordToDatabase(word) {
@@ -114,14 +145,10 @@
                         .from("search_suggestions")
                         .update({ search_count: newCount })
                         .eq("id", data.id);
-                    
-                    console.log(`Updated count for "${cleanWord}": ${newCount}`);
                 } else {
                     await supabaseClient
                         .from("search_suggestions")
                         .insert([{ keyword: cleanWord, search_count: 1 }]);
-                    
-                    console.log(`Added new word "${cleanWord}" with count 1`);
                 }
             } catch (err) {
                 console.error("Database Save Exception:", err);
@@ -142,7 +169,9 @@
         let selectedIndex = -1;
         let debounceTimer;
 
-        // SECTION 1: Theme Switcher
+        // SECTION 1: Page Load & Theme Switcher
+        document.addEventListener('DOMContentLoaded', loadTrendingTopics);
+
         themeToggleBtn.addEventListener('click', () => {
             document.body.classList.toggle('dark-theme');
             document.body.classList.toggle('light-theme');
@@ -241,17 +270,7 @@
             });
         }
 
-        // SECTION 5: Trending Items Click Event
-        document.querySelectorAll('.trend-item').forEach(item => {
-            item.addEventListener('click', function() {
-                const query = this.dataset.query;
-                searchInput.value = query;
-                clearBtn.style.display = 'block';
-                executeSearch(query);
-            });
-        });
-
-        // SECTION 6: Voice Search
+        // SECTION 5: Voice Search
         if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             const recognition = new SpeechRecognition();
@@ -271,7 +290,7 @@
             recognition.onend = () => { voiceBtn.style.color = ''; };
         }
 
-        // SECTION 7: Search Execution and Website Redirection
+        // SECTION 6: Search Execution and Website Redirection
         async function executeSearch(queryStr) {
             const query = (typeof queryStr === 'string' && queryStr.trim() !== '') ? queryStr.trim() : searchInput.value.trim();
             suggestionsList.innerHTML = '';
@@ -279,6 +298,7 @@
             if (!query) return;
 
             await saveSearchWordToDatabase(query);
+            loadTrendingTopics(); // রিয়েল-টাইমে ট্রেন্ডিং কাউন্ট আপডেট
 
             const isDomain = /^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/.*)?$/.test(query);
             const hasProtocol = /^https?:\/\//i.test(query);
