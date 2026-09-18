@@ -53,6 +53,21 @@
             height: 100%;
             border: 0;
         }
+        /* Auth Form Inputs Styling */
+        .auth-input {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color, #cbd5e1);
+            margin-bottom: 12px;
+            background: var(--bg-color, #ffffff);
+            color: var(--text-primary, #000000);
+            outline: none;
+            font-size: 0.9rem;
+        }
+        .auth-input:focus {
+            border-color: var(--accent-color, #4f46e5);
+        }
     </style>
 </head>
 <body class="light-theme">
@@ -60,9 +75,13 @@
         <!-- Header -->
         <header class="navbar">
             <div class="nav-brand">wareligent<span>.search</span></div>
-            <div class="nav-actions">
+            <div class="nav-actions" style="display: flex; gap: 8px; align-items: center;">
                 <button id="themeToggleBtn" class="theme-btn" title="Toggle Theme">
                     <span id="themeIcon">🌙</span>
+                </button>
+                <!-- Profile / Auth Button -->
+                <button id="profileBtn" class="theme-btn" style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                    👤 <span id="userStatusText" style="font-size: 0.85rem; font-weight: 600;">Guest</span>
                 </button>
             </div>
         </header>
@@ -122,6 +141,38 @@
         </div>
     </div>
 
+    <!-- Auth / Profile Modal -->
+    <div id="authModalOverlay" class="delete-modal-overlay" style="display: none;">
+        <div class="delete-modal" style="max-width: 360px; text-align: left;">
+            <div id="loggedOutView">
+                <h3 style="margin-bottom: 8px; color: var(--text-primary); text-align: center;">Account Login / Signup</h3>
+                <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 16px; text-align: center;">
+                    Create an account to save your search history across all devices.
+                </p>
+                
+                <input type="email" id="authEmail" class="auth-input" placeholder="Enter your email" autocomplete="off">
+                <input type="password" id="authPassword" class="auth-input" placeholder="Enter password" autocomplete="off">
+                
+                <div style="display: flex; gap: 8px; margin-top: 4px;">
+                    <button id="loginBtn" style="flex: 1; padding: 10px; background: var(--accent-color, #4f46e5); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Login</button>
+                    <button id="signupBtn" style="flex: 1; padding: 10px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Sign Up</button>
+                </div>
+            </div>
+
+            <div id="loggedInView" style="display: none; text-align: center;">
+                <h3 style="margin-bottom: 8px; color: var(--text-primary);">Profile Account</h3>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 6px;">Logged in as:</p>
+                <p id="loggedInUserEmail" style="font-size: 0.95rem; color: var(--accent-color, #4f46e5); margin-bottom: 20px; font-weight: 700; word-break: break-all;"></p>
+                
+                <button id="logoutBtn" style="width: 100%; padding: 10px; background: #ef4444; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Logout</button>
+            </div>
+
+            <div style="text-align: center; margin-top: 15px;">
+                <button id="closeAuthModal" style="background: none; border: none; color: var(--text-secondary); cursor: pointer; text-decoration: underline; font-size: 0.85rem;">Close</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const SUPABASE_URL = "https://xveccsbdrysuiwyuvodw.supabase.co";
         const SUPABASE_ANON_KEY = "sb_publishable_HkyRE170ylT0kkdZxbwUSQ_ihHrS_Ra";
@@ -130,17 +181,99 @@
         let targetDeleteId = null;
         let currentSearchQuery = "";
         let currentSearchCategory = "all";
+        let currentUser = null;
 
+        // --- Auth State Handler ---
+        async function checkUserSession() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            updateUIForUser(session ? session.user : null);
+
+            supabaseClient.auth.onAuthStateChange((_event, session) => {
+                updateUIForUser(session ? session.user : null);
+                loadTrendingTopics();
+            });
+        }
+
+        function updateUIForUser(user) {
+            currentUser = user;
+            const userStatusText = document.getElementById('userStatusText');
+            const loggedOutView = document.getElementById('loggedOutView');
+            const loggedInView = document.getElementById('loggedInView');
+            const loggedInUserEmail = document.getElementById('loggedInUserEmail');
+
+            if (user) {
+                userStatusText.textContent = user.email.split('@')[0];
+                loggedOutView.style.display = 'none';
+                loggedInView.style.display = 'block';
+                loggedInUserEmail.textContent = user.email;
+            } else {
+                userStatusText.textContent = 'Guest';
+                loggedOutView.style.display = 'block';
+                loggedInView.style.display = 'none';
+            }
+        }
+
+        // --- Profile Modal Controls ---
+        const authModalOverlay = document.getElementById('authModalOverlay');
+        document.getElementById('profileBtn').addEventListener('click', () => {
+            authModalOverlay.style.display = 'flex';
+        });
+        document.getElementById('closeAuthModal').addEventListener('click', () => {
+            authModalOverlay.style.display = 'none';
+        });
+
+        // --- Auth Actions (Login, Signup, Logout) ---
+        document.getElementById('signupBtn').addEventListener('click', async () => {
+            const email = document.getElementById('authEmail').value.trim();
+            const password = document.getElementById('authPassword').value.trim();
+
+            if (!email || !password) return alert('Please enter email and password');
+
+            const { data, error } = await supabaseClient.auth.signUp({ email, password });
+            if (error) alert(error.message);
+            else {
+                alert('Signup successful! Check your email for confirmation or log in.');
+                authModalOverlay.style.display = 'none';
+            }
+        });
+
+        document.getElementById('loginBtn').addEventListener('click', async () => {
+            const email = document.getElementById('authEmail').value.trim();
+            const password = document.getElementById('authPassword').value.trim();
+
+            if (!email || !password) return alert('Please enter email and password');
+
+            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+            if (error) alert(error.message);
+            else {
+                authModalOverlay.style.display = 'none';
+            }
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            await supabaseClient.auth.signOut();
+            authModalOverlay.style.display = 'none';
+        });
+
+        // --- Load History (Guest vs Logged User) ---
         async function loadTrendingTopics() {
             const trendingGrid = document.getElementById('trendingGrid');
             if (!trendingGrid) return;
 
             try {
-                const { data, error } = await supabaseClient
+                let query = supabaseClient
                     .from('search_suggestions')
                     .select('id, keyword')
                     .order('created_at', { ascending: false })
                     .limit(7);
+
+                if (currentUser) {
+                    query = query.eq('user_id', currentUser.id);
+                } else {
+                    query = query.is('user_id', null);
+                }
+
+                const { data, error } = await query;
 
                 if (error) return;
 
@@ -191,6 +324,8 @@
 
                         trendingGrid.appendChild(trendItem);
                     });
+                } else {
+                    trendingGrid.innerHTML = `<p style="font-size: 0.85rem; color: var(--text-secondary); padding: 10px 0;">No search history found.</p>`;
                 }
             } catch (err) {
                 console.error(err);
@@ -227,17 +362,31 @@
             }
         });
 
+        // --- Save Search Word (User vs Guest Handling) ---
         async function saveSearchWordToDatabase(word) {
             if (!word) return;
             const cleanWord = word.trim().toLowerCase();
             if (!cleanWord || cleanWord.length < 2) return;
 
             try {
-                const { data } = await supabaseClient
+                const payload = {
+                    keyword: cleanWord,
+                    created_at: new Date().toISOString(),
+                    user_id: currentUser ? currentUser.id : null
+                };
+
+                let checkQuery = supabaseClient
                     .from("search_suggestions")
                     .select("id")
-                    .eq("keyword", cleanWord)
-                    .maybeSingle();
+                    .eq("keyword", cleanWord);
+
+                if (currentUser) {
+                    checkQuery = checkQuery.eq("user_id", currentUser.id);
+                } else {
+                    checkQuery = checkQuery.is("user_id", null);
+                }
+
+                const { data } = await checkQuery.maybeSingle();
 
                 if (data) {
                     await supabaseClient
@@ -247,13 +396,21 @@
                 } else {
                     await supabaseClient
                         .from("search_suggestions")
-                        .insert([{ keyword: cleanWord, created_at: new Date().toISOString() }]);
+                        .insert([payload]);
                 }
 
-                const { data: allHistory } = await supabaseClient
+                let historyQuery = supabaseClient
                     .from("search_suggestions")
                     .select("id")
                     .order("created_at", { ascending: false });
+
+                if (currentUser) {
+                    historyQuery = historyQuery.eq("user_id", currentUser.id);
+                } else {
+                    historyQuery = historyQuery.is("user_id", null);
+                }
+
+                const { data: allHistory } = await historyQuery;
 
                 if (allHistory && allHistory.length > 7) {
                     const idsToDelete = allHistory.slice(7).map(item => item.id);
@@ -279,7 +436,9 @@
 
         let debounceTimer;
 
-        document.addEventListener('DOMContentLoaded', loadTrendingTopics);
+        document.addEventListener('DOMContentLoaded', () => {
+            checkUserSession();
+        });
 
         themeToggleBtn.addEventListener('click', () => {
             document.body.classList.toggle('dark-theme');
@@ -471,9 +630,8 @@
 
             } else if (type === "videos") {
                 resultsWrapper.innerHTML = `
-                    <div class="video-box" style="margin-top: 15px; border-radius: 12px; overflow: hidden; background: #000; position: relative; padding-bottom: 56.25%; height: 0;">
+                    <div class="video-box">
                         <iframe 
-                            style="position: absolute; top:0; left:0; width:100%; height:100%; border:0;" 
                             src="https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(query)}" 
                             allowfullscreen>
                         </iframe>
