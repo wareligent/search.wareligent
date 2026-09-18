@@ -53,7 +53,7 @@ body {
     flex: 1;
 }
 
-/* নেভিগেশন বার */
+/* Navigation Bar */
 .navbar {
     display: flex;
     justify-content: space-between;
@@ -81,7 +81,7 @@ body {
     box-shadow: var(--shadow-sm);
 }
 
-/* প্রধান লোগো */
+/* Main Brand Logo */
 .brand-container {
     text-align: center;
     margin: 20px 0 28px 0;
@@ -102,7 +102,7 @@ body {
     margin-top: 4px;
 }
 
-/* সার্চ বার */
+/* Search Bar Section */
 .search-section {
     position: relative;
     width: 100%;
@@ -149,7 +149,7 @@ body {
     color: var(--text-secondary);
 }
 
-/* অটো-সাজেস্ট ড্রপডাউন */
+/* Auto-Suggest Dropdown */
 .suggestions-box {
     position: absolute;
     top: 100%;
@@ -179,7 +179,7 @@ body {
     color: var(--accent-color);
 }
 
-/* ফিল্টার চিপস */
+/* Filter Chips / Category Tabs */
 .category-tabs {
     display: flex;
     gap: 10px;
@@ -204,7 +204,7 @@ body {
     border-color: var(--accent-color);
 }
 
-/* ট্রেন্ডিং বক্স */
+/* Trending / Search History Section */
 .trending-box {
     margin-top: 32px;
 }
@@ -252,7 +252,7 @@ body {
     font-weight: 500;
 }
 
-/* ফলাফল কার্ড */
+/* Search Result Cards */
 .results-container {
     margin-top: 28px;
 }
@@ -304,7 +304,7 @@ body {
     line-height: 1.5;
 }
 
-/* ডিলিট মোডাল স্টাইল */
+/* Delete Modal Styling */
 .delete-modal-overlay {
     position: fixed;
     top: 0;
@@ -363,7 +363,7 @@ body {
     color: #ffffff;
 }
 
-/* ফুটার স্টাইল */
+/* Footer Section */
 .footer-container {
     width: 100%;
     text-align: center;
