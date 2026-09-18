@@ -46,10 +46,10 @@
                 <button class="tab-chip">Videos</button>
             </div>
 
-            <!-- ট্রেন্ডিং টপিকস -->
+            <!-- সার্চ হিস্ট্রি -->
             <section class="trending-box" id="trendingBox">
                 <div class="trending-header">
-                    <span>🔥 Trending Topics</span>
+                    <span>🕒 Search History</span>
                 </div>
                 <!-- Supabase থেকে সেরা ৭টি ডাইনামিকালি লোড হবে -->
                 <div class="trending-grid" id="trendingGrid"></div>
@@ -71,7 +71,7 @@
         const SUPABASE_ANON_KEY = "sb_publishable_HkyRE170ylT0kkdZxbwUSQ_ihHrS_Ra";
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // --- FETCH TOP 7 TRENDING KEYWORDS ---
+        // --- FETCH TOP 7 SEARCH HISTORY KEYWORDS ---
         async function loadTrendingTopics() {
             const trendingGrid = document.getElementById('trendingGrid');
             if (!trendingGrid) return;
@@ -84,7 +84,7 @@
                     .limit(7);
 
                 if (error) {
-                    console.error("Trending Fetch Error:", error.message);
+                    console.error("Search History Fetch Error:", error.message);
                     return;
                 }
 
@@ -114,7 +114,7 @@
                     });
                 }
             } catch (err) {
-                console.error("Failed to load trending topics:", err);
+                console.error("Failed to load search history:", err);
             }
         }
 
@@ -298,7 +298,7 @@
             if (!query) return;
 
             await saveSearchWordToDatabase(query);
-            loadTrendingTopics(); // রিয়েল-টাইমে ট্রেন্ডিং কাউন্ট আপডেট
+            loadTrendingTopics(); // হিস্ট্রি কাউন্ট রিয়েল-টাইমে আপডেট
 
             const isDomain = /^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/.*)?$/.test(query);
             const hasProtocol = /^https?:\/\//i.test(query);
