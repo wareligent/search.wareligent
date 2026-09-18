@@ -65,6 +65,62 @@
             background: #ef4444;
             color: #ffffff;
         }
+
+        /* ইন-পেজ রেজাল্ট কার্ড স্টাইল */
+        .results-container {
+            width: 100%;
+            max-width: 650px;
+            margin: 20px auto;
+        }
+
+        .result-card {
+            background: var(--card-bg, #ffffff);
+            border: 1px solid var(--border-color, #e5e7eb);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            text-align: left;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+
+        .site-icon {
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+        }
+
+        .site-url {
+            font-size: 0.85rem;
+            color: #6b7280;
+            word-break: break-all;
+        }
+
+        .result-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #4f46e5;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .result-title:hover {
+            text-decoration: underline;
+        }
+
+        .result-snippet {
+            font-size: 0.9rem;
+            color: #4b5563;
+            line-height: 1.5;
+            margin: 0;
+        }
     </style>
 </head>
 <body class="light-theme">
@@ -86,7 +142,7 @@
                 <p class="sub-text">Search the web intelligently</p>
             </div>
 
-            <!-- আপনার নিজস্ব সার্চ বক্স -->
+            <!-- কাস্টম সার্চ বক্স -->
             <div class="search-section">
                 <div class="search-bar">
                     <span class="search-icon">🔍</span>
@@ -97,6 +153,14 @@
                 <ul id="suggestionsList" class="suggestions-box"></ul>
             </div>
 
+            <!-- ফিল্টার ট্যাবস -->
+            <div class="category-tabs" id="categoryTabs" style="display: none;">
+                <button class="tab-chip active">All</button>
+                <button class="tab-chip">Images</button>
+                <button class="tab-chip">News</button>
+                <button class="tab-chip">Videos</button>
+            </div>
+
             <!-- সার্চ হিস্ট্রি -->
             <section class="trending-box" id="trendingBox">
                 <div class="trending-header">
@@ -104,6 +168,9 @@
                 </div>
                 <div class="trending-grid" id="trendingGrid"></div>
             </section>
+
+            <!-- ইন-পেজ রেজাল্ট এরিয়া -->
+            <div id="resultsWrapper" class="results-container"></div>
         </main>
 
         <!-- ফুটার -->
@@ -255,7 +322,9 @@
 
         const searchInput = document.getElementById('searchInput');
         const suggestionsList = document.getElementById('suggestionsList');
+        const resultsWrapper = document.getElementById('resultsWrapper');
         const trendingBox = document.getElementById('trendingBox');
+        const categoryTabs = document.getElementById('categoryTabs');
         const themeToggleBtn = document.getElementById('themeToggleBtn');
         const themeIcon = document.getElementById('themeIcon');
         const clearBtn = document.getElementById('clearBtn');
@@ -290,6 +359,9 @@
             searchInput.value = '';
             clearBtn.style.display = 'none';
             suggestionsList.innerHTML = '';
+            resultsWrapper.innerHTML = '';
+            categoryTabs.style.display = 'none';
+            trendingBox.style.display = 'block';
         });
 
         searchInput.addEventListener('keydown', (e) => {
@@ -350,7 +422,7 @@
             recognition.onend = () => { voiceBtn.style.color = ''; };
         }
 
-        // --- DIRECT SEARCH FUNCTION ---
+        // --- IN-PAGE SEARCH FUNCTION ---
         async function executeSearch(queryStr) {
             const query = (typeof queryStr === 'string' && queryStr.trim() !== '') ? queryStr.trim() : searchInput.value.trim();
             suggestionsList.innerHTML = '';
@@ -358,16 +430,91 @@
             if (!query) return;
 
             await saveSearchWordToDatabase(query);
+            loadTrendingTopics();
 
+            // ইউআরএল (URL) হলে সরাসরি রিডাইরেক্ট
             const isDomain = /^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(\/.*)?$/.test(query);
             const hasProtocol = /^https?:\/\//i.test(query);
 
             if (isDomain || hasProtocol) {
                 const finalUrl = hasProtocol ? query : `https://${query}`;
                 window.location.href = finalUrl;
-            } else {
-                // গুগল সার্চ পেজে সরাসরি পাঠাবে কিন্তু ইউজার আপনার ইন্টারফেস ব্যবহার করবে
-                window.location.href = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+                return;
+            }
+
+            // ওয়েবসাইটেই রেজাল্ট দেখানোর সেটআপ
+            trendingBox.style.display = 'none';
+            categoryTabs.style.display = 'flex';
+            resultsWrapper.innerHTML = `<p style="color: var(--text-secondary, #6b7280); text-align: center; padding: 30px;">Searching for "${query}"...</p>`;
+
+            try {
+                // DuckDuckGo API (JSONP ব্যবহার করে CORS সমস্যা এড়িয়ে ওয়েবসাইটেই ডাটা দেখানো)
+                const scriptId = 'ddg-search-script';
+                const oldScript = document.getElementById(scriptId);
+                if (oldScript) oldScript.remove();
+
+                window.handleDDGResults = function(data) {
+                    resultsWrapper.innerHTML = '';
+
+                    let results = [];
+
+                    if (data.AbstractText) {
+                        results.push({
+                            title: data.Heading,
+                            link: data.AbstractURL,
+                            snippet: data.AbstractText
+                        });
+                    }
+
+                    if (data.RelatedTopics && data.RelatedTopics.length > 0) {
+                        data.RelatedTopics.forEach(item => {
+                            if (item.Text && item.FirstURL) {
+                                results.push({
+                                    title: item.Text.split(' - ')[0] || item.Text,
+                                    link: item.FirstURL,
+                                    snippet: item.Text
+                                });
+                            }
+                        });
+                    }
+
+                    if (results.length > 0) {
+                        results.forEach(item => {
+                            let domain = "";
+                            try { domain = new URL(item.link).hostname; } catch(e) { domain = item.link; }
+
+                            const card = document.createElement('div');
+                            card.className = 'result-card';
+                            card.innerHTML = `
+                                <div class="result-header">
+                                    <img src="https://www.google.com/s2/favicons?domain=${domain}&sz=32" class="site-icon" alt="">
+                                    <span class="site-url">${domain}</span>
+                                </div>
+                                <a href="${item.link}" target="_blank" class="result-title">${item.title}</a>
+                                <p class="result-snippet">${item.snippet}</p>
+                            `;
+                            resultsWrapper.appendChild(card);
+                        });
+                    } else {
+                        // যদি Instant Answer ডাটা না পাওয়া যায়, তবে সুন্দর বাটন দিয়ে ওয়েব লিংক দেখানো
+                        resultsWrapper.innerHTML = `
+                            <div class="result-card" style="text-align: center; padding: 25px;">
+                                <h3 style="margin-bottom: 10px; color: #1f2937;">Search Result for "${query}"</h3>
+                                <p style="color: #6b7280; margin-bottom: 15px;">Click below to open full web results:</p>
+                                <a href="https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}" target="_blank" style="display: inline-block; background: #4f46e5; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600;">Open Results for "${query}"</a>
+                            </div>
+                        `;
+                    }
+                };
+
+                const script = document.createElement('script');
+                script.id = scriptId;
+                script.src = `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&callback=handleDDGResults`;
+                document.body.appendChild(script);
+
+            } catch (err) {
+                console.error(err);
+                resultsWrapper.innerHTML = `<p style="color: #ef4444; text-align: center; padding: 20px;">Failed to fetch search results.</p>`;
             }
         }
     </script>
