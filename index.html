@@ -7,121 +7,6 @@
     <!-- Supabase Official SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="style.css">
-    <style>
-        .delete-modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.4);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-
-        .delete-modal {
-            background: var(--card-bg, #ffffff);
-            border: 1px solid var(--border-color, #e5e7eb);
-            padding: 20px;
-            border-radius: 16px;
-            text-align: center;
-            width: 85%;
-            max-width: 320px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-        }
-
-        .delete-modal p {
-            font-size: 0.95rem;
-            color: var(--text-primary, #1f2937);
-            margin-bottom: 18px;
-            word-break: break-word;
-        }
-
-        .delete-modal-actions {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-        }
-
-        .delete-modal-actions button {
-            flex: 1;
-            padding: 10px 14px;
-            border-radius: 10px;
-            border: none;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 0.9rem;
-        }
-
-        .btn-cancel {
-            background: var(--bg-color, #f9fafb);
-            color: var(--text-primary, #1f2937);
-            border: 1px solid var(--border-color, #e5e7eb) !important;
-        }
-
-        .btn-confirm-delete {
-            background: #ef4444;
-            color: #ffffff;
-        }
-
-        /* ইন-পেজ রেজাল্ট কার্ড স্টাইল */
-        .results-container {
-            width: 100%;
-            max-width: 650px;
-            margin: 20px auto;
-        }
-
-        .result-card {
-            background: var(--card-bg, #ffffff);
-            border: 1px solid var(--border-color, #e5e7eb);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 16px;
-            text-align: left;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-        }
-
-        .result-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 6px;
-        }
-
-        .site-icon {
-            width: 18px;
-            height: 18px;
-            border-radius: 4px;
-        }
-
-        .site-url {
-            font-size: 0.85rem;
-            color: #6b7280;
-            word-break: break-all;
-        }
-
-        .result-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #4f46e5;
-            text-decoration: none;
-            display: block;
-            margin-bottom: 6px;
-        }
-
-        .result-title:hover {
-            text-decoration: underline;
-        }
-
-        .result-snippet {
-            font-size: 0.9rem;
-            color: #4b5563;
-            line-height: 1.5;
-            margin: 0;
-        }
-    </style>
 </head>
 <body class="light-theme">
     <div class="wrapper">
@@ -161,7 +46,7 @@
                 <button class="tab-chip">Videos</button>
             </div>
 
-            <!-- সার্চ হিস্ট্রি -->
+            <!-- সার্চ হিস্ট্রি / ট্রেন্ডিং -->
             <section class="trending-box" id="trendingBox">
                 <div class="trending-header">
                     <span>🕒 SEARCH HISTORY</span>
@@ -439,7 +324,7 @@
             resultsWrapper.innerHTML = `<p style="color: var(--text-secondary, #6b7280); text-align: center; padding: 30px;">Searching for "${query}"...</p>`;
 
             try {
-                // Supabase 'websites' টেবিল থেকে ডাটা খোঁজা
+                // Supabase 'websites' টেবিল থেকে ডাটা সার্চ করা
                 const { data: searchResults, error } = await supabaseClient
                     .from('websites')
                     .select('*')
@@ -449,7 +334,6 @@
 
                 resultsWrapper.innerHTML = '';
 
-                // ডাটাবেজে তথ্য পাওয়া গেলে তা দেখানো
                 if (searchResults && searchResults.length > 0) {
                     searchResults.forEach(site => {
                         let domain = "";
@@ -472,11 +356,11 @@
                         resultsWrapper.appendChild(card);
                     });
                 } else {
-                    // ডাটাবেজে না পাওয়া গেলে গুগল সার্চ ব্যাকআপ
+                    // ডাটাবেজে ডাটা না থাকলে গুগল ব্যাকআপ সার্চ
                     resultsWrapper.innerHTML = `
                         <div class="result-card" style="text-align: center; padding: 25px;">
-                            <p style="color: #6b7280; margin-bottom: 12px;">"${query}" এর তথ্য আমাদের ডাটাবেজে পাওয়া যায়নি।</p>
-                            <a href="https://www.google.com/search?q=${encodeURIComponent(query)}" target="_blank" style="display: inline-block; background: #4f46e5; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600;">
+                            <p style="color: var(--text-secondary); margin-bottom: 12px;">"${query}" এর তথ্য আমাদের ডাটাবেজে পাওয়া যায়নি।</p>
+                            <a href="https://www.google.com/search?q=${encodeURIComponent(query)}" target="_blank" style="display: inline-block; background: var(--accent-color); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600;">
                                 গুগলে সার্চ করুন
                             </a>
                         </div>
