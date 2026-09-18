@@ -3,12 +3,12 @@ const SUPABASE_URL = "https://xveccsbdrysuiwyuvodw.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_HkyRE170ylT0kkdZxbwUSQ_ihHrS_Ra";
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// ডাটাবেজে সার্চ কিওয়ার্ড সেভ করার ফাংশন
+// Function to save search keyword to database
 async function saveSearchWordToDatabase(word) {
     if (!word) return;
     const cleanWord = word.trim().toLowerCase();
 
-    // ফিল্টার: খালি বা ২ অক্ষরের ছোট কিওয়ার্ড বাদ যাবে
+    // Filter: Empty or keywords shorter than 2 characters will be ignored
     if (!cleanWord || cleanWord.length < 2) {
         return;
     }
@@ -180,16 +180,16 @@ async function executeSearch(queryStr) {
 
     const cleanQuery = query.trim().toLowerCase();
 
-    // ১. সুপাবেস ডাটাবেজে কিউয়ার্ড সেভ করা
+    // 1. Save keyword to Supabase database
     await saveSearchWordToDatabase(cleanQuery);
 
-    // ২. UI প্রিপারেশন
+    // 2. UI Preparation
     trendingBox.style.display = 'none';
     categoryTabs.style.display = 'flex';
     resultsWrapper.innerHTML = `<p style="color: var(--text-secondary); text-align: center; padding: 30px;">Searching for "${query}"...</p>`;
 
     try {
-        // ৩. Supabase 'websites' টেবিল থেকে ডাটা খোঁজা
+        // 3. Search data from Supabase 'websites' table
         const { data: searchResults, error } = await supabaseClient
             .from('websites')
             .select('*')
@@ -199,7 +199,7 @@ async function executeSearch(queryStr) {
 
         resultsWrapper.innerHTML = '';
 
-        // ৪. ডাটাবেজে তথ্য পাওয়া গেলে তা দেখানো
+        // 4. Display results if found in database
         if (searchResults && searchResults.length > 0) {
             searchResults.forEach(site => {
                 let domain = "";
@@ -222,12 +222,12 @@ async function executeSearch(queryStr) {
                 resultsWrapper.appendChild(card);
             });
         } else {
-            // ৫. ডাটাবেজে না পাওয়া গেলে ব্যাকআপ রেজাল্ট
+            // 5. Fallback result if not found in database
             resultsWrapper.innerHTML = `
                 <div class="result-card" style="text-align: center; padding: 25px;">
-                    <p style="color: var(--text-secondary); margin-bottom: 12px;">"${query}" সংক্রান্ত কোনো লিঙ্ক আমাদের ডাটাবেজে পাওয়া যায়নি।</p>
+                    <p style="color: var(--text-secondary); margin-bottom: 12px;">No results found for "${query}" in our database.</p>
                     <a href="https://www.google.com/search?q=${encodeURIComponent(query)}" target="_blank" style="display: inline-block; background: #4f46e5; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600;">
-                        গুগলে সার্চ করুন
+                        Search on Google
                     </a>
                 </div>
             `;
@@ -236,7 +236,7 @@ async function executeSearch(queryStr) {
         console.error("Search Error:", err);
         resultsWrapper.innerHTML = `
             <div class="result-card" style="text-align: center; padding: 20px;">
-                <p style="color: #ef4444;">সার্চ করতে সমস্যা হয়েছে।</p>
+                <p style="color: #ef4444;">An error occurred while searching.</p>
             </div>
         `;
     }
