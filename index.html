@@ -14,6 +14,8 @@
             --text-secondary: #64748b;
             --border-color: #e2e8f0;
             --accent-color: #2563eb;
+            --highlight-bg: #fef08a;
+            --highlight-text: #854d0e;
             --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
             --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
             --shadow-lg: 0 10px 25px -5px rgba(0,0,0,0.1);
@@ -26,6 +28,8 @@
             --text-secondary: #94a3b8;
             --border-color: #334155;
             --accent-color: #3b82f6;
+            --highlight-bg: #854d0e;
+            --highlight-text: #fef08a;
             --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
             --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
             --shadow-lg: 0 10px 25px -5px rgba(0,0,0,0.5);
@@ -279,7 +283,16 @@
             padding: 8px 0;
             margin-bottom: 8px;
             border-bottom: 1px solid var(--border-color);
-            display: none; /* শুরুতে লুকানো থাকবে */
+            display: none;
+        }
+
+        /* Highlight Style */
+        mark.highlight {
+            background-color: var(--highlight-bg);
+            color: var(--highlight-text);
+            font-weight: 700;
+            padding: 0 2px;
+            border-radius: 3px;
         }
 
         /* Search Results Cards */
@@ -566,7 +579,14 @@
 
         // --- Pagination Variables ---
         let currentPage = 0;
-        const PAGE_SIZE = 5; // প্রতিবারে কতোটি করে রেজাল্ট দেখাবে
+        const PAGE_SIZE = 5;
+
+        // --- Keyword Highlighting Function ---
+        function highlightText(text, keyword) {
+            if (!text || !keyword) return text || '';
+            const regex = new RegExp(`(${keyword.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+            return text.replace(regex, '<mark class="highlight">$1</mark>');
+        }
 
         async function checkUserSession() {
             const { data: { session } } = await supabaseClient.auth.getSession();
@@ -795,7 +815,7 @@
             clearBtn.style.display = 'none';
             suggestionsList.innerHTML = '';
             resultsWrapper.innerHTML = '';
-            searchPerfMeta.style.display = 'none'; // meta তথ্য লুকিয়ে ফেলি
+            searchPerfMeta.style.display = 'none';
             loadMoreContainer.style.display = 'none';
             categoryTabs.style.display = 'none';
             trendingBox.style.display = 'block';
@@ -879,8 +899,8 @@
         }
 
         async function renderCategoryResults(query, type) {
-            loadMoreContainer.style.display = 'none'; // অন্যান্য ট্যাবের জন্য Load More থাকবে না
-            searchPerfMeta.style.display = 'none'; // অন্যান্য ট্যাবের জন্য meta থাকবে না
+            loadMoreContainer.style.display = 'none';
+            searchPerfMeta.style.display = 'none';
 
             if (type === "all") {
                 currentPage = 0;
@@ -923,12 +943,16 @@
                     resultsWrapper.innerHTML = '';
                     if (data.query && data.query.search.length > 0) {
                         data.query.search.forEach(item => {
+                            const highlightedTitle = highlightText(item.title, query);
+                            const cleanSnippet = item.snippet.replace(/<\/?[^>]+(>|$)/g, "");
+                            const highlightedSnippet = highlightText(cleanSnippet, query);
+
                             const card = document.createElement('div');
                             card.className = 'result-card';
                             card.innerHTML = `
                                 <div class="result-header"><span class="site-url">wikipedia.org</span></div>
-                                <a class="result-title" target="_blank" href="https://en.wikipedia.org/wiki/${encodeURIComponent(item.title)}">${item.title}</a>
-                                <p class="result-snippet">${item.snippet.replace(/<\/?[^>]+(>|$)/g, "")}...</p>
+                                <a class="result-title" target="_blank" href="https://en.wikipedia.org/wiki/${encodeURIComponent(item.title)}">${highlightedTitle}</a>
+                                <p class="result-snippet">${highlightedSnippet}...</p>
                             `;
                             resultsWrapper.appendChild(card);
                         });
@@ -949,7 +973,6 @@
             }
         }
 
-        // --- Execute Search with Pagination Logic & Performance Time ---
         async function executeSearch(queryStr, saveToHistory = true, isLoadMore = false) {
             const query = (typeof queryStr === 'string' && queryStr.trim() !== '') ? queryStr.trim() : searchInput.value.trim();
             suggestionsList.innerHTML = '';
@@ -959,8 +982,8 @@
             currentSearchQuery = cleanQuery;
 
             if (!isLoadMore) {
-                currentPage = 0; // নতুন সার্চ করলে পেজ আবার ০ থেকে শুরু হবে
-                searchPerfMeta.style.display = 'none'; // পুরানো meta লুকিয়ে ফেলি
+                currentPage = 0;
+                searchPerfMeta.style.display = 'none';
             }
 
             if (saveToHistory && !isLoadMore) {
@@ -983,14 +1006,12 @@
                 loadMoreBtn.textContent = 'Loading...';
             }
 
-            // ১. টাইমার শুরু করা
             const startTime = performance.now();
 
             try {
                 const from = currentPage * PAGE_SIZE;
                 const to = from + PAGE_SIZE - 1;
 
-                // Supabase range query for Pagination
                 const { data: searchResults, error, count } = await supabaseClient
                     .from('websites')
                     .select('*', { count: 'exact' })
@@ -999,14 +1020,12 @@
 
                 if (error) throw error;
 
-                // ২. সার্চ শেষ হওয়ার সময় রেকর্ড করা এবং স্পিড হিসাব করা
                 const endTime = performance.now();
-                const timeTakenSeconds = ((endTime - startTime) / 1000).toFixed(2); // মিলিসেকেন্ড থেকে সেকেন্ডে রূপান্তর এবং দশমিকের পর ২ ঘর রাখা
+                const timeTakenSeconds = ((endTime - startTime) / 1000).toFixed(2);
 
                 if (!isLoadMore) {
                     resultsWrapper.innerHTML = '';
                     
-                    // ৩. UI-তে meta তথ্য দেখানো
                     if (count > 0) {
                         searchPerfMeta.textContent = `About ${count} results found in ${timeTakenSeconds} seconds.`;
                         searchPerfMeta.style.display = 'block';
@@ -1023,6 +1042,10 @@
                         let domain = "";
                         try { domain = new URL(targetUrl).hostname; } catch (e) { domain = targetUrl; }
 
+                        // হাইলাইট প্রয়োগ করা হচ্ছে
+                        const highlightedTitle = highlightText(site.title, cleanQuery);
+                        const highlightedDescription = highlightText(site.description || '', cleanQuery);
+
                         const card = document.createElement('div');
                         card.className = 'result-card';
                         card.innerHTML = `
@@ -1030,13 +1053,12 @@
                                 <img src="https://www.google.com/s2/favicons?domain=${domain}&sz=32" class="site-icon" alt="">
                                 <span class="site-url">${domain}</span>
                             </div>
-                            <a href="${targetUrl}" target="_blank" class="result-title">${site.title}</a>
-                            <p class="result-snippet">${site.description || ''}</p>
+                            <a href="${targetUrl}" target="_blank" class="result-title">${highlightedTitle}</a>
+                            <p class="result-snippet">${highlightedDescription}</p>
                         `;
                         resultsWrapper.appendChild(card);
                     });
 
-                    // চেক করব আরও ডাটা আছে কিনা
                     if (from + searchResults.length < count) {
                         loadMoreContainer.style.display = 'block';
                         loadMoreBtn.textContent = 'Load More Results';
@@ -1065,7 +1087,6 @@
             }
         }
 
-        // Load More Event Listener
         loadMoreBtn.addEventListener('click', () => {
             currentPage++;
             executeSearch(currentSearchQuery, false, true);
