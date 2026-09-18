@@ -7,6 +7,41 @@
     <!-- Supabase Official SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* ইমেজ এবং ভিডিও গ্রিডের জন্য অতিরিক্ত সিএসএস */
+        .media-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 12px;
+            margin-top: 15px;
+        }
+        .media-card {
+            border-radius: 12px;
+            overflow: hidden;
+            background: var(--card-bg, #ffffff);
+            border: 1px solid rgba(0,0,0,0.08);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+        .media-card:hover {
+            transform: translateY(-3px);
+        }
+        .media-card img {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            display: block;
+        }
+        .media-title {
+            padding: 8px 10px;
+            font-size: 13px;
+            color: var(--text-color, #333);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    </style>
 </head>
 <body class="light-theme">
     <div class="wrapper">
@@ -84,7 +119,7 @@
         let currentSearchQuery = "";
         let currentSearchCategory = "all";
 
-        // ১. হিস্ট্রি লোড করার ফাংশন (সর্বশেষ সার্চ করা ৭টি দেখাবে)
+        // ১. হিস্ট্রি লোড করার ফাংশন
         async function loadTrendingTopics() {
             const trendingGrid = document.getElementById('trendingGrid');
             if (!trendingGrid) return;
@@ -349,34 +384,52 @@
             });
         }
 
-        function renderCategoryResults(query, type) {
+        // --- ইন-পেজ ছবি, ভিডিও ও নিউজ লোড ফাংশন ---
+        async function renderCategoryResults(query, type) {
             if (type === "all") {
                 executeSearch(query, false);
             } else if (type === "images") {
-                resultsWrapper.innerHTML = `
-                    <div class="result-card" style="text-align: center; padding: 25px;">
-                        <p style="color: var(--text-secondary); margin-bottom: 12px;">"${query}" এর ছবি খুঁজুন গুগলে:</p>
-                        <a href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(query)}" target="_blank" style="display: inline-block; background: var(--accent-color); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600;">
-                            🖼️ Google Images এ দেখুন
-                        </a>
-                    </div>
-                `;
+                resultsWrapper.innerHTML = `<p style="color: var(--text-secondary); text-align: center; padding: 20px;">ছবি খোঁজা হচ্ছে...</p>`;
+                
+                // Unsplash Direct API থেকে ছবি লোড
+                const mediaGrid = document.createElement('div');
+                mediaGrid.className = 'media-grid';
+
+                for (let i = 1; i <= 8; i++) {
+                    const imgUrl = `https://source.unsplash.com/featured/400x300/?${encodeURIComponent(query)},${i}`;
+                    const card = document.createElement('div');
+                    card.className = 'media-card';
+                    card.innerHTML = `
+                        <img src="${imgUrl}" alt="${query}" onerror="this.src='https://via.placeholder.com/400x300?text=Image+Not+Found'">
+                        <div class="media-title">🖼️ ${query} - Image ${i}</div>
+                    `;
+                    card.onclick = () => window.open(imgUrl, '_blank');
+                    mediaGrid.appendChild(card);
+                }
+
+                resultsWrapper.innerHTML = '';
+                resultsWrapper.appendChild(mediaGrid);
+
             } else if (type === "news") {
+                resultsWrapper.innerHTML = `<p style="color: var(--text-secondary); text-align: center; padding: 20px;">সংবাদ খোঁজা হচ্ছে...</p>`;
+                
+                // ইন-পেজ নিউজ রেজাল্ট সিমুলেশন
                 resultsWrapper.innerHTML = `
-                    <div class="result-card" style="text-align: center; padding: 25px;">
-                        <p style="color: var(--text-secondary); margin-bottom: 12px;">"${query}" এর সাম্প্রতিক খবর পড়ুন:</p>
-                        <a href="https://www.google.com/search?tbm=nws&q=${encodeURIComponent(query)}" target="_blank" style="display: inline-block; background: var(--accent-color); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600;">
-                            📰 Google News এ পড়ুন
-                        </a>
+                    <div class="result-card" style="cursor: pointer;" onclick="window.open('https://news.google.com/search?q=${encodeURIComponent(query)}', '_blank')">
+                        <div class="result-header">
+                            <span class="site-url">news.google.com</span>
+                        </div>
+                        <h3 class="result-title">📰 Latest news and articles about ${query}</h3>
+                        <p class="result-snippet">Read top breaking updates, analysis, and recent reports related to "${query}".</p>
                     </div>
                 `;
             } else if (type === "videos") {
+                resultsWrapper.innerHTML = `<p style="color: var(--text-secondary); text-align: center; padding: 20px;">ভিডিও খোঁজা হচ্ছে...</p>`;
+                
+                // ইউটিউব প্লেয়ার ইন-পেজ প্লে করার ফ্রেম
                 resultsWrapper.innerHTML = `
-                    <div class="result-card" style="text-align: center; padding: 25px;">
-                        <p style="color: var(--text-secondary); margin-bottom: 12px;">"${query}" সম্পর্কিত ভিডিও দেখুন:</p>
-                        <a href="https://www.youtube.com/results?search_query=${encodeURIComponent(query)}" target="_blank" style="display: inline-block; background: #ff0000; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600;">
-                            ▶️ YouTube এ ভিডিও দেখুন
-                        </a>
+                    <div style="margin-top: 15px; border-radius: 12px; overflow: hidden; background: #000;">
+                        <iframe width="100%" height="280" src="https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(query)}" frameborder="0" allowfullscreen></iframe>
                     </div>
                 `;
             }
