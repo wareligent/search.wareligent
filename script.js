@@ -1,2384 +1,1897 @@
-/* =========================================================
-   WARELIGENT SEARCH ENGINE
-   Main Application Script
-   ========================================================= */
+/* =================================
+   Wareligent Search Engine
+================================= */
+
+(() => {
+  "use strict";
 
 
-/* =========================================================
-   0. SUPABASE
-   ========================================================= */
+  /* ===============================
+     Supabase
+  =============================== */
 
-const SUPABASE_URL =
+  const SUPABASE_URL =
     "https://xveccsbdrysuiwyuvodw.supabase.co";
 
-const SUPABASE_ANON_KEY =
+  const SUPABASE_KEY =
     "sb_publishable_HkyRE170ylT0kkdZxbwUSQ_ihHrS_Ra";
 
-let supabaseClient = null;
+  let supabaseClient = null;
 
-try {
-    if (window.supabase) {
-        supabaseClient = window.supabase.createClient(
-            SUPABASE_URL,
-            SUPABASE_ANON_KEY
+  try {
+    if (
+      window.supabase &&
+      SUPABASE_URL.includes(".supabase.co") &&
+      !SUPABASE_URL.includes("YOUR-PROJECT")
+    ) {
+      supabaseClient =
+        window.supabase.createClient(
+          SUPABASE_URL,
+          SUPABASE_KEY
         );
     }
-} catch (error) {
-    console.error("Supabase initialization failed:", error);
-}
+  } catch (error) {
+    console.warn("Supabase unavailable:", error);
+  }
 
 
-/* =========================================================
-   1. DOM ELEMENTS
-   ========================================================= */
+  /* ===============================
+     DOM
+  =============================== */
 
-const searchInput = document.getElementById("searchInput");
-const searchForm = document.getElementById("searchForm");
+  const searchForm =
+    document.getElementById("searchForm");
 
-const clearBtn = document.getElementById("clearBtn");
-const voiceBtn = document.getElementById("voiceBtn");
-const imageInput = document.getElementById("imageInput");
+  const searchInput =
+    document.getElementById("searchInput");
 
-const suggestionsList =
+  const clearBtn =
+    document.getElementById("clearBtn");
+
+  const imageBtn =
+    document.getElementById("imageBtn");
+
+  const imageInput =
+    document.getElementById("imageInput");
+
+  const voiceBtn =
+    document.getElementById("voiceBtn");
+
+  const suggestionsList =
     document.getElementById("suggestionsList");
 
-const resultsFeed =
-    document.getElementById("resultsFeed");
+  const resultsWrapper =
+    document.getElementById("resultsWrapper");
 
-const resultsHeader =
-    document.getElementById("resultsHeader");
+  const trendingBox =
+    document.getElementById("trendingBox");
 
-const resultsLabel =
-    document.getElementById("resultsLabel");
+  const trendingGrid =
+    document.getElementById("trendingGrid");
 
-const resultsCount =
-    document.getElementById("resultsCount");
+  const categoryTabs =
+    document.getElementById("categoryTabs");
 
-const loadingState =
-    document.getElementById("loadingState");
+  const searchPerfMeta =
+    document.getElementById("searchPerfMeta");
 
-const emptyState =
-    document.getElementById("emptyState");
+  const themeToggleBtn =
+    document.getElementById("themeToggleBtn");
 
-const errorState =
-    document.getElementById("errorState");
+  const themeIcon =
+    document.getElementById("themeIcon");
 
-const errorMessage =
-    document.getElementById("errorMessage");
-
-const historySection =
-    document.getElementById("historySection");
-
-const historyList =
-    document.getElementById("historyList");
-
-const settingsPanel =
-    document.getElementById("settingsPanel");
-
-const settingsOverlay =
-    document.getElementById("settingsOverlay");
-
-const historyToggle =
-    document.getElementById("historyToggle");
-
-const safeSearchToggle =
-    document.getElementById("safeSearchToggle");
+  const toastContainer =
+    document.getElementById("toastContainer");
 
 
-/* =========================================================
-   2. APP STATE
-   ========================================================= */
+  /* ===============================
+     State
+  =============================== */
 
-let selectedSuggestionIndex = -1;
-let suggestionTimer = null;
+  let currentMode = "all";
 
-let currentQuery = "";
-let currentSearchType = "all";
+  let selectedSuggestion = -1;
 
-let lastSearchQuery = "";
+  let suggestionTimer = null;
 
-let isSearching = false;
-
-let sortMode = "relevance";
-
-let recognition = null;
-let isRecording = false;
+  let suggestionRequestId = 0;
 
 
-/* =========================================================
-   3. STORAGE KEYS
-   ========================================================= */
+  /* ===============================
+     Static Trending
+  =============================== */
 
-const STORAGE_KEYS = {
-    HISTORY: "wareligent_search_history",
-    THEME: "wareligent_theme",
-    HISTORY_ENABLED: "wareligent_history_enabled",
-    SAFE_SEARCH: "wareligent_safe_search"
-};
-
-
-/* =========================================================
-   4. INITIALIZATION
-   ========================================================= */
-
-document.addEventListener("DOMContentLoaded", () => {
-
-    initializeSettings();
-
-    initializeSearch();
-
-    initializeVoiceSearch();
-
-    initializeImageSearch();
-
-    renderSearchHistory();
-
-    updateClearButton();
-
-    loadInitialPage();
-
-});
+  const defaultTrending = [
+    "Latest technology trends",
+    "World news today",
+    "AI tools",
+    "Best mobile phones",
+    "Sports news",
+    "Travel destinations"
+  ];
 
 
-/* =========================================================
-   5. INITIAL PAGE
-   ========================================================= */
+  /* ===============================
+     Utilities
+  =============================== */
 
-async function loadInitialPage() {
+  function escapeHtml(value) {
+    return String(value || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
 
-    hideLoading();
-    hideError();
-    hideEmpty();
 
-    if (resultsFeed) {
-        resultsFeed.innerHTML = "";
+  function normalizeUrl(url) {
+    if (!url) return "";
+
+    let value = String(url).trim();
+
+    if (!value) return "";
+
+    if (!/^https?:\/\//i.test(value)) {
+      if (
+        /^[a-z0-9.-]+\.[a-z]{2,}(\/.*)?$/i.test(value)
+      ) {
+        value = "https://" + value;
+      } else {
+        return "";
+      }
     }
 
-    if (resultsHeader) {
-        resultsHeader.hidden = true;
+    try {
+      const parsed = new URL(value);
+
+      if (
+        parsed.protocol !== "http:" &&
+        parsed.protocol !== "https:"
+      ) {
+        return "";
+      }
+
+      return parsed.href;
+    } catch {
+      return "";
+    }
+  }
+
+
+  function getDomain(url) {
+    try {
+      return new URL(url).hostname.replace(
+        /^www\./,
+        ""
+      );
+    } catch {
+      return "Web";
+    }
+  }
+
+
+  function showToast(message) {
+    if (!toastContainer) return;
+
+    const toast =
+      document.createElement("div");
+
+    toast.className = "toast";
+    toast.textContent = message;
+
+    toastContainer.appendChild(toast);
+
+    setTimeout(() => {
+      toast.remove();
+    }, 2800);
+  }
+
+
+  /* ===============================
+     Theme
+  =============================== */
+
+  function setTheme(theme) {
+    document.body.classList.toggle(
+      "dark-theme",
+      theme === "dark"
+    );
+
+    document.body.classList.toggle(
+      "light-theme",
+      theme === "light"
+    );
+
+    if (themeIcon) {
+      themeIcon.textContent =
+        theme === "dark" ? "☀" : "☾";
     }
 
-    /*
-     * Initial page intentionally stays clean.
-     * Search results are loaded after the user searches.
-     */
-}
+    localStorage.setItem(
+      "wareligent-theme",
+      theme
+    );
+  }
 
 
-/* =========================================================
-   6. SEARCH INITIALIZATION
-   ========================================================= */
+  function initTheme() {
+    const saved =
+      localStorage.getItem(
+        "wareligent-theme"
+      );
 
-function initializeSearch() {
+    if (saved) {
+      setTheme(saved);
+      return;
+    }
 
-    if (!searchInput) return;
+    const prefersDark =
+      window.matchMedia &&
+      window.matchMedia(
+        "(prefers-color-scheme: dark)"
+      ).matches;
 
-
-    /* Input */
-
-    searchInput.addEventListener("input", () => {
-
-        const query = searchInput.value.trim();
-
-        updateClearButton();
-
-        selectedSuggestionIndex = -1;
-
-        if (!query) {
-            hideSuggestions();
-            return;
-        }
-
-        clearTimeout(suggestionTimer);
-
-        suggestionTimer = setTimeout(() => {
-            fetchSuggestions(query);
-        }, 250);
-
-    });
+    setTheme(
+      prefersDark ? "dark" : "light"
+    );
+  }
 
 
-    /* Keyboard */
+  themeToggleBtn?.addEventListener(
+    "click",
+    () => {
+      const isDark =
+        document.body.classList.contains(
+          "dark-theme"
+        );
 
-    searchInput.addEventListener("keydown", (event) => {
+      setTheme(
+        isDark ? "light" : "dark"
+      );
+    }
+  );
 
-        const items =
-            suggestionsList
-                ? suggestionsList.querySelectorAll("li")
-                : [];
+
+  /* ===============================
+     Trending
+  =============================== */
+
+  function renderTrending(items) {
+    if (!trendingGrid) return;
+
+    const list =
+      items.length
+        ? items
+        : defaultTrending;
+
+    trendingGrid.innerHTML =
+      list
+        .slice(0, 6)
+        .map(
+          (item, index) => `
+            <button
+              class="trend-item"
+              data-query="${escapeHtml(item)}"
+            >
+              <span class="trend-number">
+                ${index + 1}
+              </span>
+
+              <span class="trend-text">
+                ${escapeHtml(item)}
+              </span>
+            </button>
+          `
+        )
+        .join("");
+
+    trendingGrid
+      .querySelectorAll(".trend-item")
+      .forEach((button) => {
+        button.addEventListener(
+          "click",
+          () => {
+            const query =
+              button.dataset.query || "";
+
+            searchInput.value = query;
+
+            executeSearch(query);
+          }
+        );
+      });
+  }
 
 
-        if (event.key === "ArrowDown") {
+  async function loadTrending() {
+    renderTrending(defaultTrending);
 
-            if (!items.length) return;
+    if (!supabaseClient) return;
 
+    try {
+      const { data, error } =
+        await supabaseClient
+          .from("search_suggestions")
+          .select("keyword")
+          .order("created_at", {
+            ascending: false
+          })
+          .limit(10);
+
+      if (error || !data?.length) return;
+
+      const keywords =
+        data
+          .map(item => item.keyword)
+          .filter(Boolean);
+
+      const combined = [
+        ...keywords,
+        ...defaultTrending
+      ];
+
+      const unique =
+        [...new Set(combined)];
+
+      renderTrending(unique);
+
+    } catch (error) {
+      console.warn(
+        "Trending unavailable:",
+        error
+      );
+    }
+  }
+
+
+  /* ===============================
+     Search Suggestions
+  =============================== */
+
+  function hideSuggestions() {
+    suggestionsList.hidden = true;
+    suggestionsList.innerHTML = "";
+    selectedSuggestion = -1;
+  }
+
+
+  function renderSuggestions(items) {
+    if (!items.length) {
+      hideSuggestions();
+      return;
+    }
+
+    suggestionsList.innerHTML =
+      items
+        .slice(0, 7)
+        .map(
+          item => `
+            <li
+              data-value="${escapeHtml(item)}"
+            >
+              🔎
+              <span>${escapeHtml(item)}</span>
+            </li>
+          `
+        )
+        .join("");
+
+    suggestionsList.hidden = false;
+
+    suggestionsList
+      .querySelectorAll("li")
+      .forEach((item) => {
+        item.addEventListener(
+          "mousedown",
+          (event) => {
             event.preventDefault();
 
-            selectedSuggestionIndex =
-                (selectedSuggestionIndex + 1) %
-                items.length;
+            const value =
+              item.dataset.value || "";
 
-            updateSuggestionSelection(items);
-
-            return;
-        }
-
-
-        if (event.key === "ArrowUp") {
-
-            if (!items.length) return;
-
-            event.preventDefault();
-
-            selectedSuggestionIndex =
-                (selectedSuggestionIndex - 1 + items.length) %
-                items.length;
-
-            updateSuggestionSelection(items);
-
-            return;
-        }
-
-
-        if (event.key === "Escape") {
+            searchInput.value = value;
 
             hideSuggestions();
 
-            return;
-        }
+            executeSearch(value);
+          }
+        );
+      });
+  }
 
 
-        if (event.key === "Enter") {
-
-            event.preventDefault();
-
-            if (
-                selectedSuggestionIndex >= 0 &&
-                items[selectedSuggestionIndex]
-            ) {
-
-                const selectedValue =
-                    items[selectedSuggestionIndex].dataset.val;
-
-                searchInput.value = selectedValue;
-
-            }
-
-            hideSuggestions();
-
-            executeSearch();
-
-        }
-
-    });
-
-
-    /* Form */
-
-    if (searchForm) {
-
-        searchForm.addEventListener("submit", (event) => {
-
-            event.preventDefault();
-
-            executeSearch();
-
-        });
-
+  function fetchGoogleSuggestions(query) {
+    if (!query || query.length < 2) {
+      hideSuggestions();
+      return;
     }
 
+    const requestId =
+      ++suggestionRequestId;
 
-    /* Outside click */
+    const callbackName =
+      "__wareligentSuggestions";
 
-    document.addEventListener("click", (event) => {
+    window[callbackName] = function(data) {
+      if (
+        requestId !== suggestionRequestId
+      ) {
+        return;
+      }
 
-        if (
-            suggestionsList &&
-            !suggestionsList.contains(event.target) &&
-            !searchForm?.contains(event.target)
-        ) {
-            hideSuggestions();
-        }
+      const suggestions =
+        Array.isArray(data?.[1])
+          ? data[1]
+              .map(item =>
+                Array.isArray(item)
+                  ? item[0]
+                  : item
+              )
+              .filter(Boolean)
+          : [];
 
-    });
-
-}
-
-
-/* =========================================================
-   7. CLEAR BUTTON
-   ========================================================= */
-
-function updateClearButton() {
-
-    if (!clearBtn || !searchInput) return;
-
-    const hasValue =
-        searchInput.value.trim().length > 0;
-
-    clearBtn.hidden = !hasValue;
-
-}
-
-
-/* =========================================================
-   8. CLEAR SEARCH
-   ========================================================= */
-
-function clearSearch() {
-
-    if (searchInput) {
-        searchInput.value = "";
-        searchInput.focus();
-    }
-
-    currentQuery = "";
-    lastSearchQuery = "";
-
-    updateClearButton();
-
-    hideSuggestions();
-    hideLoading();
-    hideError();
-    hideEmpty();
-
-    if (resultsFeed) {
-        resultsFeed.innerHTML = "";
-    }
-
-    if (resultsHeader) {
-        resultsHeader.hidden = true;
-    }
-
-    showHomeNavigation();
-
-}
-
-
-/* =========================================================
-   9. QUICK SEARCH
-   ========================================================= */
-
-function quickSearch(queryText) {
-
-    if (!queryText) return;
-
-    if (searchInput) {
-        searchInput.value = queryText;
-    }
-
-    updateClearButton();
-
-    executeSearch(queryText);
-
-}
-
-
-/* =========================================================
-   10. SEARCH SUGGESTIONS
-   ========================================================= */
-
-function fetchSuggestions(query) {
-
-    if (!suggestionsList || !query) return;
-
-    const oldScript =
-        document.getElementById("jsonp-suggestions");
-
-    if (oldScript) {
-        oldScript.remove();
-    }
-
-
-    window.handleGoogleSuggestions = (data) => {
-
-        const suggestions =
-            data && Array.isArray(data[1])
-                ? data[1]
-                : [];
-
-        renderSuggestions(suggestions);
-
+      renderSuggestions(suggestions);
     };
 
+    const oldScript =
+      document.getElementById(
+        "googleSuggestionsScript"
+      );
+
+    if (oldScript) {
+      oldScript.remove();
+    }
 
     const script =
-        document.createElement("script");
+      document.createElement("script");
 
-    script.id = "jsonp-suggestions";
+    script.id =
+      "googleSuggestionsScript";
 
     script.src =
-        `https://suggestqueries.google.com/complete/search?client=chrome&q=${encodeURIComponent(query)}&callback=handleGoogleSuggestions`;
+      "https://suggestqueries.google.com/complete/search" +
+      `?client=firefox&q=${encodeURIComponent(query)}` +
+      `&callback=${callbackName}`;
 
     script.onerror = () => {
-        renderSuggestions([]);
+      hideSuggestions();
     };
 
     document.body.appendChild(script);
+  }
 
-}
 
+  searchInput?.addEventListener(
+    "input",
+    () => {
+      const value =
+        searchInput.value.trim();
 
-/* =========================================================
-   11. RENDER SUGGESTIONS
-   ========================================================= */
+      clearBtn?.classList.toggle(
+        "hidden",
+        !value
+      );
 
-function renderSuggestions(suggestions) {
+      clearTimeout(
+        suggestionTimer
+      );
 
-    if (!suggestionsList) return;
-
-    suggestionsList.innerHTML = "";
-
-    selectedSuggestionIndex = -1;
-
-    if (!suggestions || suggestions.length === 0) {
-
+      if (!value) {
         hideSuggestions();
-
         return;
+      }
+
+      suggestionTimer =
+        setTimeout(() => {
+          fetchGoogleSuggestions(
+            value
+          );
+        }, 250);
     }
+  );
 
 
-    suggestions
-        .filter(Boolean)
-        .slice(0, 7)
-        .forEach((term) => {
+  /* ===============================
+     Keyboard
+  =============================== */
 
-            const li =
-                document.createElement("li");
+  searchInput?.addEventListener(
+    "keydown",
+    (event) => {
 
-            li.dataset.val = term;
-
-            li.setAttribute(
-                "role",
-                "option"
-            );
-
-
-            const icon =
-                document.createElement("span");
-
-            icon.className =
-                "suggestion-icon";
-
-            icon.textContent = "⌕";
-
-
-            const text =
-                document.createElement("span");
-
-            text.textContent = term;
-
-
-            li.appendChild(icon);
-            li.appendChild(text);
-
-
-            li.addEventListener("mousedown", (event) => {
-
-                event.preventDefault();
-
-                if (searchInput) {
-                    searchInput.value = term;
-                }
-
-                hideSuggestions();
-
-                executeSearch(term);
-
-            });
-
-
-            suggestionsList.appendChild(li);
-
-        });
-
-
-    if (suggestionsList.children.length) {
-
-        suggestionsList.hidden = false;
-
-    }
-
-}
-
-
-/* =========================================================
-   12. SUGGESTION KEYBOARD SELECTION
-   ========================================================= */
-
-function updateSuggestionSelection(items) {
-
-    items.forEach((item, index) => {
-
-        const selected =
-            index === selectedSuggestionIndex;
-
-        item.classList.toggle(
-            "selected",
-            selected
+      const items =
+        suggestionsList.querySelectorAll(
+          "li"
         );
 
-        item.setAttribute(
-            "aria-selected",
-            selected ? "true" : "false"
-        );
+      if (!items.length) {
+        if (
+          event.key === "Enter"
+        ) {
+          event.preventDefault();
 
-    });
-
-
-    const selected =
-        items[selectedSuggestionIndex];
-
-    if (selected && searchInput) {
-
-        searchInput.value =
-            selected.dataset.val;
-
-    }
-
-}
-
-
-/* =========================================================
-   13. HIDE SUGGESTIONS
-   ========================================================= */
-
-function hideSuggestions() {
-
-    if (!suggestionsList) return;
-
-    suggestionsList.innerHTML = "";
-
-    suggestionsList.hidden = true;
-
-    selectedSuggestionIndex = -1;
-
-}
-
-
-/* =========================================================
-   14. MAIN SEARCH FUNCTION
-   ========================================================= */
-
-async function executeSearch(queryStr = "") {
-
-    if (isSearching) return;
-
-
-    const query =
-        typeof queryStr === "string" &&
-        queryStr.trim()
-            ? queryStr.trim()
-            : searchInput
-                ? searchInput.value.trim()
-                : "";
-
-
-    if (!query) {
-
-        clearSearch();
-
-        return;
-
-    }
-
-
-    currentQuery = query;
-
-    lastSearchQuery = query;
-
-    if (searchInput) {
-        searchInput.value = query;
-    }
-
-    updateClearButton();
-
-    hideSuggestions();
-
-    saveSearchToHistory(query);
-
-    saveSearchWordToDatabase(query);
-
-
-    showSearchState();
-
-
-    isSearching = true;
-
-
-    try {
-
-        let results =
-            await searchSupabase(query);
-
-
-        /*
-         * If database has no result,
-         * use the project's existing web API.
-         */
-
-        if (!results.length) {
-
-            showLoading(
-                "Searching the live web..."
-            );
-
-            const webResults =
-                await fetchAndSaveFromWeb(query);
-
-            if (webResults.length) {
-                results = webResults;
-            }
-
+          executeSearch(
+            searchInput.value
+          );
         }
 
+        return;
+      }
 
-        /*
-         * Final result rendering
-         */
 
-        if (results.length) {
+      if (event.key === "ArrowDown") {
+        event.preventDefault();
 
-            results =
-                normalizeResults(results);
+        selectedSuggestion =
+          Math.min(
+            selectedSuggestion + 1,
+            items.length - 1
+          );
+      }
 
-            results =
-                sortResults(results);
 
-            renderResults(results, query);
+      if (event.key === "ArrowUp") {
+        event.preventDefault();
+
+        selectedSuggestion =
+          Math.max(
+            selectedSuggestion - 1,
+            0
+          );
+      }
+
+
+      if (event.key === "Enter") {
+        event.preventDefault();
+
+        if (
+          selectedSuggestion >= 0
+        ) {
+          const value =
+            items[
+              selectedSuggestion
+            ].dataset.value;
+
+          searchInput.value =
+            value;
+
+          hideSuggestions();
+
+          executeSearch(value);
 
         } else {
-
-            showEmptyState(query);
-
+          executeSearch(
+            searchInput.value
+          );
         }
 
-    } catch (error) {
+        return;
+      }
 
-        console.error(
-            "Wareligent Search Error:",
-            error
-        );
 
-        showErrorState(
-            "Search failed. Please try again."
-        );
-
-    } finally {
-
-        isSearching = false;
-
-        hideLoading();
-
+      items.forEach(
+        (item, index) => {
+          item.classList.toggle(
+            "selected",
+            index ===
+              selectedSuggestion
+          );
+        }
+      );
     }
+  );
 
-}
+
+  /* ===============================
+     Save Search
+  =============================== */
+
+  async function saveSearchWord(word) {
+    if (!supabaseClient) return;
+
+    const keyword =
+      String(word || "")
+        .trim()
+        .toLowerCase();
+
+    if (keyword.length < 2) return;
+
+    try {
+      const {
+        data: sessionData
+      } =
+        await supabaseClient.auth
+          .getSession();
+
+      const user =
+        sessionData?.session?.user;
+
+      const row = {
+        keyword
+      };
+
+      if (user) {
+        row.user_id = user.id;
+      }
+
+      await supabaseClient
+        .from("search_suggestions")
+        .insert(row);
+
+    } catch (error) {
+      console.warn(
+        "Could not save search:",
+        error
+      );
+    }
+  }
 
 
-/* =========================================================
-   15. SUPABASE SEARCH
-   ========================================================= */
+  /* ===============================
+     Database Search
+  =============================== */
 
-async function searchSupabase(query) {
-
+  async function searchDatabase(query) {
     if (!supabaseClient) {
-        return [];
+      return [];
     }
-
-
-    /*
-     * Escape PostgREST filter characters.
-     */
-
-    const safeQuery =
-        escapePostgrestValue(query);
-
 
     try {
 
-        let request =
+      const fields = [
+        "title",
+        "keywords",
+        "description"
+      ];
+
+      const responses =
+        await Promise.all(
+          fields.map(field =>
             supabaseClient
-                .from("websites")
-                .select("*")
-                .or(
-                    `title.ilike.%${safeQuery}%,keywords.ilike.%${safeQuery}%,description.ilike.%${safeQuery}%`
-                )
-                .limit(30);
-
-
-        /*
-         * Search type hooks.
-         *
-         * These are intentionally lightweight because
-         * the current database schema does not show
-         * dedicated news/image/video fields.
-         */
-
-        const { data, error } =
-            await request;
-
-
-        if (error) {
-
-            console.error(
-                "Supabase Search Error:",
-                error
-            );
-
-            return [];
-
-        }
-
-
-        return Array.isArray(data)
-            ? data
-            : [];
-
-    } catch (error) {
-
-        console.error(
-            "Supabase request failed:",
-            error
+              .from("websites")
+              .select(
+                "id,title,url,description,keywords"
+              )
+              .ilike(
+                field,
+                `%${query}%`
+              )
+              .limit(10)
+          )
         );
 
-        return [];
+      const map = new Map();
 
-    }
-
-}
-
-
-/* =========================================================
-   16. POSTGREST ESCAPE
-   ========================================================= */
-
-function escapePostgrestValue(value) {
-
-    return String(value)
-        .replace(/\\/g, "\\\\")
-        .replace(/%/g, "\\%")
-        .replace(/_/g, "\\_")
-        .replace(/,/g, "\\,")
-        .replace(/\./g, "\\.");
-
-}
-
-
-/* =========================================================
-   17. LIVE WEB SEARCH + DATABASE SAVE
-   ========================================================= */
-
-async function fetchAndSaveFromWeb(query) {
-
-    try {
-
-        const response =
-            await fetch(
-                `/api/search-web?q=${encodeURIComponent(query)}`,
-                {
-                    method: "GET",
-                    headers: {
-                        "Accept": "application/json"
-                    }
-                }
-            );
-
-
-        if (!response.ok) {
-
-            throw new Error(
-                `Web API returned ${response.status}`
-            );
-
-        }
-
-
-        const apiData =
-            await response.json();
-
+      responses.forEach(response => {
 
         if (
-            !apiData ||
-            !Array.isArray(apiData.results)
+          response.error ||
+          !response.data
         ) {
-            return [];
+          return;
         }
 
+        response.data.forEach(item => {
 
-        const items =
-            apiData.results
-                .filter(item => item && item.link)
-                .map(item => ({
+          const url =
+            normalizeUrl(item.url);
 
-                    title:
-                        item.title ||
-                        "Untitled Result",
+          const key =
+            item.id ||
+            url ||
+            item.title;
 
-                    url:
-                        item.link,
-
-                    description:
-                        item.snippet ||
-                        "",
-
-                    keywords:
-                        `${query}, ${
-                            item.title
-                                ? item.title.toLowerCase()
-                                : ""
-                        }`
-
-                }));
-
-
-        /*
-         * Save to Supabase.
-         */
-
-        if (
-            supabaseClient &&
-            items.length
-        ) {
-
-            try {
-
-                await supabaseClient
-                    .from("websites")
-                    .insert(items);
-
-            } catch (saveError) {
-
-                /*
-                 * Search should still work even if
-                 * database saving fails.
-                 */
-
-                console.warn(
-                    "Could not save web results:",
-                    saveError
-                );
-
-            }
-
-        }
-
-
-        return items;
-
-    } catch (error) {
-
-        console.error(
-            "Live web search failed:",
-            error
-        );
-
-        return [];
-
-    }
-
-}
-
-
-/* =========================================================
-   18. NORMALIZE RESULTS
-   ========================================================= */
-
-function normalizeResults(results) {
-
-    return results
-        .filter(Boolean)
-        .map((site) => {
-
-            let targetUrl =
-                site.url
-                    ? String(site.url).trim()
-                    : "";
-
-
-            if (
-                targetUrl &&
-                !/^https?:\/\//i.test(targetUrl)
-            ) {
-
-                targetUrl =
-                    "https://" + targetUrl;
-
-            }
-
-
-            let domain = "";
-
-            try {
-
-                domain =
-                    new URL(targetUrl).hostname;
-
-            } catch {
-
-                domain =
-                    targetUrl
-                        .replace(/^https?:\/\//i, "")
-                        .split("/")[0];
-
-            }
-
-
-            return {
-
-                ...site,
-
-                title:
-                    site.title ||
-                    "Untitled Result",
-
-                url:
-                    targetUrl,
-
-                domain:
-                    domain,
-
-                description:
-                    site.description ||
-                    site.snippet ||
-                    ""
-
-            };
-
-        })
-        .filter(site => site.url);
-
-}
-
-
-/* =========================================================
-   19. SORT RESULTS
-   ========================================================= */
-
-function sortResults(results) {
-
-    if (!Array.isArray(results)) {
-        return [];
-    }
-
-
-    if (sortMode === "recent") {
-
-        return [...results].sort((a, b) => {
-
-            const dateA =
-                new Date(
-                    a.created_at || 0
-                ).getTime();
-
-            const dateB =
-                new Date(
-                    b.created_at || 0
-                ).getTime();
-
-            return dateB - dateA;
+          if (
+            key &&
+            !map.has(key)
+          ) {
+            map.set(key, item);
+          }
 
         });
+      });
 
+      return [...map.values()]
+        .slice(0, 20);
+
+    } catch (error) {
+
+      console.warn(
+        "Database search failed:",
+        error
+      );
+
+      return [];
     }
+  }
 
 
-    /*
-     * Default = relevance.
-     * Keep database/API order.
-     */
+  /* ===============================
+     Web API Search
+  =============================== */
 
-    return results;
+  async function searchWebAPI(
+    query,
+    mode
+  ) {
 
-}
+    try {
 
+      const url =
+        `/api/search-web?q=${encodeURIComponent(
+          query
+        )}&type=${encodeURIComponent(
+          mode
+        )}`;
 
-/* =========================================================
-   20. RENDER RESULTS
-   ========================================================= */
+      const response =
+        await fetch(url, {
+          headers: {
+            Accept:
+              "application/json"
+          }
+        });
 
-function renderResults(results, query) {
+      if (!response.ok) {
+        return [];
+      }
 
-    if (!resultsFeed) return;
+      const data =
+        await response.json();
 
-
-    resultsFeed.innerHTML = "";
-
-
-    if (resultsHeader) {
-        resultsHeader.hidden = false;
-    }
-
-
-    if (resultsLabel) {
-        resultsLabel.textContent =
-            currentSearchType === "all"
-                ? "Search results"
-                : `${capitalize(currentSearchType)} results`;
-    }
-
-
-    if (resultsCount) {
-
-        resultsCount.textContent =
-            `${results.length} result${
-                results.length === 1
-                    ? ""
-                    : "s"
-            }`;
-
-    }
-
-
-    results.forEach((site) => {
-
-        const card =
-            document.createElement("article");
-
-        card.className =
-            "result-card";
-
-
-        const meta =
-            document.createElement("div");
-
-        meta.className =
-            "result-header";
-
-
-        /*
-         * Favicon
-         */
-
-        const icon =
-            document.createElement("img");
-
-        icon.className =
-            "site-icon";
-
-        icon.alt = "";
-
-        icon.loading = "lazy";
-
-        icon.src =
-            `https://www.google.com/s2/favicons?domain=${encodeURIComponent(site.domain)}&sz=32`;
-
-        icon.onerror = () => {
-            icon.style.display = "none";
-        };
-
-
-        const domain =
-            document.createElement("span");
-
-        domain.className =
-            "site-url";
-
-        domain.textContent =
-            site.domain || "Web result";
-
-
-        meta.appendChild(icon);
-        meta.appendChild(domain);
-
-
-        /*
-         * Result title
-         */
-
-        const title =
-            document.createElement("a");
-
-        title.className =
-            "result-title";
-
-        title.textContent =
-            site.title;
-
-        title.href =
-            buildReaderUrl(
-                site.url,
-                site.title
+      const results =
+        Array.isArray(data)
+          ? data
+          : (
+              data.results ||
+              data.items ||
+              []
             );
 
+      return results.map(item => ({
+        title:
+          item.title ||
+          item.name ||
+          "Untitled result",
 
-        /*
-         * Result description
-         */
+        url:
+          item.url ||
+          item.link ||
+          item.href ||
+          "",
 
-        const description =
-            document.createElement("p");
+        description:
+          item.description ||
+          item.snippet ||
+          item.summary ||
+          "",
 
-        description.className =
-            "result-snippet";
+        image:
+          item.image ||
+          item.thumbnail ||
+          item.thumbnailUrl ||
+          "",
 
-        description.innerHTML =
-            highlightText(
-                escapeHtml(site.description),
-                query
-            );
+        video:
+          item.video ||
+          item.videoUrl ||
+          "",
 
+        source:
+          item.source ||
+          item.site ||
+          ""
+      }));
 
-        /*
-         * Result URL
-         */
+    } catch (error) {
 
-        const urlLine =
-            document.createElement("span");
+      console.warn(
+        "Web API unavailable:",
+        error
+      );
 
-        urlLine.className =
-            "result-url";
-
-        urlLine.textContent =
-            shortenUrl(site.url);
-
-
-        card.appendChild(meta);
-
-        card.appendChild(title);
-
-        card.appendChild(urlLine);
-
-        card.appendChild(description);
-
-
-        resultsFeed.appendChild(card);
-
-    });
-
-
-    scrollToResults();
-
-}
-
-
-/* =========================================================
-   21. READER URL
-   ========================================================= */
-
-function buildReaderUrl(url, title) {
-
-    if (!url) return "#";
-
-
-    return (
-        `/view.html?url=${
-            encodeURIComponent(url)
-        }&title=${
-            encodeURIComponent(title || "")
-        }`
-    );
-
-}
-
-
-/* =========================================================
-   22. HIGHLIGHT TEXT
-   ========================================================= */
-
-function highlightText(text, keyword) {
-
-    if (!text || !keyword) {
-        return text || "";
+      return [];
     }
+  }
 
 
-    const escaped =
-        String(keyword)
-            .trim()
-            .replace(
-                /[.*+?^${}()|[\]\\]/g,
-                "\\$&"
-            );
+  /* ===============================
+     Wikipedia fallback
+  =============================== */
 
+  async function wikipediaSearch(query) {
 
-    if (!escaped) {
-        return text;
+    try {
+
+      const url =
+        "https://en.wikipedia.org/w/api.php" +
+        "?action=query" +
+        "&format=json" +
+        "&origin=*" +
+        "&generator=search" +
+        "&gsrsearch=" +
+        encodeURIComponent(query) +
+        "&gsrlimit=8" +
+        "&prop=extracts|info" +
+        "&exintro=1" +
+        "&explaintext=1" +
+        "&inprop=url";
+
+      const response =
+        await fetch(url);
+
+      if (!response.ok) {
+        return [];
+      }
+
+      const data =
+        await response.json();
+
+      const pages =
+        data?.query?.pages || {};
+
+      return Object.values(pages)
+        .map(page => ({
+          title:
+            page.title,
+
+          url:
+            page.fullurl ||
+            `https://en.wikipedia.org/wiki/${encodeURIComponent(
+              page.title
+            )}`,
+
+          description:
+            page.extract || "",
+
+          source:
+            "Wikipedia"
+        }));
+
+    } catch {
+      return [];
     }
+  }
 
 
-    const regex =
-        new RegExp(
-            `(${escaped})`,
-            "gi"
-        );
+  /* ===============================
+     Loading UI
+  =============================== */
+
+  function showLoading() {
+
+    resultsWrapper.innerHTML = `
+      <div class="loading-card">
+        <div class="skeleton short"></div>
+        <br>
+        <div class="skeleton medium"></div>
+        <br>
+        <div class="skeleton long"></div>
+        <br>
+        <div class="skeleton medium"></div>
+      </div>
+
+      <div class="loading-card">
+        <div class="skeleton short"></div>
+        <br>
+        <div class="skeleton long"></div>
+        <br>
+        <div class="skeleton medium"></div>
+      </div>
+    `;
+  }
 
 
-    return text.replace(
-        regex,
-        '<mark class="highlight">$1</mark>'
-    );
+  /* ===============================
+     Render Result
+  =============================== */
 
-}
+  function renderResultCard(item) {
 
-
-/* =========================================================
-   23. HTML ESCAPE
-   ========================================================= */
-
-function escapeHtml(value) {
-
-    return String(value ?? "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-
-}
-
-
-/* =========================================================
-   24. SHORTEN URL
-   ========================================================= */
-
-function shortenUrl(url) {
+    const url =
+      normalizeUrl(item.url);
 
     if (!url) return "";
 
-    try {
+    const domain =
+      getDomain(url);
 
-        const parsed =
-            new URL(url);
+    const title =
+      item.title ||
+      "Untitled result";
 
-        const path =
-            parsed.pathname === "/"
-                ? ""
-                : parsed.pathname;
+    const description =
+      item.description ||
+      "No description available.";
 
-        const result =
-            `${parsed.hostname}${path}`;
+    const favicon =
+      `https://www.google.com/s2/favicons?domain=${encodeURIComponent(
+        domain
+      )}&sz=64`;
 
-        return result.length > 70
-            ? result.slice(0, 67) + "..."
-            : result;
+    const viewUrl =
+      `/view.html?url=${encodeURIComponent(
+        url
+      )}&title=${encodeURIComponent(
+        title
+      )}`;
 
-    } catch {
+    return `
+      <article class="result-card">
 
-        return String(url).slice(0, 70);
+        <div class="result-top">
 
+          <img
+            class="site-icon"
+            src="${favicon}"
+            alt=""
+            loading="lazy"
+          >
+
+          <div class="result-source">
+            <strong>
+              ${escapeHtml(domain)}
+            </strong>
+
+            <small>
+              ${escapeHtml(
+                item.source || "Web"
+              )}
+            </small>
+          </div>
+
+        </div>
+
+
+        <a
+          class="result-title"
+          href="${viewUrl}"
+        >
+          ${escapeHtml(title)}
+        </a>
+
+
+        <p class="result-description">
+          ${escapeHtml(description)}
+        </p>
+
+
+        <div class="result-actions">
+
+          <a
+            class="result-action"
+            href="${viewUrl}"
+          >
+            Open
+          </a>
+
+          <a
+            class="result-action"
+            href="${url}"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Visit site
+          </a>
+
+        </div>
+
+      </article>
+    `;
+  }
+
+
+  /* ===============================
+     Render Media
+  =============================== */
+
+  function renderMediaCard(item) {
+
+    const url =
+      normalizeUrl(item.url);
+
+    if (!url) return "";
+
+    const image =
+      item.image ||
+      item.thumbnail;
+
+    if (!image) {
+      return renderResultCard(item);
     }
 
-}
+    const title =
+      item.title ||
+      "Untitled";
+
+    return `
+      <article class="media-card">
+
+        <a
+          href="${url}"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+
+          <img
+            class="media-image"
+            src="${escapeHtml(image)}"
+            alt="${escapeHtml(title)}"
+            loading="lazy"
+            onerror="this.style.display='none'"
+          >
+
+        </a>
+
+        <div class="media-content">
+
+          <div class="media-title">
+            ${escapeHtml(title)}
+          </div>
+
+          <div class="media-source">
+            ${escapeHtml(
+              item.source ||
+              getDomain(url)
+            )}
+          </div>
+
+        </div>
+
+      </article>
+    `;
+  }
 
 
-/* =========================================================
-   25. SEARCH UI STATES
-   ========================================================= */
+  function renderResults(
+    results,
+    mode
+  ) {
 
-function showSearchState() {
+    if (!results.length) {
 
-    hideEmpty();
-    hideError();
+      resultsWrapper.innerHTML = `
+        <div class="empty-state">
 
-    if (resultsFeed) {
-        resultsFeed.innerHTML = "";
-    }
+          <div class="empty-state-icon">
+            🔎
+          </div>
 
-    if (resultsHeader) {
-        resultsHeader.hidden = true;
-    }
+          <h3>
+            No results found
+          </h3>
 
-    showLoading("Searching Wareligent...");
+          <p>
+            Try another search or a different keyword.
+          </p>
 
-    updateNavigation("home");
+        </div>
+      `;
 
-}
-
-
-function showLoading(message = "Searching...") {
-
-    if (!loadingState) return;
-
-    const text =
-        loadingState.querySelector("p");
-
-    if (text) {
-        text.textContent = message;
-    }
-
-    loadingState.hidden = false;
-
-}
-
-
-function hideLoading() {
-
-    if (loadingState) {
-        loadingState.hidden = true;
-    }
-
-}
-
-
-function showEmptyState(query) {
-
-    hideLoading();
-    hideError();
-
-    if (resultsFeed) {
-        resultsFeed.innerHTML = "";
-    }
-
-    if (emptyState) {
-
-        const paragraph =
-            emptyState.querySelector("p");
-
-        if (paragraph) {
-
-            paragraph.textContent =
-                `No results found for "${query}". Try another search term.`;
-
-        }
-
-        emptyState.hidden = false;
-
-    }
-
-    if (resultsHeader) {
-        resultsHeader.hidden = true;
-    }
-
-}
-
-
-function hideEmpty() {
-
-    if (emptyState) {
-        emptyState.hidden = true;
-    }
-
-}
-
-
-function showErrorState(message) {
-
-    hideLoading();
-    hideEmpty();
-
-    if (resultsFeed) {
-        resultsFeed.innerHTML = "";
-    }
-
-    if (errorMessage) {
-        errorMessage.textContent =
-            message;
-    }
-
-    if (errorState) {
-        errorState.hidden = false;
-    }
-
-    if (resultsHeader) {
-        resultsHeader.hidden = true;
-    }
-
-}
-
-
-function hideError() {
-
-    if (errorState) {
-        errorState.hidden = true;
-    }
-
-}
-
-
-/* =========================================================
-   26. RETRY
-   ========================================================= */
-
-function retrySearch() {
-
-    if (!lastSearchQuery) return;
-
-    executeSearch(lastSearchQuery);
-
-}
-
-
-/* =========================================================
-   27. SEARCH TYPE TABS
-   ========================================================= */
-
-function changeSearchType(type) {
-
-    const allowedTypes = [
-        "all",
-        "news",
-        "images",
-        "videos"
-    ];
-
-
-    if (!allowedTypes.includes(type)) {
-        type = "all";
+      return;
     }
 
 
-    currentSearchType = type;
+    if (
+      mode === "images" ||
+      mode === "videos"
+    ) {
+
+      resultsWrapper.innerHTML =
+        results
+          .map(renderMediaCard)
+          .join("");
+
+    } else {
+
+      resultsWrapper.innerHTML =
+        results
+          .map(renderResultCard)
+          .join("");
+    }
+  }
+
+
+  /* ===============================
+     Direct URL
+  =============================== */
+
+  function looksLikeUrl(value) {
+
+    return (
+      /^https?:\/\//i.test(value) ||
+      /^www\./i.test(value) ||
+      /^[a-z0-9.-]+\.[a-z]{2,}$/i.test(
+        value
+      )
+    );
+  }
+
+
+  function renderUrlResult(value) {
+
+    const url =
+      normalizeUrl(value);
+
+    if (!url) return false;
+
+    const domain =
+      getDomain(url);
+
+    resultsWrapper.innerHTML = `
+      <article class="result-card">
+
+        <div class="result-top">
+
+          <img
+            class="site-icon"
+            src="https://www.google.com/s2/favicons?domain=${encodeURIComponent(
+              domain
+            )}&sz=64"
+            alt=""
+          >
+
+          <div class="result-source">
+            <strong>
+              ${escapeHtml(domain)}
+            </strong>
+
+            <small>
+              Direct website
+            </small>
+          </div>
+
+        </div>
+
+        <a
+          class="result-title"
+          href="${url}"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Open ${escapeHtml(domain)}
+        </a>
+
+        <p class="result-description">
+          You entered a website address.
+        </p>
+
+        <div class="result-actions">
+
+          <a
+            class="result-action"
+            href="${url}"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Visit website
+          </a>
+
+        </div>
+
+      </article>
+    `;
+
+    return true;
+  }
+
+
+  /* ===============================
+     Main Search
+  =============================== */
+
+  async function executeSearch(
+    query,
+    mode = currentMode
+  ) {
+
+    query =
+      String(query || "").trim();
+
+    if (!query) {
+      showToast(
+        "Please enter something to search."
+      );
+
+      searchInput.focus();
+
+      return;
+    }
+
+
+    currentMode = mode;
+
+    hideSuggestions();
 
 
     document
-        .querySelectorAll(".search-tab")
-        .forEach(tab => {
-
-            tab.classList.toggle(
-                "active",
-                tab.dataset.type === type
-            );
-
-        });
+      .querySelectorAll(".tab")
+      .forEach(tab => {
+        tab.classList.toggle(
+          "active",
+          tab.dataset.mode === mode
+        );
+      });
 
 
-    /*
-     * If there is already a query,
-     * re-run it with the selected type.
-     */
+    trendingBox.style.display =
+      "none";
 
-    if (currentQuery) {
-        executeSearch(currentQuery);
+
+    searchPerfMeta.hidden = false;
+
+    searchPerfMeta.textContent =
+      "Searching...";
+
+
+    const started =
+      performance.now();
+
+
+    clearBtn.classList.remove(
+      "hidden"
+    );
+
+
+    await saveSearchWord(query);
+
+
+    if (looksLikeUrl(query)) {
+
+      const success =
+        renderUrlResult(query);
+
+      if (success) {
+
+        const time =
+          Math.round(
+            performance.now() -
+              started
+          );
+
+        searchPerfMeta.textContent =
+          `Website • ${time} ms`;
+
+        return;
+      }
     }
 
-}
+
+    showLoading();
 
 
-/* =========================================================
-   28. SORT
-   ========================================================= */
+    let results = [];
 
-function toggleSort() {
-
-    sortMode =
-        sortMode === "relevance"
-            ? "recent"
-            : "relevance";
+    let source = "Wareligent";
 
 
-    const sortBtn =
-        document.getElementById("sortBtn");
+    /* 1. Database */
 
-    if (sortBtn) {
+    results =
+      await searchDatabase(query);
 
-        sortBtn.textContent =
-            sortMode === "relevance"
-                ? "Relevance"
-                : "Recent";
 
+    /* 2. Web API */
+
+    if (!results.length) {
+
+      results =
+        await searchWebAPI(
+          query,
+          mode
+        );
+
+      if (results.length) {
+        source = "Live Web";
+      }
     }
 
 
-    if (currentQuery) {
-        executeSearch(currentQuery);
-    }
-
-}
-
-
-/* =========================================================
-   29. LOCAL SEARCH HISTORY
-   ========================================================= */
-
-function getSearchHistory() {
-
-    try {
-
-        const history =
-            JSON.parse(
-                localStorage.getItem(
-                    STORAGE_KEYS.HISTORY
-                ) || "[]"
-            );
-
-        return Array.isArray(history)
-            ? history
-            : [];
-
-    } catch {
-
-        return [];
-
-    }
-
-}
-
-
-function saveSearchToHistory(query) {
-
-    if (!query) return;
+    /* 3. Wikipedia fallback */
 
     if (
-        localStorage.getItem(
-            STORAGE_KEYS.HISTORY_ENABLED
-        ) === "false"
+      !results.length &&
+      (
+        mode === "all" ||
+        mode === "news" ||
+        mode === "web"
+      )
     ) {
-        return;
+
+      results =
+        await wikipediaSearch(query);
+
+      if (results.length) {
+        source = "Wikipedia";
+      }
     }
 
 
-    const clean =
-        query.trim();
+    renderResults(
+      results,
+      mode
+    );
 
 
-    if (clean.length < 2) {
-        return;
+    const time =
+      Math.round(
+        performance.now() -
+          started
+      );
+
+
+    searchPerfMeta.textContent =
+      `${results.length} result${
+        results.length === 1
+          ? ""
+          : "s"
+      } • ${source} • ${time} ms`;
+  }
+
+
+  /* ===============================
+     Search Form
+  =============================== */
+
+  searchForm?.addEventListener(
+    "submit",
+    event => {
+
+      event.preventDefault();
+
+      executeSearch(
+        searchInput.value,
+        currentMode
+      );
     }
+  );
 
 
-    let history =
-        getSearchHistory();
+  /* ===============================
+     Clear
+  =============================== */
 
+  clearBtn?.addEventListener(
+    "click",
+    () => {
 
-    history =
-        history.filter(
-            item =>
-                item.toLowerCase() !==
-                clean.toLowerCase()
-        );
+      searchInput.value = "";
 
+      clearBtn.classList.add(
+        "hidden"
+      );
 
-    history.unshift(clean);
+      hideSuggestions();
 
+      resultsWrapper.innerHTML = "";
 
-    history =
-        history.slice(0, 15);
+      searchPerfMeta.hidden = true;
 
+      trendingBox.style.display =
+        "";
 
-    try {
+      currentMode = "all";
 
-        localStorage.setItem(
-            STORAGE_KEYS.HISTORY,
-            JSON.stringify(history)
-        );
-
-    } catch (error) {
-
-        console.warn(
-            "Could not save local history:",
-            error
-        );
-
-    }
-
-
-    renderSearchHistory();
-
-}
-
-
-/* =========================================================
-   30. RENDER HISTORY
-   ========================================================= */
-
-function renderSearchHistory() {
-
-    if (!historyList || !historySection) {
-        return;
-    }
-
-
-    const history =
-        getSearchHistory();
-
-
-    historyList.innerHTML = "";
-
-
-    if (!history.length) {
-
-        historySection.hidden = true;
-
-        return;
-
-    }
-
-
-    historySection.hidden = false;
-
-
-    history.forEach((query) => {
-
-        const button =
-            document.createElement("button");
-
-        button.className =
-            "history-item";
-
-        button.type =
-            "button";
-
-
-        const icon =
-            document.createElement("span");
-
-        icon.textContent =
-            "↶";
-
-
-        const text =
-            document.createElement("span");
-
-        text.textContent =
-            query;
-
-
-        button.appendChild(icon);
-        button.appendChild(text);
-
-
-        button.addEventListener(
-            "click",
-            () => {
-
-                if (searchInput) {
-                    searchInput.value =
-                        query;
-                }
-
-                updateClearButton();
-
-                executeSearch(query);
-
-            }
-        );
-
-
-        historyList.appendChild(button);
-
-    });
-
-}
-
-
-/* =========================================================
-   31. SHOW HISTORY
-   ========================================================= */
-
-function showSearchHistory() {
-
-    renderSearchHistory();
-
-    if (historySection) {
-
-        historySection.hidden = false;
-
-        historySection.scrollIntoView({
-            behavior: "smooth",
-            block: "start"
+      document
+        .querySelectorAll(".tab")
+        .forEach(tab => {
+          tab.classList.toggle(
+            "active",
+            tab.dataset.mode === "all"
+          );
         });
 
+      searchInput.focus();
     }
-
-    updateNavigation("history");
-
-}
+  );
 
 
-/* =========================================================
-   32. CLEAR HISTORY
-   ========================================================= */
+  /* ===============================
+     Category Tabs
+  =============================== */
 
-function clearSearchHistory() {
+  categoryTabs
+    ?.querySelectorAll(".tab")
+    .forEach(tab => {
 
-    try {
+      tab.addEventListener(
+        "click",
+        () => {
 
-        localStorage.removeItem(
-            STORAGE_KEYS.HISTORY
-        );
+          const mode =
+            tab.dataset.mode;
 
-    } catch (error) {
+          currentMode = mode;
 
-        console.warn(error);
+          categoryTabs
+            .querySelectorAll(".tab")
+            .forEach(item => {
+              item.classList.remove(
+                "active"
+              );
+            });
 
-    }
-
-
-    renderSearchHistory();
-
-}
-
-
-/* =========================================================
-   33. SUPABASE SEARCH HISTORY
-   ========================================================= */
-
-async function saveSearchWordToDatabase(word) {
-
-    if (!supabaseClient || !word) {
-        return;
-    }
+          tab.classList.add(
+            "active"
+          );
 
 
-    const cleanWord =
-        word
-            .trim()
-            .toLowerCase();
+          const query =
+            searchInput.value.trim();
 
+          if (!query) {
 
-    if (cleanWord.length < 2) {
-        return;
-    }
-
-
-    try {
-
-        const {
-            data: sessionData
-        } =
-            await supabaseClient.auth.getSession();
-
-
-        const user =
-            sessionData?.session?.user || null;
-
-
-        const payload = {
-
-            keyword:
-                cleanWord,
-
-            created_at:
-                new Date().toISOString(),
-
-            user_id:
-                user
-                    ? user.id
-                    : null
-
-        };
-
-
-        let checkQuery =
-            supabaseClient
-                .from("search_suggestions")
-                .select("id")
-                .eq("keyword", cleanWord);
-
-
-        if (user) {
-
-            checkQuery =
-                checkQuery.eq(
-                    "user_id",
-                    user.id
-                );
-
-        } else {
-
-            checkQuery =
-                checkQuery.is(
-                    "user_id",
-                    null
-                );
-
-        }
-
-
-        const {
-            data,
-            error
-        } =
-            await checkQuery.maybeSingle();
-
-
-        if (error) {
-
-            console.warn(
-                "History lookup failed:",
-                error
+            showToast(
+              "Search something first."
             );
 
             return;
+          }
+
+          executeSearch(
+            query,
+            mode
+          );
+        }
+      );
+    });
+
+
+  /* ===============================
+     Quick Cards
+  =============================== */
+
+  document
+    .querySelectorAll(".quick-card")
+    .forEach(card => {
+
+      card.addEventListener(
+        "click",
+        () => {
+
+          const action =
+            card.dataset.action;
+
+          if (action === "images") {
+
+            imageInput?.click();
+
+            return;
+          }
+
+
+          if (action === "news") {
+
+            searchInput.value =
+              "latest news";
+
+            executeSearch(
+              "latest news",
+              "news"
+            );
+
+            return;
+          }
+
+
+          if (action === "trending") {
+
+            trendingBox.scrollIntoView({
+              behavior: "smooth"
+            });
+
+            return;
+          }
+
+
+          if (action === "rewards") {
+
+            showToast(
+              "Rewards feature is coming soon."
+            );
+
+          }
 
         }
+      );
+    });
 
 
-        if (data) {
+  /* ===============================
+     Image Search
+  =============================== */
 
-            await supabaseClient
-                .from("search_suggestions")
-                .update({
-                    created_at:
-                        payload.created_at
-                })
-                .eq(
-                    "id",
-                    data.id
-                );
+  imageBtn?.addEventListener(
+    "click",
+    () => {
+      imageInput?.click();
+    }
+  );
 
-        } else {
 
-            await supabaseClient
-                .from("search_suggestions")
-                .insert([
-                    payload
-                ]);
+  imageInput?.addEventListener(
+    "change",
+    async () => {
 
-        }
+      const file =
+        imageInput.files?.[0];
 
-    } catch (error) {
+      if (!file) return;
 
-        console.warn(
-            "Database history save failed:",
-            error
+
+      if (!file.type.startsWith("image/")) {
+
+        showToast(
+          "Please select an image."
         );
 
-    }
-
-}
-
-
-/* =========================================================
-   34. VOICE SEARCH
-   ========================================================= */
-
-function initializeVoiceSearch() {
-
-    if (!voiceBtn) return;
+        return;
+      }
 
 
-    const SpeechRecognition =
-        window.SpeechRecognition ||
-        window.webkitSpeechRecognition;
+      if (
+        file.size >
+        8 * 1024 * 1024
+      ) {
 
-
-    if (!SpeechRecognition) {
-
-        voiceBtn.title =
-            "Voice search is not supported";
+        showToast(
+          "Image must be smaller than 8MB."
+        );
 
         return;
+      }
+
+
+      showToast(
+        "Image selected."
+      );
+
+
+      /*
+       * If /api/image-search exists,
+       * real image search can be used.
+       */
+
+      try {
+
+        const formData =
+          new FormData();
+
+        formData.append(
+          "image",
+          file
+        );
+
+
+        const response =
+          await fetch(
+            "/api/image-search",
+            {
+              method: "POST",
+              body: formData
+            }
+          );
+
+
+        if (response.ok) {
+
+          const data =
+            await response.json();
+
+          const results =
+            Array.isArray(data)
+              ? data
+              : (
+                  data.results ||
+                  []
+                );
+
+          if (results.length) {
+
+            searchInput.value =
+              file.name;
+
+            trendingBox.style.display =
+              "none";
+
+            renderResults(
+              results,
+              "images"
+            );
+
+            searchPerfMeta.hidden =
+              false;
+
+            searchPerfMeta.textContent =
+              `${results.length} image results`;
+
+            return;
+          }
+        }
+
+      } catch {
+        // Fallback below
+      }
+
+
+      /*
+       * Backend না থাকলে filename search.
+       */
+
+      const filename =
+        file.name
+          .replace(/\.[^/.]+$/, "")
+          .replace(/[_-]+/g, " ")
+          .trim();
+
+
+      if (filename) {
+
+        searchInput.value =
+          filename;
+
+        executeSearch(
+          filename,
+          "images"
+        );
+      }
 
     }
+  );
 
+
+  /* ===============================
+     Voice Search
+  =============================== */
+
+  let recognition = null;
+
+  const SpeechRecognition =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
+
+
+  if (SpeechRecognition) {
 
     recognition =
-        new SpeechRecognition();
+      new SpeechRecognition();
 
+    recognition.continuous = false;
 
-    recognition.continuous =
-        false;
+    recognition.interimResults = false;
 
-    recognition.interimResults =
-        false;
-
-
-    /*
-     * Bengali first.
-     * Browser may use the user's microphone language.
-     */
-
-    recognition.lang =
-        "bn-BD";
+    recognition.lang = "bn-BD";
 
 
     recognition.onstart = () => {
 
-        isRecording = true;
+      voiceBtn.classList.add(
+        "listening"
+      );
 
-        voiceBtn.classList.add(
-            "recording"
-        );
-
-        voiceBtn.setAttribute(
-            "aria-label",
-            "Listening..."
-        );
-
-        if (searchInput) {
-            searchInput.placeholder =
-                "শুনছি...";
-        }
-
+      showToast(
+        "Listening..."
+      );
     };
 
 
-    recognition.onresult = (event) => {
+    recognition.onresult =
+      event => {
 
-        const transcript =
-            event.results?.[0]?.[0]?.transcript
-            ?.trim();
+        const text =
+          event.results[0][0]
+            .transcript;
 
+        searchInput.value =
+          text;
 
-        if (!transcript) return;
-
-
-        if (searchInput) {
-            searchInput.value =
-                transcript;
-        }
-
-        updateClearButton();
-
-        executeSearch(transcript);
-
-    };
-
-
-    recognition.onerror = (event) => {
-
-        console.warn(
-            "Voice recognition error:",
-            event.error
+        clearBtn.classList.remove(
+          "hidden"
         );
 
-    };
+        executeSearch(
+          text
+        );
+      };
+
+
+    recognition.onerror =
+      () => {
+
+        showToast(
+          "Voice search could not start."
+        );
+      };
 
 
     recognition.onend = () => {
 
-        isRecording = false;
-
-        voiceBtn.classList.remove(
-            "recording"
-        );
-
-        voiceBtn.setAttribute(
-            "aria-label",
-            "Voice search"
-        );
-
-        if (searchInput) {
-            searchInput.placeholder =
-                "Search the web...";
-        }
-
+      voiceBtn.classList.remove(
+        "listening"
+      );
     };
 
 
-    voiceBtn.addEventListener(
+    voiceBtn?.addEventListener(
+      "click",
+      () => {
+
+        try {
+          recognition.start();
+        } catch {
+          // Already running
+        }
+
+      }
+    );
+
+  } else {
+
+    voiceBtn?.addEventListener(
+      "click",
+      () => {
+
+        showToast(
+          "Voice search is not supported in this browser."
+        );
+
+      }
+    );
+
+  }
+
+
+  /* ===============================
+     Bottom Navigation
+  =============================== */
+
+  document
+    .querySelectorAll(".bottom-item")
+    .forEach(item => {
+
+      item.addEventListener(
         "click",
-        startVoiceRecognition
-    );
-
-}
-
-
-function startVoiceRecognition() {
-
-    if (!recognition) {
-
-        alert(
-            "আপনার ব্রাউজারে Voice Search সাপোর্ট করছে না। Chrome বা Edge ব্যবহার করে আবার চেষ্টা করুন।"
-        );
-
-        return;
-
-    }
-
-
-    if (isRecording) {
-
-        recognition.stop();
-
-        return;
-
-    }
-
-
-    try {
-
-        recognition.start();
-
-    } catch (error) {
-
-        console.warn(
-            "Could not start voice recognition:",
-            error
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   35. IMAGE SEARCH
-   ========================================================= */
-
-function initializeImageSearch() {
-
-    if (!imageInput) return;
-
-
-    imageInput.addEventListener(
-        "change",
-        handleImageUpload
-    );
-
-}
-
-
-function handleImageUpload(event) {
-
-    const file =
-        event.target?.files?.[0];
-
-
-    if (!file) return;
-
-
-    if (!file.type.startsWith("image/")) {
-
-        alert(
-            "Please select a valid image."
-        );
-
-        return;
-
-    }
-
-
-    /*
-     * Current backend does not provide
-     * a real reverse-image-search endpoint.
-     *
-     * For now we use the filename as a
-     * searchable keyword.
-     */
-
-    const imageName =
-        file.name
-            .replace(/\.[^/.]+$/, "")
-            .replace(/[-_]+/g, " ")
-            .replace(/\s+/g, " ")
-            .trim();
-
-
-    if (!imageName) {
-
-        alert(
-            "ছবিটির নাম থেকে কোনো search keyword পাওয়া যায়নি।"
-        );
-
-        return;
-
-    }
-
-
-    if (searchInput) {
-        searchInput.value =
-            imageName;
-    }
-
-    updateClearButton();
-
-    executeSearch(imageName);
-
-
-    /*
-     * Reset input so the same image
-     * can be selected again later.
-     */
-
-    event.target.value = "";
-
-}
-
-
-/* =========================================================
-   36. THEME
-   ========================================================= */
-
-function initializeSettings() {
-
-    const savedTheme =
-        localStorage.getItem(
-            STORAGE_KEYS.THEME
-        );
-
-
-    if (savedTheme === "light") {
-
-        document.body.classList.add(
-            "light-theme"
-        );
-
-    } else {
-
-        document.body.classList.remove(
-            "light-theme"
-        );
-
-    }
-
-
-    const historyEnabled =
-        localStorage.getItem(
-            STORAGE_KEYS.HISTORY_ENABLED
-        );
-
-
-    if (historyToggle) {
-
-        historyToggle.checked =
-            historyEnabled !== "false";
-
-    }
-
-
-    const safeSearch =
-        localStorage.getItem(
-            STORAGE_KEYS.SAFE_SEARCH
-        );
-
-
-    if (safeSearchToggle) {
-
-        safeSearchToggle.checked =
-            safeSearch !== "false";
-
-    }
-
-}
-
-
-function toggleTheme() {
-
-    const isLight =
-        document.body.classList.toggle(
-            "light-theme"
-        );
-
-
-    localStorage.setItem(
-        STORAGE_KEYS.THEME,
-        isLight
-            ? "light"
-            : "dark"
-    );
-
-}
-
-
-/* =========================================================
-   37. SETTINGS PANEL
-   ========================================================= */
-
-function openSettings() {
-
-    if (!settingsPanel) return;
-
-
-    settingsPanel.hidden = false;
-
-    settingsPanel.setAttribute(
-        "aria-hidden",
-        "false"
-    );
-
-
-    if (settingsOverlay) {
-        settingsOverlay.hidden = false;
-    }
-
-
-    document.body.classList.add(
-        "settings-open"
-    );
-
-
-    updateNavigation("settings");
-
-}
-
-
-function closeSettings() {
-
-    if (!settingsPanel) return;
-
-
-    settingsPanel.hidden = true;
-
-    settingsPanel.setAttribute(
-        "aria-hidden",
-        "true"
-    );
-
-
-    if (settingsOverlay) {
-        settingsOverlay.hidden = true;
-    }
-
-
-    document.body.classList.remove(
-        "settings-open"
-    );
-
-
-    updateNavigation("home");
-
-}
-
-
-/* =========================================================
-   38. HISTORY SETTING
-   ========================================================= */
-
-function toggleSearchHistory(enabled) {
-
-    localStorage.setItem(
-        STORAGE_KEYS.HISTORY_ENABLED,
-        enabled
-            ? "true"
-            : "false"
-    );
-
-
-    if (!enabled) {
-
-        clearSearchHistory();
-
-    }
-
-}
-
-
-/* =========================================================
-   39. SAFE SEARCH SETTING
-   ========================================================= */
-
-function toggleSafeSearch(enabled) {
-
-    localStorage.setItem(
-        STORAGE_KEYS.SAFE_SEARCH,
-        enabled
-            ? "true"
-            : "false"
-    );
-
-}
-
-
-/* =========================================================
-   40. NAVIGATION
-   ========================================================= */
-
-function updateNavigation(active) {
-
-    document
-        .querySelectorAll(".nav-link")
-        .forEach(link => {
-
-            link.classList.toggle(
-                "active",
-                link.dataset.nav === active
-            );
-
-        });
-
-}
-
-
-function showHomeNavigation() {
-
-    updateNavigation("home");
-
-}
-
-
-/* =========================================================
-   41. SCROLL TO RESULTS
-   ========================================================= */
-
-function scrollToResults() {
-
-    const resultsSection =
-        document.querySelector(
-            ".results-section"
-        );
-
-
-    if (!resultsSection) return;
-
-
-    /*
-     * Don't force scroll on the initial page.
-     * Only scroll after a real search.
-     */
-
-    if (window.innerWidth < 700) {
-
-        setTimeout(() => {
-
-            resultsSection.scrollIntoView({
-                behavior: "smooth",
-                block: "start"
+        () => {
+
+          const nav =
+            item.dataset.nav;
+
+          document
+            .querySelectorAll(
+              ".bottom-item"
+            )
+            .forEach(button => {
+              button.classList.remove(
+                "active"
+              );
             });
 
-        }, 100);
-
-    }
-
-}
+          item.classList.add(
+            "active"
+          );
 
 
-/* =========================================================
-   42. UTILITY
-   ========================================================= */
+          if (nav === "home") {
 
-function capitalize(value) {
+            window.scrollTo({
+              top: 0,
+              behavior: "smooth"
+            });
 
-    if (!value) return "";
+            return;
+          }
 
-    return (
-        value.charAt(0).toUpperCase() +
-        value.slice(1)
+
+          if (
+            nav === "images"
+          ) {
+
+            imageInput?.click();
+
+            return;
+          }
+
+
+          if (
+            nav === "videos"
+          ) {
+
+            const query =
+              searchInput.value.trim();
+
+            if (!query) {
+
+              showToast(
+                "Search something first."
+              );
+
+              return;
+            }
+
+            executeSearch(
+              query,
+              "videos"
+            );
+
+            return;
+          }
+
+
+          if (
+            nav === "history"
+          ) {
+
+            showToast(
+              "Search history will be available here."
+            );
+
+            return;
+          }
+
+
+          if (
+            nav === "more"
+          ) {
+
+            showToast(
+              "More features coming soon."
+            );
+
+          }
+
+        }
+      );
+    });
+
+
+  /* ===============================
+     See All Trending
+  =============================== */
+
+  document
+    .getElementById(
+      "seeTrendingBtn"
+    )
+    ?.addEventListener(
+      "click",
+      () => {
+
+        trendingBox.scrollIntoView({
+          behavior: "smooth"
+        });
+
+      }
     );
 
-}
+
+  /* ===============================
+     Outside click
+  =============================== */
+
+  document.addEventListener(
+    "click",
+    event => {
+
+      if (
+        !event.target.closest(
+          ".search-section"
+        )
+      ) {
+        hideSuggestions();
+      }
+
+    }
+  );
 
 
-/* =========================================================
-   43. GLOBAL EXPORTS
-   =========================================================
-   The new index.html uses inline onclick handlers.
-   These functions must therefore be available globally.
-   ========================================================= */
+  /* ===============================
+     Init
+  =============================== */
 
-window.executeSearch =
-    executeSearch;
+  initTheme();
 
-window.quickSearch =
-    quickSearch;
+  loadTrending();
 
-window.clearSearch =
-    clearSearch;
-
-window.startVoiceRecognition =
-    startVoiceRecognition;
-
-window.changeSearchType =
-    changeSearchType;
-
-window.toggleSort =
-    toggleSort;
-
-window.retrySearch =
-    retrySearch;
-
-window.toggleTheme =
-    toggleTheme;
-
-window.openSettings =
-    openSettings;
-
-window.closeSettings =
-    closeSettings;
-
-window.toggleSearchHistory =
-    toggleSearchHistory;
-
-window.toggleSafeSearch =
-    toggleSafeSearch;
-
-window.showSearchHistory =
-    showSearchHistory;
-
-window.clearSearchHistory =
-    clearSearchHistory;
-
-window.handleImageUpload =
-    handleImageUpload;
+})();
