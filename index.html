@@ -8,25 +8,13 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
-            --card-bg: rgba(255, 255, 255, 0.92);
-            --card-solid: #ffffff;
-            --text-primary: #1c1e21;
-            --text-secondary: #5f6368;
-            --border-color: rgba(226, 232, 240, 0.8);
-            --accent-color: #0078d4;
-            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
-            --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.12);
-        }
-
-        body.dark-theme {
-            --card-bg: rgba(20, 26, 38, 0.92);
-            --card-solid: #141a26;
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
-            --border-color: rgba(30, 41, 59, 0.8);
-            --accent-color: #4f46e5;
-            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
-            --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
+            --bg-base: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --brand-primary: #6366f1;
+            --brand-gradient: linear-gradient(135deg, #6366f1, #8b5cf6);
         }
 
         * {
@@ -38,12 +26,14 @@
         }
 
         body {
-            /* Bing Style Wallpaper Background */
-            background: linear-gradient(rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.15)), 
-                        url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80') center/cover fixed no-repeat;
+            background-color: var(--bg-base);
+            color: var(--text-main);
             min-height: 100vh;
             display: flex;
             justify-content: center;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.15) 0px, transparent 50%);
         }
 
         .app-container {
@@ -56,26 +46,23 @@
             padding-bottom: 75px;
         }
 
-        /* Top Bar */
+        /* Top Brand Header */
         .app-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 16px 20px;
+            padding: 20px 20px 10px 20px;
         }
 
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #ffffff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: var(--shadow-sm);
-            color: #0078d4;
-            font-size: 1.2rem;
-            cursor: pointer;
+        .brand-logo {
+            font-size: 1.25rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: #fff;
+        }
+
+        .brand-logo span {
+            color: var(--brand-primary);
         }
 
         .content-area {
@@ -83,25 +70,81 @@
             flex: 1;
         }
 
-        /* Bing Style Pill Search Bar */
-        .search-section {
-            position: relative;
-            margin: 15px 0 20px 0;
+        .hero-title {
+            text-align: center;
+            margin: 25px 0 20px 0;
         }
 
-        .search-bar {
+        .hero-title h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(to right, #ffffff, #a5b4fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-title p {
+            font-size: 0.82rem;
+            color: var(--text-sub);
+            margin-top: 4px;
+        }
+
+        /* Modern Professional Search Bar */
+        .search-wrapper {
+            position: relative;
+            margin-bottom: 24px;
+        }
+
+        .search-box {
             display: flex;
             align-items: center;
-            background: var(--card-solid);
-            border-radius: 30px;
-            padding: 12px 20px;
-            box-shadow: var(--shadow-md);
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 12px 16px;
+            gap: 12px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
         }
 
-        .search-icon {
-            font-size: 1.2rem;
-            margin-right: 12px;
-            color: var(--text-secondary);
+        .search-box:focus-within {
+            border-color: var(--brand-primary);
+        }
+
+        .svg-icon {
+            width: 20px;
+            height: 20px;
+            fill: none;
+            stroke: var(--text-sub);
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            flex-shrink: 0;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px;
+        }
+
+        .icon-btn:hover .svg-icon {
+            stroke: var(--text-main);
+        }
+
+        .icon-btn.recording .svg-icon {
+            stroke: #ef4444;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.4; }
+            100% { opacity: 1; }
         }
 
         #searchInput {
@@ -109,243 +152,220 @@
             border: none;
             outline: none;
             background: transparent;
-            color: var(--text-primary);
-            font-size: 1rem;
-            font-weight: 500;
+            color: var(--text-main);
+            font-size: 0.95rem;
+            width: 100%;
         }
 
-        .search-actions {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            color: var(--text-secondary);
-            font-size: 1.1rem;
+        #searchInput::placeholder {
+            color: var(--text-sub);
         }
 
-        .search-actions button {
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--text-secondary);
-        }
-
-        /* Suggestions Box */
-        .suggestions-box {
+        /* Suggestions Dropdown */
+        .suggestions-list {
             position: absolute;
-            top: 110%;
+            top: 108%;
             left: 0;
             right: 0;
-            background: var(--card-solid);
-            border-radius: 20px;
-            box-shadow: var(--shadow-md);
+            background: #1e293b;
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
             list-style: none;
             z-index: 100;
             overflow: hidden;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
         }
 
-        .suggestions-box li {
-            padding: 14px 20px;
+        .suggestions-list li {
+            padding: 12px 16px;
             cursor: pointer;
             display: flex;
             align-items: center;
             gap: 12px;
-            font-size: 0.95rem;
-            border-bottom: 1px solid var(--border-color);
-            color: var(--text-primary);
+            font-size: 0.9rem;
+            color: var(--text-main);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
-        .suggestions-box li:last-child {
+        .suggestions-list li:last-child {
             border-bottom: none;
         }
 
-        /* Horizontal Quick Widgets (Rewards/Creator style) */
-        .widgets-scroll {
-            display: flex;
+        .suggestions-list li:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* Feature Cards */
+        .features-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 12px;
-            overflow-x: auto;
-            margin-bottom: 20px;
-            scrollbar-width: none;
+            margin-bottom: 24px;
         }
 
-        .widgets-scroll::-webkit-scrollbar { display: none; }
-
-        .widget-card {
-            min-width: 150px;
+        .feature-card {
             background: var(--card-bg);
-            backdrop-filter: blur(10px);
-            border-radius: 18px;
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
             padding: 14px;
-            box-shadow: var(--shadow-sm);
-            border: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
+            cursor: pointer;
+            transition: border-color 0.2s;
         }
 
-        .widget-title {
-            font-size: 0.78rem;
-            color: var(--text-secondary);
-            font-weight: 600;
+        .feature-card:hover {
+            border-color: var(--brand-primary);
         }
 
-        .widget-value {
-            font-size: 1.2rem;
-            font-weight: 800;
-            color: var(--text-primary);
-            margin-top: 6px;
+        .feature-card .card-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 4px;
         }
 
-        .widget-desc {
+        .feature-card .card-sub {
             font-size: 0.75rem;
-            color: var(--text-secondary);
-            margin-top: 4px;
+            color: var(--text-sub);
         }
 
-        /* Feed Cards Section */
-        .feed-section {
+        /* Search & Feed Results Section */
+        .results-feed {
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 12px;
         }
 
-        .feed-card {
+        .result-card {
             background: var(--card-bg);
-            backdrop-filter: blur(12px);
-            border-radius: 20px;
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
             padding: 16px;
-            box-shadow: var(--shadow-sm);
-            border: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
         }
 
-        .feed-source {
+        .result-meta {
             display: flex;
             align-items: center;
             gap: 8px;
             font-size: 0.75rem;
-            color: var(--text-secondary);
+            color: var(--text-sub);
+        }
+
+        .result-title {
+            font-size: 0.98rem;
             font-weight: 600;
-        }
-
-        .feed-source img {
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-        }
-
-        .feed-title {
-            font-size: 1rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            line-height: 1.4;
+            color: #818cf8;
             text-decoration: none;
+            line-height: 1.4;
         }
 
-        .feed-snippet {
+        .result-title:hover {
+            text-decoration: underline;
+        }
+
+        .result-desc {
             font-size: 0.85rem;
-            color: var(--text-secondary);
+            color: var(--text-sub);
             line-height: 1.5;
         }
 
-        /* Bottom Floating Bar */
+        /* Clean Bottom Navigation */
         .bottom-nav {
             position: fixed;
             bottom: 0;
             width: 100%;
             max-width: 480px;
-            height: 62px;
-            background: var(--card-solid);
-            border-top: 1px solid var(--border-color);
+            height: 60px;
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(16px);
+            border-top: 1px solid var(--card-border);
             display: flex;
             justify-content: space-around;
             align-items: center;
             z-index: 100;
         }
 
-        .nav-btn {
+        .nav-link {
             background: none;
             border: none;
-            font-size: 1.3rem;
             cursor: pointer;
-            color: var(--text-secondary);
-            padding: 8px;
+            padding: 10px;
         }
 
-        .nav-btn.active {
-            color: var(--accent-color);
+        .nav-link.active .svg-icon {
+            stroke: var(--brand-primary);
         }
 
-        .center-copilot-btn {
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #0078d4, #a855f7);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #ffffff;
-            font-size: 1.1rem;
-            box-shadow: 0 4px 12px rgba(0, 120, 212, 0.4);
-            border: none;
-            cursor: pointer;
-        }
+        /* Hidden File Input for Image Search */
+        #imageInput { display: none; }
     </style>
 </head>
-<body class="light-theme">
+<body>
 
     <div class="app-container">
-        <!-- Header Profile Bar -->
+        <!-- Header -->
         <header class="app-header">
-            <div class="user-avatar" id="themeToggleBtn">👤</div>
+            <div class="brand-logo">wareligent<span>.search</span></div>
         </header>
 
         <main class="content-area">
-            <!-- Bing Style Curved Search Bar -->
-            <div class="search-section">
-                <div class="search-bar">
-                    <span class="search-icon">🔍</span>
-                    <input type="text" id="searchInput" placeholder="Search or ask anything..." autocomplete="off">
-                    <div class="search-actions">
-                        <button id="clearBtn" style="display:none;" onclick="resetSearch()">✕</button>
-                        <span>📷</span>
-                        <span>🎙️</span>
-                    </div>
-                </div>
-                <ul id="suggestionsList" class="suggestions-box"></ul>
+            <div class="hero-title">
+                <h1>Search the Web</h1>
+                <p>Private, Fast & Intelligent Engine</p>
             </div>
 
-            <!-- Bing Style Horizontal Feature Widgets -->
-            <div class="widgets-scroll">
-                <div class="widget-card">
-                    <span class="widget-title">Wareligent AI</span>
-                    <span class="widget-value">Copilot</span>
-                    <span class="widget-desc">Smart Answers</span>
+            <!-- Functional Search Bar -->
+            <div class="search-wrapper">
+                <div class="search-box">
+                    <svg class="svg-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    
+                    <input type="text" id="searchInput" placeholder="Search or type a URL..." autocomplete="off">
+                    
+                    <button id="clearBtn" class="icon-btn" style="display: none;" onclick="clearSearch()">
+                        <svg class="svg-icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+
+                    <!-- Functional Image Search Button -->
+                    <button class="icon-btn" title="Search by Image" onclick="document.getElementById('imageInput').click()">
+                        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                    </button>
+                    <input type="file" id="imageInput" accept="image/*" onchange="handleImageUpload(event)">
+
+                    <!-- Functional Voice Search Button -->
+                    <button id="voiceBtn" class="icon-btn" title="Voice Search" onclick="startVoiceRecognition()">
+                        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+                    </button>
                 </div>
-                <div class="widget-card">
-                    <span class="widget-title">Live Web</span>
-                    <span class="widget-value">Search</span>
-                    <span class="widget-desc">Fast Results</span>
+
+                <ul id="suggestionsList" class="suggestions-list"></ul>
+            </div>
+
+            <!-- Interactive Features -->
+            <div class="features-grid">
+                <div class="feature-card" onclick="quickSearch('Latest Technology Trends')">
+                    <div class="card-title">Tech Trends</div>
+                    <div class="card-sub">Explore recent innovations</div>
                 </div>
-                <div class="widget-card">
-                    <span class="widget-title">Trending</span>
-                    <span class="widget-value">News</span>
-                    <span class="widget-desc">Daily Updates</span>
+                <div class="feature-card" onclick="quickSearch('World News Today')">
+                    <div class="card-title">Live News</div>
+                    <div class="card-sub">Stay updated with world events</div>
                 </div>
             </div>
 
-            <!-- Dynamic Search Feed & Trending Results -->
-            <div id="resultsWrapper" class="feed-section"></div>
+            <!-- Results Section -->
+            <div id="resultsFeed" class="results-feed"></div>
         </main>
 
-        <!-- Bing Style Bottom Navigation Bar -->
+        <!-- Bottom Navigation -->
         <nav class="bottom-nav">
-            <button class="nav-btn active" onclick="resetSearch()">🏠</button>
-            <button class="nav-btn" onclick="document.getElementById('searchInput').focus()">📷</button>
-            <button class="center-copilot-btn" onclick="document.getElementById('searchInput').focus()">✨</button>
-            <button class="nav-btn">📋</button>
-            <button class="nav-btn">田</button>
+            <button class="nav-link active" onclick="clearSearch()">
+                <svg class="svg-icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            </button>
+            <button class="nav-link" onclick="startVoiceRecognition()">
+                <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path></svg>
+            </button>
         </nav>
     </div>
 
@@ -354,49 +374,25 @@
         const SUPABASE_ANON_KEY = "sb_publishable_HkyRE170ylT0kkdZxbwUSQ_ihHrS_Ra";
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        document.addEventListener('DOMContentLoaded', () => { 
-            loadTrendingNews();
-        });
-
-        // ১. ট্রেন্ডিং পেজ ফিড
-        async function loadTrendingNews() {
-            const resultsWrapper = document.getElementById('resultsWrapper');
-            resultsWrapper.innerHTML = `<p style="color: #ffffff; text-align: center; font-size:0.85rem; padding: 20px;">Loading daily feed...</p>`;
-            
-            try {
-                const res = await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=trending%20news&format=json&origin=*`);
-                const data = await res.json();
-                resultsWrapper.innerHTML = '';
-
-                if (data.query && data.query.search.length > 0) {
-                    data.query.search.slice(0, 6).forEach(item => {
-                        const cleanSnippet = item.snippet.replace(/<\/?[^>]+(>|$)/g, "");
-                        const card = document.createElement('div');
-                        card.className = 'feed-card';
-                        card.innerHTML = `
-                            <div class="feed-source">
-                                <img src="https://www.google.com/s2/favicons?domain=wikipedia.org&sz=32" alt="">
-                                <span>Trending Story</span>
-                            </div>
-                            <a class="feed-title" href="https://en.wikipedia.org/wiki/${encodeURIComponent(item.title)}" target="_blank">${item.title}</a>
-                            <p class="feed-snippet">${cleanSnippet}...</p>
-                        `;
-                        resultsWrapper.appendChild(card);
-                    });
-                }
-            } catch (e) {
-                resultsWrapper.innerHTML = `<p style="text-align: center; color: #ffffff;">Could not load news.</p>`;
-            }
-        }
-
-        // ২. সার্চ সিস্টেম
         const searchInput = document.getElementById('searchInput');
         const clearBtn = document.getElementById('clearBtn');
         const suggestionsList = document.getElementById('suggestionsList');
+        const resultsFeed = document.getElementById('resultsFeed');
 
+        document.addEventListener('DOMContentLoaded', () => {
+            loadInitialTrending();
+        });
+
+        // 1. প্রাথমিক ফিড লোড
+        async function loadInitialTrending() {
+            resultsFeed.innerHTML = `<p style="color: var(--text-sub); text-align: center; font-size: 0.85rem; padding: 20px;">Loading trending topics...</p>`;
+            fetchWebResults('Technology News');
+        }
+
+        // 2. সার্চ ইনপুট হ্যান্ডলিং
         searchInput.addEventListener('input', function() {
             const query = this.value.trim();
-            clearBtn.style.display = query ? 'inline' : 'none';
+            clearBtn.style.display = query ? 'flex' : 'none';
             if (!query) { suggestionsList.innerHTML = ''; return; }
             fetchSuggestions(query);
         });
@@ -408,13 +404,20 @@
             }
         });
 
-        function resetSearch() {
+        function clearSearch() {
             searchInput.value = '';
             clearBtn.style.display = 'none';
             suggestionsList.innerHTML = '';
-            loadTrendingNews();
+            loadInitialTrending();
         }
 
+        function quickSearch(queryText) {
+            searchInput.value = queryText;
+            clearBtn.style.display = 'flex';
+            executeSearch();
+        }
+
+        // 3. রিয়েল টাইপ সাজেশন
         function fetchSuggestions(query) {
             const oldScript = document.getElementById('jsonp-suggestions');
             if (oldScript) oldScript.remove();
@@ -424,7 +427,7 @@
                 if (data && data[1]) {
                     data[1].slice(0, 5).forEach((term) => {
                         const li = document.createElement('li');
-                        li.innerHTML = `🔍 ${term}`;
+                        li.innerHTML = `<svg class="svg-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg> ${term}`;
                         li.onclick = () => {
                             searchInput.value = term;
                             suggestionsList.innerHTML = '';
@@ -441,23 +444,21 @@
             document.body.appendChild(script);
         }
 
-        // ৩. In-App Direct Search (No Redirects)
+        // 4. প্রধান সার্চ লজিক (Supabase + Fallback Web API)
         async function executeSearch() {
             const query = searchInput.value.trim();
             if (!query) return;
 
-            const resultsWrapper = document.getElementById('resultsWrapper');
-            resultsWrapper.innerHTML = `<p style="text-align: center; padding: 20px; color: #ffffff;">Searching Wareligent Web...</p>`;
+            resultsFeed.innerHTML = `<p style="color: var(--text-sub); text-align: center; padding: 20px;">Searching Wareligent...</p>`;
 
             try {
-                // Supabase ডেটাবেজ চেক
                 let { data: dbResults } = await supabaseClient
                     .from('websites')
                     .select('*')
                     .or(`title.ilike.%${query}%,keywords.ilike.%${query}%,description.ilike.%${query}%`)
                     .limit(6);
 
-                resultsWrapper.innerHTML = '';
+                resultsFeed.innerHTML = '';
 
                 if (dbResults && dbResults.length > 0) {
                     dbResults.forEach(site => {
@@ -465,32 +466,27 @@
                         try { domain = new URL(site.url).hostname; } catch(e){}
 
                         const card = document.createElement('div');
-                        card.className = 'feed-card';
+                        card.className = 'result-card';
                         card.innerHTML = `
-                            <div class="feed-source">
-                                <img src="https://www.google.com/s2/favicons?domain=${domain}&sz=32" alt="">
-                                <span>${domain}</span>
-                            </div>
-                            <a href="${site.url}" target="_blank" class="feed-title">${site.title}</a>
-                            <p class="feed-snippet">${site.description || ''}</p>
+                            <div class="result-meta">🌐 ${domain}</div>
+                            <a href="${site.url}" target="_blank" class="result-title">${site.title}</a>
+                            <p class="result-desc">${site.description || ''}</p>
                         `;
-                        resultsWrapper.appendChild(card);
+                        resultsFeed.appendChild(card);
                     });
                 } else {
-                    // Fallback Direct Search Results
-                    await fetchLiveWebResults(query);
+                    await fetchWebResults(query);
                 }
             } catch (err) {
-                await fetchLiveWebResults(query);
+                await fetchWebResults(query);
             }
         }
 
-        async function fetchLiveWebResults(query) {
-            const resultsWrapper = document.getElementById('resultsWrapper');
+        async function fetchWebResults(query) {
             try {
                 const res = await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json&origin=*`);
                 const data = await res.json();
-                resultsWrapper.innerHTML = '';
+                resultsFeed.innerHTML = '';
 
                 if (data.query && data.query.search.length > 0) {
                     data.query.search.forEach(item => {
@@ -498,29 +494,70 @@
                         const itemUrl = `https://en.wikipedia.org/wiki/${encodeURIComponent(item.title)}`;
                         
                         const card = document.createElement('div');
-                        card.className = 'feed-card';
+                        card.className = 'result-card';
                         card.innerHTML = `
-                            <div class="feed-source">
-                                <img src="https://www.google.com/s2/favicons?domain=wikipedia.org&sz=32" alt="">
-                                <span>Web Result</span>
-                            </div>
-                            <a class="feed-title" href="${itemUrl}" target="_blank">${item.title}</a>
-                            <p class="feed-snippet">${cleanSnippet}...</p>
+                            <div class="result-meta">🌐 Live Web Result</div>
+                            <a href="${itemUrl}" target="_blank" class="result-title">${item.title}</a>
+                            <p class="result-desc">${cleanSnippet}...</p>
                         `;
-                        resultsWrapper.appendChild(card);
+                        resultsFeed.appendChild(card);
                     });
                 } else {
-                    resultsWrapper.innerHTML = `<p style="text-align: center; color: #ffffff; padding: 20px;">No results found for "${query}".</p>`;
+                    resultsFeed.innerHTML = `<p style="text-align: center; color: var(--text-sub); padding: 20px;">No results found.</p>`;
                 }
             } catch (e) {
-                resultsWrapper.innerHTML = `<p style="text-align: center; color: #ffffff; padding: 20px;">Failed to load results.</p>`;
+                resultsFeed.innerHTML = `<p style="text-align: center; color: var(--text-sub); padding: 20px;">Failed to load results.</p>`;
             }
         }
 
-        // থিম টগল
-        document.getElementById('themeToggleBtn').onclick = () => {
-            document.body.classList.toggle('dark-theme');
-        };
+        // 5. ভয়েস সার্চ (Voice Search Feature)
+        function startVoiceRecognition() {
+            const voiceBtn = document.getElementById('voiceBtn');
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+            if (!SpeechRecognition) {
+                alert("আপনার ব্রাউজারে ভয়েস সার্চ সাপোর্ট করছে না। Chrome বা Edge ব্রাউজার ব্যবহার করুন।");
+                return;
+            }
+
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'en-US';
+
+            recognition.onstart = () => {
+                voiceBtn.classList.add('recording');
+                searchInput.placeholder = "Listening...";
+            };
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                searchInput.value = transcript;
+                clearBtn.style.display = 'flex';
+                executeSearch();
+            };
+
+            recognition.onerror = () => {
+                alert("কথা শুনতে সমস্যা হয়েছে, আবার চেষ্টা করুন।");
+            };
+
+            recognition.onend = () => {
+                voiceBtn.classList.remove('recording');
+                searchInput.placeholder = "Search or type a URL...";
+            };
+
+            recognition.start();
+        }
+
+        // 6. ইমেজ আপলোড সার্চ (Image Search Feature)
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                // ফাইল নেম বা টপিক বের করে সার্চ
+                const imageName = file.name.split('.')[0].replace(/[-_]/g, ' ');
+                searchInput.value = imageName;
+                clearBtn.style.display = 'flex';
+                executeSearch();
+            }
+        }
     </script>
 </body>
-</html>
+                                                                      </html>
