@@ -3,15 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-
   <title>Wareligent Search</title>
-
   <link rel="stylesheet" href="/style.css" />
-
-  <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <!-- Main JS -->
   <script src="/script.js" defer></script>
 </head>
 
@@ -34,14 +28,11 @@
       </button>
     </header>
 
-
-    <!-- Search -->
+    <!-- Main Content -->
     <main>
-
+      <!-- Search Section -->
       <section class="search-section">
-
         <form id="searchForm" class="search-bar">
-
           <button type="submit" class="search-icon-btn" aria-label="Search">
             <svg viewBox="0 0 24 24">
               <circle cx="11" cy="11" r="7"></circle>
@@ -53,24 +44,12 @@
             id="searchInput"
             type="search"
             autocomplete="off"
-            placeholder="Search or type a URL..."
+            placeholder="Search or type URL"
           />
 
-          <button
-            type="button"
-            id="clearBtn"
-            class="search-action hidden"
-            aria-label="Clear"
-          >
-            ×
-          </button>
+          <button type="button" id="clearBtn" class="search-action hidden" aria-label="Clear">×</button>
 
-          <button
-            type="button"
-            id="imageBtn"
-            class="search-action"
-            aria-label="Image search"
-          >
+          <button type="button" id="imageBtn" class="search-action" aria-label="Image search">
             <svg viewBox="0 0 24 24">
               <rect x="3" y="5" width="18" height="15" rx="3"></rect>
               <circle cx="8.5" cy="10" r="1.5"></circle>
@@ -78,12 +57,7 @@
             </svg>
           </button>
 
-          <button
-            type="button"
-            id="voiceBtn"
-            class="search-action"
-            aria-label="Voice search"
-          >
+          <button type="button" id="voiceBtn" class="search-action" aria-label="Voice search">
             <svg viewBox="0 0 24 24">
               <rect x="9" y="3" width="6" height="12" rx="3"></rect>
               <path d="M5 11a7 7 0 0 0 14 0"></path>
@@ -92,146 +66,113 @@
             </svg>
           </button>
 
-          <input
-            type="file"
-            id="imageInput"
-            accept="image/*"
-            hidden
-          />
-
+          <input type="file" id="imageInput" accept="image/*" hidden />
         </form>
 
-        <!-- Suggestions -->
         <ul id="suggestionsList" class="suggestions" hidden></ul>
-
       </section>
 
-
-      <!-- Quick Features -->
+      <!-- Quick Features Carousel -->
       <section class="quick-grid">
-
         <button class="quick-card" data-action="rewards">
-          <div class="quick-icon rewards">★</div>
-          <strong>Rewards</strong>
-          <small>0/75</small>
+          <div class="quick-card-top">
+            <strong>Rewards</strong>
+            <span class="badge">🎖️</span>
+          </div>
+          <div class="quick-card-val">3/75</div>
         </button>
 
         <button class="quick-card" data-action="images">
-          <div class="quick-icon images">▧</div>
-          <strong>Image Search</strong>
-          <small>AI powered</small>
+          <div class="quick-card-top">
+            <strong>Image Creator</strong>
+            <span class="badge spark">✨</span>
+          </div>
+          <small>Create stunning AI images</small>
         </button>
 
         <button class="quick-card" data-action="news">
-          <div class="quick-icon news">▤</div>
-          <strong>Latest News</strong>
-          <small>Stay updated</small>
+          <div class="quick-card-top">
+            <strong>AI Writer</strong>
+            <span class="badge">📝</span>
+          </div>
+          <small>Draft essays & posts</small>
         </button>
 
         <button class="quick-card" data-action="trending">
-          <div class="quick-icon trending">🔥</div>
-          <strong>Trending</strong>
-          <small>Popular now</small>
+          <div class="quick-card-top">
+            <strong>Translator</strong>
+            <span class="badge">🌐</span>
+          </div>
+          <small>Instant translation</small>
         </button>
-
       </section>
 
-
-      <!-- Categories -->
+      <!-- Category Filter Pills -->
       <nav class="category-tabs" id="categoryTabs">
-
-        <button class="tab active" data-mode="all">
-          All
-        </button>
-
-        <button class="tab" data-mode="news">
-          News
-        </button>
-
-        <button class="tab" data-mode="images">
-          Images
-        </button>
-
-        <button class="tab" data-mode="videos">
-          Videos
-        </button>
-
-        <button class="tab" data-mode="web">
-          Web
-        </button>
-
+        <button class="tab active" data-mode="all">All</button>
+        <button class="tab" data-mode="news">News</button>
+        <button class="tab" data-mode="images">Images</button>
+        <button class="tab" data-mode="videos">Videos</button>
+        <button class="tab" data-mode="web">Web</button>
       </nav>
 
-
-      <!-- Trending -->
+      <!-- Trending & Discover Feed (Edge/Start Style) -->
       <section class="content-card" id="trendingBox">
-
         <div class="section-heading">
           <div>
-            <span class="section-icon fire">🔥</span>
-            <h2>Trending Searches</h2>
+            <span class="section-icon">🔥</span>
+            <h2>Trending News</h2>
           </div>
-
-          <button id="seeTrendingBtn" class="see-all">
-            See all →
-          </button>
+          <button id="seeTrendingBtn" class="see-all">See all →</button>
         </div>
 
-        <div id="trendingGrid" class="trending-list"></div>
-
+        <div id="trendingGrid" class="trending-list">
+          <!-- Sample Trending Feed Card -->
+          <article class="feed-card">
+            <img src="https://picsum.photos/600/320?random=1" class="feed-img" alt="News Image" />
+            <div class="feed-content">
+              <h3 class="feed-title">Global Technology Merges and Innovation Milestones Achieved</h3>
+              <div class="feed-meta">
+                <span class="feed-source"><strong>K</strong> Tuko • 10h</span>
+                <span class="feed-actions">👍 29 &nbsp; 💬 4</span>
+              </div>
+            </div>
+          </article>
+        </div>
       </section>
 
-
-      <!-- Results -->
+      <!-- Search Results Container -->
       <section class="results-section">
-
-        <div
-          id="searchPerfMeta"
-          class="search-meta"
-          hidden
-        ></div>
-
+        <div id="searchPerfMeta" class="search-meta" hidden></div>
         <div id="resultsWrapper"></div>
-
       </section>
-
     </main>
 
-
-    <!-- Bottom Navigation -->
+    <!-- Bottom Navigation Bar -->
     <nav class="bottom-nav">
-
       <button class="bottom-item active" data-nav="home">
         <span class="bottom-icon">⌂</span>
-        <small>Home</small>
       </button>
 
       <button class="bottom-item" data-nav="images">
-        <span class="bottom-icon">▣</span>
-        <small>Images</small>
+        <span class="bottom-icon">📷</span>
       </button>
 
-      <button class="bottom-item" data-nav="videos">
-        <span class="bottom-icon">▶</span>
-        <small>Videos</small>
+      <button class="bottom-item copilot-btn" data-nav="copilot">
+        <div class="copilot-icon">🎨</div>
       </button>
 
-      <button class="bottom-item" data-nav="history">
-        <span class="bottom-icon">◷</span>
-        <small>History</small>
+      <button class="bottom-item" data-nav="tabs">
+        <span class="bottom-icon">2</span>
       </button>
 
       <button class="bottom-item" data-nav="more">
         <span class="bottom-icon">⊞</span>
-        <small>More</small>
       </button>
-
     </nav>
 
-
-    <!-- Toast -->
+    <!-- Toast Notification -->
     <div id="toastContainer" class="toast-container"></div>
-
   </div>
 </body>
 </html>
