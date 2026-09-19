@@ -1,20 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wareligent Search</title>
-    <!-- Supabase Official SDK -->
+    <!-- Vercel & Supabase Official SDK -->
     <script defer src="/_vercel/insights/script.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
-            --bg-color: #f8fafc;
+            --bg-color: #f4f6f9;
             --card-bg: #ffffff;
-            --text-primary: #0f172a;
+            --text-primary: #1e293b;
             --text-secondary: #64748b;
             --border-color: #e2e8f0;
-            --accent-color: #2563eb;
+            --accent-color: #4f46e5;
+            --accent-gradient: linear-gradient(135deg, #4f46e5, #ec4899);
             --highlight-text: #0f172a;
             --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
             --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
@@ -27,7 +28,7 @@
             --text-primary: #f8fafc;
             --text-secondary: #94a3b8;
             --border-color: #334155;
-            --accent-color: #3b82f6;
+            --accent-color: #818cf8;
             --highlight-text: #ffffff;
             --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
             --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
@@ -47,32 +48,39 @@
             color: var(--text-primary);
             min-height: 100vh;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
         }
 
-        .wrapper {
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            background: var(--card-bg);
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.05);
+            padding-bottom: 70px;
         }
 
-        /* Fixed Navbar UI */
-        .navbar {
+        /* Fixed Mobile Header UI */
+        .app-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 16px;
+            padding: 14px 16px;
             background: var(--card-bg);
             border-bottom: 1px solid var(--border-color);
-            box-shadow: var(--shadow-sm);
+            position: sticky;
+            top: 0;
+            z-index: 90;
         }
 
         .nav-brand {
-            font-size: 1.05rem;
-            font-weight: 700;
+            font-size: 1.15rem;
+            font-weight: 800;
             letter-spacing: -0.5px;
             color: var(--text-primary);
-            white-space: nowrap;
         }
 
         .nav-brand span {
@@ -97,27 +105,23 @@
             align-items: center;
             gap: 4px;
             cursor: pointer;
-            white-space: nowrap;
         }
 
-        /* Main Content Layout */
+        /* Content Layout */
         .content-area {
-            max-width: 680px;
-            width: 100%;
-            margin: 0 auto;
-            padding: 24px 16px;
+            padding: 16px;
             flex: 1;
         }
 
-        .brand-container {
+        .brand-section {
             text-align: center;
-            margin-bottom: 20px;
+            margin: 16px 0 20px 0;
         }
 
         .main-logo {
-            font-size: 2.5rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #2563eb, #a855f7);
+            font-size: 2.4rem;
+            font-weight: 900;
+            background: var(--accent-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             letter-spacing: -1px;
@@ -126,21 +130,21 @@
 
         .sub-text {
             color: var(--text-secondary);
-            font-size: 0.88rem;
+            font-size: 0.85rem;
         }
 
-        /* Search Bar */
+        /* Modern Search Bar UI */
         .search-section {
             position: relative;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
 
         .search-bar {
             display: flex;
             align-items: center;
             background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 24px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 28px;
             padding: 8px 16px;
             box-shadow: var(--shadow-md);
         }
@@ -152,7 +156,7 @@
 
         .search-icon {
             font-size: 1rem;
-            margin-right: 10px;
+            margin-right: 8px;
             opacity: 0.6;
         }
 
@@ -170,23 +174,23 @@
             background: none;
             border: none;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 1.1rem;
             padding: 4px;
-            margin-left: 4px;
+            margin-left: 6px;
             color: var(--text-secondary);
         }
 
-        /* Category Chips */
+        /* Category Tabs */
         .category-tabs {
             display: flex;
             gap: 8px;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
             justify-content: center;
             flex-wrap: wrap;
         }
 
         .tab-chip {
-            background: var(--card-bg);
+            background: var(--bg-color);
             border: 1px solid var(--border-color);
             color: var(--text-secondary);
             padding: 6px 14px;
@@ -210,7 +214,7 @@
             right: 0;
             background: var(--card-bg);
             border: 1px solid var(--border-color);
-            border-radius: 14px;
+            border-radius: 16px;
             box-shadow: var(--shadow-lg);
             list-style: none;
             z-index: 100;
@@ -231,13 +235,34 @@
             border-bottom: none;
         }
 
+        /* Privacy Info Card (DuckDuckGo inspired) */
+        .privacy-card {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 14px;
+            margin-bottom: 16px;
+        }
+
+        .privacy-header h3 {
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .privacy-header p {
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+        }
+
         /* Search History Box */
         .trending-box {
             background: var(--card-bg);
-            border-radius: 14px;
+            border-radius: 16px;
             padding: 16px;
             border: 1px solid var(--border-color);
             box-shadow: var(--shadow-sm);
+            margin-bottom: 16px;
         }
 
         .trending-header {
@@ -245,7 +270,7 @@
             font-weight: 700;
             color: var(--text-secondary);
             letter-spacing: 0.5px;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
 
         .trending-grid {
@@ -271,26 +296,25 @@
         }
 
         .trend-text {
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             color: var(--text-primary);
         }
 
-        /* Search Response Time Styling */
+        /* Performance Meta */
         .search-perf-meta {
             font-size: 0.8rem;
             color: var(--text-secondary);
-            padding: 8px 0;
+            padding: 6px 0;
             margin-bottom: 8px;
             border-bottom: 1px solid var(--border-color);
             display: none;
         }
 
-        /* Clean Google-style Highlight */
+        /* Highlight Styling */
         mark.highlight {
             background-color: transparent;
             color: var(--highlight-text);
             font-weight: 700;
-            padding: 0;
         }
 
         /* Search Results Cards */
@@ -298,12 +322,11 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
-            margin-top: 16px;
         }
 
         .result-card {
             background: var(--card-bg);
-            border-radius: 12px;
+            border-radius: 14px;
             padding: 14px 16px;
             border: 1px solid var(--border-color);
             box-shadow: var(--shadow-sm);
@@ -327,7 +350,7 @@
         }
 
         .result-title {
-            font-size: 1.05rem;
+            font-size: 1rem;
             font-weight: 600;
             color: var(--accent-color);
             text-decoration: none;
@@ -341,11 +364,10 @@
             line-height: 1.4;
         }
 
-        /* Load More Button Style */
+        /* Load More */
         .load-more-container {
             text-align: center;
             margin-top: 16px;
-            margin-bottom: 10px;
         }
 
         .load-more-btn {
@@ -354,27 +376,21 @@
             color: var(--accent-color);
             padding: 8px 20px;
             border-radius: 20px;
-            font-size: 0.9rem;
+            font-size: 0.88rem;
             font-weight: 600;
             cursor: pointer;
             box-shadow: var(--shadow-sm);
-            transition: all 0.2s ease;
-        }
-
-        .load-more-btn:hover {
-            background: var(--border-color);
-            box-shadow: var(--shadow-md);
         }
 
         /* Media Grid & Video Elements */
         .media-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
             gap: 10px;
         }
 
         .media-card {
-            border-radius: 8px;
+            border-radius: 10px;
             overflow: hidden;
             background: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -383,14 +399,14 @@
 
         .media-card img {
             width: 100%;
-            height: 100px;
+            height: 90px;
             object-fit: cover;
             display: block;
         }
 
         .media-title {
             padding: 6px;
-            font-size: 0.72rem;
+            font-size: 0.7rem;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -414,7 +430,48 @@
             border: 0;
         }
 
-        /* Modal Styles */
+        /* Bottom Nav Shell (Bing Inspired) */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 480px;
+            height: 60px;
+            background: var(--card-bg);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .nav-item {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            opacity: 0.6;
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            opacity: 1;
+        }
+
+        .nav-item.center-ai {
+            background: var(--accent-gradient);
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            opacity: 1;
+            box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+        }
+
+        /* Modals */
         .delete-modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -429,7 +486,7 @@
 
         .delete-modal {
             background: var(--card-bg);
-            border-radius: 14px;
+            border-radius: 16px;
             padding: 20px;
             width: 100%;
             max-width: 340px;
@@ -450,10 +507,8 @@
 
         .footer-container {
             text-align: center;
-            padding: 16px;
-            border-top: 1px solid var(--border-color);
-            background: var(--card-bg);
-            font-size: 0.8rem;
+            padding: 16px 16px 20px 16px;
+            font-size: 0.78rem;
             color: var(--text-secondary);
         }
 
@@ -465,9 +520,10 @@
     </style>
 </head>
 <body class="light-theme">
-    <div class="wrapper">
+
+    <div class="app-container">
         <!-- Header -->
-        <header class="navbar">
+        <header class="app-header">
             <div class="nav-brand">wareligent<span>.search</span></div>
             <div class="nav-actions">
                 <button id="themeToggleBtn" class="theme-btn" title="Toggle Theme">
@@ -479,22 +535,25 @@
             </div>
         </header>
 
+        <!-- Main Content -->
         <main class="content-area">
-            <div class="brand-container">
+            <div class="brand-section">
                 <h1 class="main-logo">wareligent</h1>
-                <p class="sub-text">Search the web intelligently</p>
+                <p class="sub-text">Privacy-Focused Intelligent Search</p>
             </div>
 
+            <!-- Search Bar -->
             <div class="search-section">
                 <div class="search-bar">
                     <span class="search-icon">🔍</span>
-                    <input type="text" id="searchInput" placeholder="Search the web..." autocomplete="off">
+                    <input type="text" id="searchInput" placeholder="Search the web intelligently..." autocomplete="off">
                     <button id="clearBtn" class="action-btn" style="display: none;">✕</button>
                     <button id="voiceBtn" class="action-btn" title="Voice Search">🎙️</button>
                 </div>
                 <ul id="suggestionsList" class="suggestions-box"></ul>
             </div>
 
+            <!-- Categories Tabs -->
             <div class="category-tabs" id="categoryTabs" style="display: none;">
                 <button class="tab-chip active" data-type="all">All</button>
                 <button class="tab-chip" data-type="images">Images</button>
@@ -502,6 +561,15 @@
                 <button class="tab-chip" data-type="videos">Videos</button>
             </div>
 
+            <!-- Privacy Widget Badge -->
+            <div class="privacy-card" id="privacyCard">
+                <div class="privacy-header">
+                    <h3>🛡️ Ultra Privacy Enabled</h3>
+                    <p>Search privately without tracker scripts or data logging.</p>
+                </div>
+            </div>
+
+            <!-- Search History Widget -->
             <section class="trending-box" id="trendingBox">
                 <div class="trending-header">
                     <span>🕒 SEARCH HISTORY</span>
@@ -509,9 +577,10 @@
                 <div class="trending-grid" id="trendingGrid"></div>
             </section>
 
-            <!-- Search meta information -->
+            <!-- Search Performance Meta -->
             <div id="searchPerfMeta" class="search-perf-meta"></div>
 
+            <!-- Results Output Wrapper -->
             <div id="resultsWrapper" class="results-container"></div>
             
             <!-- Load More Container -->
@@ -523,6 +592,25 @@
         <footer class="footer-container">
             <p>&copy; 2026 Wareligent. All rights reserved. | <a href="https://about-wareligent.vercel.app" target="_blank" rel="noopener noreferrer">ABOUT US</a></p>
         </footer>
+
+        <!-- Bottom Navigation Shell -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+                <span class="nav-icon">🏠</span>
+            </button>
+            <button class="nav-item" onclick="document.getElementById('voiceBtn').click()">
+                <span class="nav-icon">🎙️</span>
+            </button>
+            <button class="nav-item center-ai" onclick="document.getElementById('searchInput').focus()">
+                <span class="nav-icon">✨</span>
+            </button>
+            <button class="nav-item" onclick="document.getElementById('profileBtn').click()">
+                <span class="nav-icon">👤</span>
+            </button>
+            <button class="nav-item" onclick="document.getElementById('themeToggleBtn').click()">
+                <span class="nav-icon">⚙️</span>
+            </button>
+        </nav>
     </div>
 
     <!-- Modals -->
@@ -575,11 +663,9 @@
         let currentSearchCategory = "all";
         let currentUser = null;
 
-        // --- Pagination Variables ---
         let currentPage = 0;
         const PAGE_SIZE = 5;
 
-        // --- Clean Keyword Highlighting ---
         function highlightText(text, keyword) {
             if (!text || !keyword) return text || '';
             const regex = new RegExp(`(${keyword.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
@@ -776,6 +862,7 @@
         const suggestionsList = document.getElementById('suggestionsList');
         const resultsWrapper = document.getElementById('resultsWrapper');
         const trendingBox = document.getElementById('trendingBox');
+        const privacyCard = document.getElementById('privacyCard');
         const categoryTabs = document.getElementById('categoryTabs');
         const themeToggleBtn = document.getElementById('themeToggleBtn');
         const themeIcon = document.getElementById('themeIcon');
@@ -817,6 +904,7 @@
             loadMoreContainer.style.display = 'none';
             categoryTabs.style.display = 'none';
             trendingBox.style.display = 'block';
+            privacyCard.style.display = 'block';
             currentSearchQuery = "";
             currentPage = 0;
             resetCategoryTabs();
@@ -968,7 +1056,6 @@
             }
         }
 
-        // --- On-Demand Auto Crawl & Save Feature ---
         async function fetchAndSaveFromWeb(query) {
             try {
                 const response = await fetch(`/api/search-web?q=${encodeURIComponent(query)}`);
@@ -982,7 +1069,6 @@
                         keywords: `${query}, ${item.title.toLowerCase()}`
                     }));
 
-                    // Supabase-এ অটোমেটিক ইনসার্ট
                     await supabaseClient.from('websites').insert(itemsToSave);
 
                     return itemsToSave;
@@ -1013,6 +1099,7 @@
             }
 
             trendingBox.style.display = 'none';
+            privacyCard.style.display = 'none';
             categoryTabs.style.display = 'flex';
 
             if (currentSearchCategory !== "all") {
@@ -1040,7 +1127,6 @@
 
                 if (error) throw error;
 
-                // --- যদি ডাটাবেজে ডাটা না থাকে -> Auto-Crawl & Save logic ---
                 if ((!searchResults || searchResults.length === 0) && !isLoadMore) {
                     resultsWrapper.innerHTML = `<p style="color: var(--text-secondary); text-align: center; padding: 20px;">🔍 Live crawling the web & indexing to database...</p>`;
                     const autoFetchedData = await fetchAndSaveFromWeb(cleanQuery);
@@ -1078,7 +1164,6 @@
                         const card = document.createElement('div');
                         card.className = 'result-card';
                         
-                        // লিংকটি গুগলে না পাঠিয়ে ইন-সাইট রিডার ভিউয়ারে (view.html) পাঠানো হলো
                         card.innerHTML = `
                             <div class="result-header">
                                 <img src="https://www.google.com/s2/favicons?domain=${domain}&sz=32" class="site-icon" alt="">
