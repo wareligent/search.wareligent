@@ -3,561 +3,634 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="description"
+        content="Wareligent Search — Private, Fast & Intelligent Search Engine"
+    >
+    <meta name="theme-color" content="#0f172a">
+
     <title>Wareligent Search</title>
+
+    <!-- Vercel Analytics -->
     <script defer src="/_vercel/insights/script.js"></script>
+
+    <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        :root {
-            --bg-base: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.7);
-            --card-border: rgba(255, 255, 255, 0.1);
-            --text-main: #f8fafc;
-            --text-sub: #94a3b8;
-            --brand-primary: #6366f1;
-            --brand-gradient: linear-gradient(135deg, #6366f1, #8b5cf6);
-        }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            background-color: var(--bg-base);
-            color: var(--text-main);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            background-image: 
-                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.15) 0px, transparent 50%);
-        }
-
-        .app-container {
-            width: 100%;
-            max-width: 480px;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            padding-bottom: 75px;
-        }
-
-        /* Top Brand Header */
-        .app-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 20px 10px 20px;
-        }
-
-        .brand-logo {
-            font-size: 1.25rem;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            color: #fff;
-        }
-
-        .brand-logo span {
-            color: var(--brand-primary);
-        }
-
-        .content-area {
-            padding: 0 16px;
-            flex: 1;
-        }
-
-        .hero-title {
-            text-align: center;
-            margin: 25px 0 20px 0;
-        }
-
-        .hero-title h1 {
-            font-size: 2rem;
-            font-weight: 800;
-            background: linear-gradient(to right, #ffffff, #a5b4fc);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .hero-title p {
-            font-size: 0.82rem;
-            color: var(--text-sub);
-            margin-top: 4px;
-        }
-
-        /* Modern Professional Search Bar */
-        .search-wrapper {
-            position: relative;
-            margin-bottom: 24px;
-        }
-
-        .search-box {
-            display: flex;
-            align-items: center;
-            background: var(--card-bg);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--card-border);
-            border-radius: 16px;
-            padding: 12px 16px;
-            gap: 12px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
-        }
-
-        .search-box:focus-within {
-            border-color: var(--brand-primary);
-        }
-
-        .svg-icon {
-            width: 20px;
-            height: 20px;
-            fill: none;
-            stroke: var(--text-sub);
-            stroke-width: 2;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-            flex-shrink: 0;
-        }
-
-        .icon-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 4px;
-        }
-
-        .icon-btn:hover .svg-icon {
-            stroke: var(--text-main);
-        }
-
-        .icon-btn.recording .svg-icon {
-            stroke: #ef4444;
-            animation: pulse 1s infinite;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.4; }
-            100% { opacity: 1; }
-        }
-
-        #searchInput {
-            flex: 1;
-            border: none;
-            outline: none;
-            background: transparent;
-            color: var(--text-main);
-            font-size: 0.95rem;
-            width: 100%;
-        }
-
-        #searchInput::placeholder {
-            color: var(--text-sub);
-        }
-
-        /* Suggestions Dropdown */
-        .suggestions-list {
-            position: absolute;
-            top: 108%;
-            left: 0;
-            right: 0;
-            background: #1e293b;
-            border: 1px solid var(--card-border);
-            border-radius: 14px;
-            list-style: none;
-            z-index: 100;
-            overflow: hidden;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
-        }
-
-        .suggestions-list li {
-            padding: 12px 16px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 0.9rem;
-            color: var(--text-main);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .suggestions-list li:last-child {
-            border-bottom: none;
-        }
-
-        .suggestions-list li:hover {
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        /* Feature Cards */
-        .features-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 24px;
-        }
-
-        .feature-card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 14px;
-            padding: 14px;
-            cursor: pointer;
-            transition: border-color 0.2s;
-        }
-
-        .feature-card:hover {
-            border-color: var(--brand-primary);
-        }
-
-        .feature-card .card-title {
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: var(--text-main);
-            margin-bottom: 4px;
-        }
-
-        .feature-card .card-sub {
-            font-size: 0.75rem;
-            color: var(--text-sub);
-        }
-
-        /* Search & Feed Results Section */
-        .results-feed {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .result-card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 14px;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .result-meta {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.75rem;
-            color: var(--text-sub);
-        }
-
-        .result-title {
-            font-size: 0.98rem;
-            font-weight: 600;
-            color: #818cf8;
-            text-decoration: none;
-            line-height: 1.4;
-        }
-
-        .result-title:hover {
-            text-decoration: underline;
-        }
-
-        .result-desc {
-            font-size: 0.85rem;
-            color: var(--text-sub);
-            line-height: 1.5;
-        }
-
-        /* Clean Bottom Navigation */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            max-width: 480px;
-            height: 60px;
-            background: rgba(15, 23, 42, 0.9);
-            backdrop-filter: blur(16px);
-            border-top: 1px solid var(--card-border);
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            z-index: 100;
-        }
-
-        .nav-link {
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 10px;
-        }
-
-        .nav-link.active .svg-icon {
-            stroke: var(--brand-primary);
-        }
-
-        /* Hidden File Input for Image Search */
-        #imageInput { display: none; }
-    </style>
+    <!-- Main Styles -->
+    <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
+    <!-- App -->
     <div class="app-container">
-        <!-- Header -->
+
+        <!-- ================= HEADER ================= -->
         <header class="app-header">
-            <div class="brand-logo">wareligent<span>.search</span></div>
+
+            <button
+                class="brand-button"
+                type="button"
+                aria-label="Wareligent Search Home"
+                onclick="clearSearch()"
+            >
+                <span class="brand-logo">
+                    wareligent<span>.search</span>
+                </span>
+            </button>
+
+            <div class="header-actions">
+
+                <!-- Theme -->
+                <button
+                    id="themeBtn"
+                    class="icon-btn"
+                    type="button"
+                    title="Change theme"
+                    aria-label="Change theme"
+                    onclick="toggleTheme()"
+                >
+                    <svg
+                        class="svg-icon"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                    >
+                        <circle cx="12" cy="12" r="4"></circle>
+                        <path d="M12 2v2"></path>
+                        <path d="M12 20v2"></path>
+                        <path d="m4.93 4.93 1.41 1.41"></path>
+                        <path d="m17.66 17.66 1.41 1.41"></path>
+                        <path d="M2 12h2"></path>
+                        <path d="M20 12h2"></path>
+                        <path d="m6.34 17.66-1.41 1.41"></path>
+                        <path d="m19.07 4.93-1.41 1.41"></path>
+                    </svg>
+                </button>
+
+                <!-- Settings -->
+                <button
+                    id="settingsBtn"
+                    class="icon-btn"
+                    type="button"
+                    title="Settings"
+                    aria-label="Settings"
+                    onclick="openSettings()"
+                >
+                    <svg
+                        class="svg-icon"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                    >
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-1.7 1.7-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1 1.55V20h-2.4v-.21a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.88.34l-.06.06-1.7-1.7.06-.06A1.7 1.7 0 0 0 8.6 15a1.7 1.7 0 0 0-1.55-1H6.8v-2.4h.25a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.88L8.2 8.66l1.7-1.7.06.06a1.7 1.7 0 0 0 1.88.34 1.7 1.7 0 0 0 1-1.55V5.6h2.4v.21a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.88-.34l.06-.06 1.7 1.7-.06.06A1.7 1.7 0 0 0 19.4 10a1.7 1.7 0 0 0 1.55 1h.25v2.4h-.25a1.7 1.7 0 0 0-1.55 1Z"></path>
+                    </svg>
+                </button>
+
+            </div>
         </header>
 
+
+        <!-- ================= MAIN ================= -->
         <main class="content-area">
-            <div class="hero-title">
-                <h1>Search the Web</h1>
-                <p>Private, Fast & Intelligent Engine</p>
-            </div>
 
-            <!-- Functional Search Bar -->
-            <div class="search-wrapper">
-                <div class="search-box">
-                    <svg class="svg-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    
-                    <input type="text" id="searchInput" placeholder="Search or type a URL..." autocomplete="off">
-                    
-                    <button id="clearBtn" class="icon-btn" style="display: none;" onclick="clearSearch()">
-                        <svg class="svg-icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            <!-- Hero -->
+            <section class="hero-title">
+                <div class="hero-badge">
+                    <span class="status-dot"></span>
+                    Intelligent Search
+                </div>
+
+                <h1>
+                    Search the Web
+                </h1>
+
+                <p>
+                    Private, fast & intelligent search experience
+                </p>
+            </section>
+
+
+            <!-- ================= SEARCH ================= -->
+            <section
+                class="search-wrapper"
+                aria-label="Search"
+            >
+
+                <form
+                    id="searchForm"
+                    class="search-box"
+                    onsubmit="event.preventDefault(); executeSearch();"
+                >
+
+                    <!-- Search Icon -->
+                    <span class="search-icon-wrapper">
+                        <svg
+                            class="svg-icon"
+                            viewBox="0 0 24 24"
+                            aria-hidden="true"
+                        >
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line
+                                x1="21"
+                                y1="21"
+                                x2="16.65"
+                                y2="16.65"
+                            ></line>
+                        </svg>
+                    </span>
+
+
+                    <!-- Search Input -->
+                    <input
+                        type="search"
+                        id="searchInput"
+                        name="q"
+                        placeholder="Search the web..."
+                        autocomplete="off"
+                        autocapitalize="off"
+                        spellcheck="false"
+                        enterkeyhint="search"
+                        aria-label="Search the web"
+                        aria-autocomplete="list"
+                        aria-controls="suggestionsList"
+                    >
+
+
+                    <!-- Clear -->
+                    <button
+                        id="clearBtn"
+                        class="icon-btn search-action"
+                        type="button"
+                        title="Clear search"
+                        aria-label="Clear search"
+                        onclick="clearSearch()"
+                        hidden
+                    >
+                        <svg
+                            class="svg-icon"
+                            viewBox="0 0 24 24"
+                            aria-hidden="true"
+                        >
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
                     </button>
 
-                    <!-- Functional Image Search Button -->
-                    <button class="icon-btn" title="Search by Image" onclick="document.getElementById('imageInput').click()">
-                        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
-                    </button>
-                    <input type="file" id="imageInput" accept="image/*" onchange="handleImageUpload(event)">
 
-                    <!-- Functional Voice Search Button -->
-                    <button id="voiceBtn" class="icon-btn" title="Voice Search" onclick="startVoiceRecognition()">
-                        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+                    <!-- Image Search -->
+                    <button
+                        id="imageSearchBtn"
+                        class="icon-btn search-action"
+                        type="button"
+                        title="Search by image"
+                        aria-label="Search by image"
+                        onclick="document.getElementById('imageInput').click()"
+                    >
+                        <svg
+                            class="svg-icon"
+                            viewBox="0 0 24 24"
+                            aria-hidden="true"
+                        >
+                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                            <circle cx="12" cy="13" r="4"></circle>
+                        </svg>
+                    </button>
+
+                    <input
+                        type="file"
+                        id="imageInput"
+                        accept="image/*"
+                        hidden
+                    >
+
+
+                    <!-- Voice Search -->
+                    <button
+                        id="voiceBtn"
+                        class="icon-btn search-action"
+                        type="button"
+                        title="Voice search"
+                        aria-label="Voice search"
+                        onclick="startVoiceRecognition()"
+                    >
+                        <svg
+                            class="svg-icon"
+                            viewBox="0 0 24 24"
+                            aria-hidden="true"
+                        >
+                            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                            <line x1="12" y1="19" x2="12" y2="23"></line>
+                            <line x1="8" y1="23" x2="16" y2="23"></line>
+                        </svg>
+                    </button>
+
+                </form>
+
+
+                <!-- Suggestions -->
+                <ul
+                    id="suggestionsList"
+                    class="suggestions-list"
+                    role="listbox"
+                    aria-label="Search suggestions"
+                    hidden
+                ></ul>
+
+            </section>
+
+
+            <!-- ================= SEARCH TABS ================= -->
+            <nav
+                class="search-tabs"
+                id="searchTabs"
+                aria-label="Search categories"
+            >
+
+                <button
+                    class="search-tab active"
+                    type="button"
+                    data-type="all"
+                    onclick="changeSearchType('all')"
+                >
+                    <span>All</span>
+                </button>
+
+                <button
+                    class="search-tab"
+                    type="button"
+                    data-type="news"
+                    onclick="changeSearchType('news')"
+                >
+                    <span>News</span>
+                </button>
+
+                <button
+                    class="search-tab"
+                    type="button"
+                    data-type="images"
+                    onclick="changeSearchType('images')"
+                >
+                    <span>Images</span>
+                </button>
+
+                <button
+                    class="search-tab"
+                    type="button"
+                    data-type="videos"
+                    onclick="changeSearchType('videos')"
+                >
+                    <span>Videos</span>
+                </button>
+
+            </nav>
+
+
+            <!-- ================= QUICK FEATURES ================= -->
+            <section
+                class="features-section"
+                aria-label="Quick searches"
+            >
+
+                <div class="section-heading">
+                    <h2>Explore</h2>
+                </div>
+
+                <div class="features-grid">
+
+                    <button
+                        class="feature-card"
+                        type="button"
+                        onclick="quickSearch('Latest Technology Trends')"
+                    >
+                        <span class="feature-icon">⚡</span>
+
+                        <span class="feature-content">
+                            <strong>Tech Trends</strong>
+                            <small>Explore recent innovations</small>
+                        </span>
+                    </button>
+
+
+                    <button
+                        class="feature-card"
+                        type="button"
+                        onclick="quickSearch('World News Today')"
+                    >
+                        <span class="feature-icon">🌍</span>
+
+                        <span class="feature-content">
+                            <strong>World News</strong>
+                            <small>Stay updated with events</small>
+                        </span>
+                    </button>
+
+
+                    <button
+                        class="feature-card"
+                        type="button"
+                        onclick="quickSearch('Artificial Intelligence')"
+                    >
+                        <span class="feature-icon">🤖</span>
+
+                        <span class="feature-content">
+                            <strong>AI & Future</strong>
+                            <small>Discover AI technology</small>
+                        </span>
+                    </button>
+
+
+                    <button
+                        class="feature-card"
+                        type="button"
+                        onclick="quickSearch('Science Discoveries')"
+                    >
+                        <span class="feature-icon">🔬</span>
+
+                        <span class="feature-content">
+                            <strong>Science</strong>
+                            <small>Explore discoveries</small>
+                        </span>
+                    </button>
+
+                </div>
+
+            </section>
+
+
+            <!-- ================= HISTORY ================= -->
+            <section
+                id="historySection"
+                class="history-section"
+                hidden
+            >
+                <div class="section-heading">
+                    <h2>Recent Searches</h2>
+
+                    <button
+                        class="text-btn"
+                        type="button"
+                        onclick="clearSearchHistory()"
+                    >
+                        Clear
                     </button>
                 </div>
 
-                <ul id="suggestionsList" class="suggestions-list"></ul>
-            </div>
+                <div
+                    id="historyList"
+                    class="history-list"
+                ></div>
+            </section>
 
-            <!-- Interactive Features -->
-            <div class="features-grid">
-                <div class="feature-card" onclick="quickSearch('Latest Technology Trends')">
-                    <div class="card-title">Tech Trends</div>
-                    <div class="card-sub">Explore recent innovations</div>
-                </div>
-                <div class="feature-card" onclick="quickSearch('World News Today')">
-                    <div class="card-title">Live News</div>
-                    <div class="card-sub">Stay updated with world events</div>
-                </div>
-            </div>
 
-            <!-- Results Section -->
-            <div id="resultsFeed" class="results-feed"></div>
+            <!-- ================= RESULTS ================= -->
+            <section
+                class="results-section"
+                aria-label="Search results"
+            >
+
+                <div
+                    id="resultsHeader"
+                    class="results-header"
+                    hidden
+                >
+                    <div>
+                        <span id="resultsLabel">Search results</span>
+                        <span id="resultsCount"></span>
+                    </div>
+
+                    <button
+                        id="sortBtn"
+                        class="text-btn"
+                        type="button"
+                        onclick="toggleSort()"
+                    >
+                        Relevance
+                    </button>
+                </div>
+
+
+                <!-- Loading -->
+                <div
+                    id="loadingState"
+                    class="loading-state"
+                    hidden
+                >
+                    <div class="loading-spinner"></div>
+                    <p>Searching Wareligent...</p>
+                </div>
+
+
+                <!-- Results -->
+                <div
+                    id="resultsFeed"
+                    class="results-feed"
+                ></div>
+
+
+                <!-- Empty -->
+                <div
+                    id="emptyState"
+                    class="empty-state"
+                    hidden
+                >
+                    <div class="empty-icon">🔎</div>
+                    <h3>No results found</h3>
+                    <p>
+                        Try a different search term or check your spelling.
+                    </p>
+                </div>
+
+
+                <!-- Error -->
+                <div
+                    id="errorState"
+                    class="error-state"
+                    hidden
+                >
+                    <div class="empty-icon">⚠️</div>
+                    <h3>Something went wrong</h3>
+                    <p id="errorMessage">
+                        We couldn't load the results.
+                    </p>
+
+                    <button
+                        class="retry-btn"
+                        type="button"
+                        onclick="retrySearch()"
+                    >
+                        Try Again
+                    </button>
+                </div>
+
+            </section>
+
         </main>
 
-        <!-- Bottom Navigation -->
-        <nav class="bottom-nav">
-            <button class="nav-link active" onclick="clearSearch()">
-                <svg class="svg-icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+
+        <!-- ================= SETTINGS PANEL ================= -->
+        <aside
+            id="settingsPanel"
+            class="settings-panel"
+            aria-hidden="true"
+            hidden
+        >
+
+            <div class="settings-header">
+                <div>
+                    <span class="settings-kicker">WARELIGENT</span>
+                    <h2>Settings</h2>
+                </div>
+
+                <button
+                    class="icon-btn"
+                    type="button"
+                    aria-label="Close settings"
+                    onclick="closeSettings()"
+                >
+                    <svg
+                        class="svg-icon"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                    >
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+
+
+            <div class="settings-content">
+
+                <label class="setting-item">
+                    <span>
+                        <strong>Search History</strong>
+                        <small>Save searches on this device</small>
+                    </span>
+
+                    <input
+                        id="historyToggle"
+                        type="checkbox"
+                        checked
+                        onchange="toggleSearchHistory(this.checked)"
+                    >
+                </label>
+
+
+                <label class="setting-item">
+                    <span>
+                        <strong>Safe Search</strong>
+                        <small>Filter potentially unsafe results</small>
+                    </span>
+
+                    <input
+                        id="safeSearchToggle"
+                        type="checkbox"
+                        checked
+                        onchange="toggleSafeSearch(this.checked)"
+                    >
+                </label>
+
+            </div>
+
+        </aside>
+
+
+        <!-- Settings Overlay -->
+        <div
+            id="settingsOverlay"
+            class="settings-overlay"
+            hidden
+            onclick="closeSettings()"
+        ></div>
+
+
+        <!-- ================= BOTTOM NAVIGATION ================= -->
+        <nav
+            class="bottom-nav"
+            aria-label="Main navigation"
+        >
+
+            <button
+                class="nav-link active"
+                type="button"
+                data-nav="home"
+                onclick="clearSearch()"
+            >
+                <svg
+                    class="svg-icon"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                >
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+                <span>Home</span>
             </button>
-            <button class="nav-link" onclick="startVoiceRecognition()">
-                <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path></svg>
+
+
+            <button
+                class="nav-link"
+                type="button"
+                data-nav="history"
+                onclick="showSearchHistory()"
+            >
+                <svg
+                    class="svg-icon"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                >
+                    <circle cx="12" cy="12" r="9"></circle>
+                    <polyline points="12 7 12 12 15 14"></polyline>
+                </svg>
+                <span>History</span>
             </button>
+
+
+            <button
+                class="nav-link"
+                type="button"
+                data-nav="voice"
+                onclick="startVoiceRecognition()"
+            >
+                <svg
+                    class="svg-icon"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                >
+                    <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                    <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                </svg>
+                <span>Voice</span>
+            </button>
+
+
+            <button
+                class="nav-link"
+                type="button"
+                data-nav="settings"
+                onclick="openSettings()"
+            >
+                <svg
+                    class="svg-icon"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                >
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-1.7 1.7-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1 1.55V20h-2.4v-.21a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.88.34l-.06.06-1.7-1.7.06-.06A1.7 1.7 0 0 0 8.6 15a1.7 1.7 0 0 0-1.55-1H6.8v-2.4h.25a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.88L8.2 8.66l1.7-1.7.06.06a1.7 1.7 0 0 0 1.88.34 1.7 1.7 0 0 0 1-1.55V5.6h2.4v.21a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.88-.34l.06-.06 1.7 1.7-.06.06A1.7 1.7 0 0 0 19.4 10a1.7 1.7 0 0 0 1.55 1h.25v2.4h-.25a1.7 1.7 0 0 0-1.55 1Z"></path>
+                </svg>
+                <span>Settings</span>
+            </button>
+
         </nav>
+
     </div>
 
-    <script>
-        const SUPABASE_URL = "https://xveccsbdrysuiwyuvodw.supabase.co";
-        const SUPABASE_ANON_KEY = "sb_publishable_HkyRE170ylT0kkdZxbwUSQ_ihHrS_Ra";
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        const searchInput = document.getElementById('searchInput');
-        const clearBtn = document.getElementById('clearBtn');
-        const suggestionsList = document.getElementById('suggestionsList');
-        const resultsFeed = document.getElementById('resultsFeed');
+    <!-- Main JavaScript -->
+    <script src="script.js" defer></script>
 
-        document.addEventListener('DOMContentLoaded', () => {
-            loadInitialTrending();
-        });
-
-        // 1. প্রাথমিক ফিড লোড
-        async function loadInitialTrending() {
-            resultsFeed.innerHTML = `<p style="color: var(--text-sub); text-align: center; font-size: 0.85rem; padding: 20px;">Loading trending topics...</p>`;
-            fetchWebResults('Technology News');
-        }
-
-        // 2. সার্চ ইনপুট হ্যান্ডলিং
-        searchInput.addEventListener('input', function() {
-            const query = this.value.trim();
-            clearBtn.style.display = query ? 'flex' : 'none';
-            if (!query) { suggestionsList.innerHTML = ''; return; }
-            fetchSuggestions(query);
-        });
-
-        searchInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                suggestionsList.innerHTML = '';
-                executeSearch();
-            }
-        });
-
-        function clearSearch() {
-            searchInput.value = '';
-            clearBtn.style.display = 'none';
-            suggestionsList.innerHTML = '';
-            loadInitialTrending();
-        }
-
-        function quickSearch(queryText) {
-            searchInput.value = queryText;
-            clearBtn.style.display = 'flex';
-            executeSearch();
-        }
-
-        // 3. রিয়েল টাইপ সাজেশন
-        function fetchSuggestions(query) {
-            const oldScript = document.getElementById('jsonp-suggestions');
-            if (oldScript) oldScript.remove();
-
-            window.handleSuggestions = (data) => {
-                suggestionsList.innerHTML = '';
-                if (data && data[1]) {
-                    data[1].slice(0, 5).forEach((term) => {
-                        const li = document.createElement('li');
-                        li.innerHTML = `<svg class="svg-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg> ${term}`;
-                        li.onclick = () => {
-                            searchInput.value = term;
-                            suggestionsList.innerHTML = '';
-                            executeSearch();
-                        };
-                        suggestionsList.appendChild(li);
-                    });
-                }
-            };
-
-            const script = document.createElement('script');
-            script.id = 'jsonp-suggestions';
-            script.src = `https://suggestqueries.google.com/complete/search?client=chrome&q=${encodeURIComponent(query)}&callback=handleSuggestions`;
-            document.body.appendChild(script);
-        }
-
-        // 4. প্রধান সার্চ লজিক (Supabase + Fallback Web API)
-        async function executeSearch() {
-            const query = searchInput.value.trim();
-            if (!query) return;
-
-            resultsFeed.innerHTML = `<p style="color: var(--text-sub); text-align: center; padding: 20px;">Searching Wareligent...</p>`;
-
-            try {
-                let { data: dbResults } = await supabaseClient
-                    .from('websites')
-                    .select('*')
-                    .or(`title.ilike.%${query}%,keywords.ilike.%${query}%,description.ilike.%${query}%`)
-                    .limit(6);
-
-                resultsFeed.innerHTML = '';
-
-                if (dbResults && dbResults.length > 0) {
-                    dbResults.forEach(site => {
-                        let domain = site.url;
-                        try { domain = new URL(site.url).hostname; } catch(e){}
-
-                        const card = document.createElement('div');
-                        card.className = 'result-card';
-                        card.innerHTML = `
-                            <div class="result-meta">🌐 ${domain}</div>
-                            <a href="${site.url}" target="_blank" class="result-title">${site.title}</a>
-                            <p class="result-desc">${site.description || ''}</p>
-                        `;
-                        resultsFeed.appendChild(card);
-                    });
-                } else {
-                    await fetchWebResults(query);
-                }
-            } catch (err) {
-                await fetchWebResults(query);
-            }
-        }
-
-        async function fetchWebResults(query) {
-            try {
-                const res = await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&format=json&origin=*`);
-                const data = await res.json();
-                resultsFeed.innerHTML = '';
-
-                if (data.query && data.query.search.length > 0) {
-                    data.query.search.forEach(item => {
-                        const cleanSnippet = item.snippet.replace(/<\/?[^>]+(>|$)/g, "");
-                        const itemUrl = `https://en.wikipedia.org/wiki/${encodeURIComponent(item.title)}`;
-                        
-                        const card = document.createElement('div');
-                        card.className = 'result-card';
-                        card.innerHTML = `
-                            <div class="result-meta">🌐 Live Web Result</div>
-                            <a href="${itemUrl}" target="_blank" class="result-title">${item.title}</a>
-                            <p class="result-desc">${cleanSnippet}...</p>
-                        `;
-                        resultsFeed.appendChild(card);
-                    });
-                } else {
-                    resultsFeed.innerHTML = `<p style="text-align: center; color: var(--text-sub); padding: 20px;">No results found.</p>`;
-                }
-            } catch (e) {
-                resultsFeed.innerHTML = `<p style="text-align: center; color: var(--text-sub); padding: 20px;">Failed to load results.</p>`;
-            }
-        }
-
-        // 5. ভয়েস সার্চ (Voice Search Feature)
-        function startVoiceRecognition() {
-            const voiceBtn = document.getElementById('voiceBtn');
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-            if (!SpeechRecognition) {
-                alert("আপনার ব্রাউজারে ভয়েস সার্চ সাপোর্ট করছে না। Chrome বা Edge ব্রাউজার ব্যবহার করুন।");
-                return;
-            }
-
-            const recognition = new SpeechRecognition();
-            recognition.lang = 'en-US';
-
-            recognition.onstart = () => {
-                voiceBtn.classList.add('recording');
-                searchInput.placeholder = "Listening...";
-            };
-
-            recognition.onresult = (event) => {
-                const transcript = event.results[0][0].transcript;
-                searchInput.value = transcript;
-                clearBtn.style.display = 'flex';
-                executeSearch();
-            };
-
-            recognition.onerror = () => {
-                alert("কথা শুনতে সমস্যা হয়েছে, আবার চেষ্টা করুন।");
-            };
-
-            recognition.onend = () => {
-                voiceBtn.classList.remove('recording');
-                searchInput.placeholder = "Search or type a URL...";
-            };
-
-            recognition.start();
-        }
-
-        // 6. ইমেজ আপলোড সার্চ (Image Search Feature)
-        function handleImageUpload(event) {
-            const file = event.target.files[0];
-            if (file) {
-                // ফাইল নেম বা টপিক বের করে সার্চ
-                const imageName = file.name.split('.')[0].replace(/[-_]/g, ' ');
-                searchInput.value = imageName;
-                clearBtn.style.display = 'flex';
-                executeSearch();
-            }
-        }
-    </script>
 </body>
-                                                                      </html>
+</html>
