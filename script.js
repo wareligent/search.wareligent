@@ -1,14 +1,15 @@
-/* =================================
+/* ====================================
    Wareligent Search Engine
-================================= */
+   Global English UI
+==================================== */
 
 (() => {
   "use strict";
 
 
-  /* ===============================
+  /* ================================
      Supabase
-  =============================== */
+  ================================= */
 
   const SUPABASE_URL =
     "https://xveccsbdrysuiwyuvodw.supabase.co";
@@ -21,8 +22,7 @@
   try {
     if (
       window.supabase &&
-      SUPABASE_URL.includes(".supabase.co") &&
-      !SUPABASE_URL.includes("YOUR-PROJECT")
+      SUPABASE_URL.includes(".supabase.co")
     ) {
       supabaseClient =
         window.supabase.createClient(
@@ -31,169 +31,59 @@
         );
     }
   } catch (error) {
-    console.warn("Supabase unavailable:", error);
+    console.warn(
+      "Supabase unavailable:",
+      error
+    );
   }
 
 
-  /* ===============================
-     DOM
-  =============================== */
-
-  const searchForm =
-    document.getElementById("searchForm");
-
-  const searchInput =
-    document.getElementById("searchInput");
-
-  const clearBtn =
-    document.getElementById("clearBtn");
-
-  const imageBtn =
-    document.getElementById("imageBtn");
-
-  const imageInput =
-    document.getElementById("imageInput");
-
-  const voiceBtn =
-    document.getElementById("voiceBtn");
-
-  const suggestionsList =
-    document.getElementById("suggestionsList");
-
-  const resultsWrapper =
-    document.getElementById("resultsWrapper");
-
-  const trendingBox =
-    document.getElementById("trendingBox");
-
-  const trendingGrid =
-    document.getElementById("trendingGrid");
-
-  const categoryTabs =
-    document.getElementById("categoryTabs");
-
-  const searchPerfMeta =
-    document.getElementById("searchPerfMeta");
+  /* ================================
+     Elements
+  ================================= */
 
   const themeToggleBtn =
-    document.getElementById("themeToggleBtn");
+    document.getElementById(
+      "themeToggleBtn"
+    );
 
   const themeIcon =
-    document.getElementById("themeIcon");
+    document.getElementById(
+      "themeIcon"
+    );
 
-  const toastContainer =
-    document.getElementById("toastContainer");
+  const homeSearchButton =
+    document.getElementById(
+      "homeSearchButton"
+    );
 
+  const refreshWeatherBtn =
+    document.getElementById(
+      "refreshWeatherBtn"
+    );
 
-  /* ===============================
-     State
-  =============================== */
+  const weatherCard =
+    document.getElementById(
+      "weatherCard"
+    );
 
-  let currentMode = "all";
+  const newsList =
+    document.getElementById(
+      "newsList"
+    );
 
-  let selectedSuggestion = -1;
-
-  let suggestionTimer = null;
-
-  let suggestionRequestId = 0;
-
-
-  /* ===============================
-     Static Trending
-  =============================== */
-
-  const defaultTrending = [
-    "Latest technology trends",
-    "World news today",
-    "AI tools",
-    "Best mobile phones",
-    "Sports news",
-    "Travel destinations"
-  ];
+  const openNewsSearch =
+    document.getElementById(
+      "openNewsSearch"
+    );
 
 
-  /* ===============================
-     Utilities
-  =============================== */
-
-  function escapeHtml(value) {
-    return String(value || "")
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
-  }
-
-
-  function normalizeUrl(url) {
-    if (!url) return "";
-
-    let value = String(url).trim();
-
-    if (!value) return "";
-
-    if (!/^https?:\/\//i.test(value)) {
-      if (
-        /^[a-z0-9.-]+\.[a-z]{2,}(\/.*)?$/i.test(value)
-      ) {
-        value = "https://" + value;
-      } else {
-        return "";
-      }
-    }
-
-    try {
-      const parsed = new URL(value);
-
-      if (
-        parsed.protocol !== "http:" &&
-        parsed.protocol !== "https:"
-      ) {
-        return "";
-      }
-
-      return parsed.href;
-    } catch {
-      return "";
-    }
-  }
-
-
-  function getDomain(url) {
-    try {
-      return new URL(url).hostname.replace(
-        /^www\./,
-        ""
-      );
-    } catch {
-      return "Web";
-    }
-  }
-
-
-  function showToast(message) {
-    if (!toastContainer) return;
-
-    const toast =
-      document.createElement("div");
-
-    toast.className = "toast";
-    toast.textContent = message;
-
-    toastContainer.appendChild(toast);
-
-    setTimeout(() => {
-      toast.remove();
-    }, 2800);
-  }
-
-
-  /* ===============================
+  /* ================================
      Theme
-  =============================== */
+  ================================= */
 
   function setTheme(theme) {
+
     document.body.classList.toggle(
       "dark-theme",
       theme === "dark"
@@ -206,7 +96,9 @@
 
     if (themeIcon) {
       themeIcon.textContent =
-        theme === "dark" ? "☀" : "☾";
+        theme === "dark"
+          ? "☀"
+          : "☾";
     }
 
     localStorage.setItem(
@@ -217,24 +109,25 @@
 
 
   function initTheme() {
+
     const saved =
       localStorage.getItem(
         "wareligent-theme"
       );
 
-    if (saved) {
+    if (saved === "dark" || saved === "light") {
       setTheme(saved);
       return;
     }
 
-    const prefersDark =
+    const dark =
       window.matchMedia &&
       window.matchMedia(
         "(prefers-color-scheme: dark)"
       ).matches;
 
     setTheme(
-      prefersDark ? "dark" : "light"
+      dark ? "dark" : "light"
     );
   }
 
@@ -242,504 +135,398 @@
   themeToggleBtn?.addEventListener(
     "click",
     () => {
-      const isDark =
+
+      const dark =
         document.body.classList.contains(
           "dark-theme"
         );
 
       setTheme(
-        isDark ? "light" : "dark"
+        dark ? "light" : "dark"
       );
     }
   );
 
 
-  /* ===============================
-     Trending
-  =============================== */
+  /* ================================
+     Open Search Page
+  ================================= */
 
-  function renderTrending(items) {
-    if (!trendingGrid) return;
+  function openSearchPage(query = "") {
 
-    const list =
-      items.length
-        ? items
-        : defaultTrending;
+    const value =
+      String(query || "").trim();
 
-    trendingGrid.innerHTML =
-      list
-        .slice(0, 6)
-        .map(
-          (item, index) => `
-            <button
-              class="trend-item"
-              data-query="${escapeHtml(item)}"
-            >
-              <span class="trend-number">
-                ${index + 1}
-              </span>
+    if (value) {
 
-              <span class="trend-text">
-                ${escapeHtml(item)}
-              </span>
-            </button>
-          `
-        )
-        .join("");
+      window.location.href =
+        `/search.html?q=${encodeURIComponent(
+          value
+        )}`;
 
-    trendingGrid
-      .querySelectorAll(".trend-item")
-      .forEach((button) => {
-        button.addEventListener(
-          "click",
-          () => {
-            const query =
-              button.dataset.query || "";
+    } else {
 
-            searchInput.value = query;
+      window.location.href =
+        "/search.html";
 
-            executeSearch(query);
-          }
-        );
-      });
-  }
-
-
-  async function loadTrending() {
-    renderTrending(defaultTrending);
-
-    if (!supabaseClient) return;
-
-    try {
-      const { data, error } =
-        await supabaseClient
-          .from("search_suggestions")
-          .select("keyword")
-          .order("created_at", {
-            ascending: false
-          })
-          .limit(10);
-
-      if (error || !data?.length) return;
-
-      const keywords =
-        data
-          .map(item => item.keyword)
-          .filter(Boolean);
-
-      const combined = [
-        ...keywords,
-        ...defaultTrending
-      ];
-
-      const unique =
-        [...new Set(combined)];
-
-      renderTrending(unique);
-
-    } catch (error) {
-      console.warn(
-        "Trending unavailable:",
-        error
-      );
     }
   }
 
 
-  /* ===============================
-     Search Suggestions
-  =============================== */
-
-  function hideSuggestions() {
-    suggestionsList.hidden = true;
-    suggestionsList.innerHTML = "";
-    selectedSuggestion = -1;
-  }
-
-
-  function renderSuggestions(items) {
-    if (!items.length) {
-      hideSuggestions();
-      return;
-    }
-
-    suggestionsList.innerHTML =
-      items
-        .slice(0, 7)
-        .map(
-          item => `
-            <li
-              data-value="${escapeHtml(item)}"
-            >
-              🔎
-              <span>${escapeHtml(item)}</span>
-            </li>
-          `
-        )
-        .join("");
-
-    suggestionsList.hidden = false;
-
-    suggestionsList
-      .querySelectorAll("li")
-      .forEach((item) => {
-        item.addEventListener(
-          "mousedown",
-          (event) => {
-            event.preventDefault();
-
-            const value =
-              item.dataset.value || "";
-
-            searchInput.value = value;
-
-            hideSuggestions();
-
-            executeSearch(value);
-          }
-        );
-      });
-  }
-
-
-  function fetchGoogleSuggestions(query) {
-    if (!query || query.length < 2) {
-      hideSuggestions();
-      return;
-    }
-
-    const requestId =
-      ++suggestionRequestId;
-
-    const callbackName =
-      "__wareligentSuggestions";
-
-    window[callbackName] = function(data) {
-      if (
-        requestId !== suggestionRequestId
-      ) {
-        return;
-      }
-
-      const suggestions =
-        Array.isArray(data?.[1])
-          ? data[1]
-              .map(item =>
-                Array.isArray(item)
-                  ? item[0]
-                  : item
-              )
-              .filter(Boolean)
-          : [];
-
-      renderSuggestions(suggestions);
-    };
-
-    const oldScript =
-      document.getElementById(
-        "googleSuggestionsScript"
-      );
-
-    if (oldScript) {
-      oldScript.remove();
-    }
-
-    const script =
-      document.createElement("script");
-
-    script.id =
-      "googleSuggestionsScript";
-
-    script.src =
-      "https://suggestqueries.google.com/complete/search" +
-      `?client=firefox&q=${encodeURIComponent(query)}` +
-      `&callback=${callbackName}`;
-
-    script.onerror = () => {
-      hideSuggestions();
-    };
-
-    document.body.appendChild(script);
-  }
-
-
-  searchInput?.addEventListener(
-    "input",
+  homeSearchButton?.addEventListener(
+    "click",
     () => {
-      const value =
-        searchInput.value.trim();
-
-      clearBtn?.classList.toggle(
-        "hidden",
-        !value
-      );
-
-      clearTimeout(
-        suggestionTimer
-      );
-
-      if (!value) {
-        hideSuggestions();
-        return;
-      }
-
-      suggestionTimer =
-        setTimeout(() => {
-          fetchGoogleSuggestions(
-            value
-          );
-        }, 250);
+      openSearchPage();
     }
   );
 
 
-  /* ===============================
-     Keyboard
-  =============================== */
+  /* ================================
+     News Search
+  ================================= */
 
-  searchInput?.addEventListener(
-    "keydown",
-    (event) => {
+  openNewsSearch?.addEventListener(
+    "click",
+    () => {
 
-      const items =
-        suggestionsList.querySelectorAll(
-          "li"
-        );
+      window.location.href =
+        "/search.html?q=latest news";
 
-      if (!items.length) {
-        if (
-          event.key === "Enter"
-        ) {
-          event.preventDefault();
-
-          executeSearch(
-            searchInput.value
-          );
-        }
-
-        return;
-      }
-
-
-      if (event.key === "ArrowDown") {
-        event.preventDefault();
-
-        selectedSuggestion =
-          Math.min(
-            selectedSuggestion + 1,
-            items.length - 1
-          );
-      }
-
-
-      if (event.key === "ArrowUp") {
-        event.preventDefault();
-
-        selectedSuggestion =
-          Math.max(
-            selectedSuggestion - 1,
-            0
-          );
-      }
-
-
-      if (event.key === "Enter") {
-        event.preventDefault();
-
-        if (
-          selectedSuggestion >= 0
-        ) {
-          const value =
-            items[
-              selectedSuggestion
-            ].dataset.value;
-
-          searchInput.value =
-            value;
-
-          hideSuggestions();
-
-          executeSearch(value);
-
-        } else {
-          executeSearch(
-            searchInput.value
-          );
-        }
-
-        return;
-      }
-
-
-      items.forEach(
-        (item, index) => {
-          item.classList.toggle(
-            "selected",
-            index ===
-              selectedSuggestion
-          );
-        }
-      );
     }
   );
 
 
-  /* ===============================
-     Save Search
-  =============================== */
+  /* ================================
+     Weather
+  ================================= */
 
-  async function saveSearchWord(word) {
-    if (!supabaseClient) return;
+  function weatherIcon(code) {
 
-    const keyword =
-      String(word || "")
-        .trim()
-        .toLowerCase();
+    if (code === 0) return "☀️";
 
-    if (keyword.length < 2) return;
-
-    try {
-      const {
-        data: sessionData
-      } =
-        await supabaseClient.auth
-          .getSession();
-
-      const user =
-        sessionData?.session?.user;
-
-      const row = {
-        keyword
-      };
-
-      if (user) {
-        row.user_id = user.id;
-      }
-
-      await supabaseClient
-        .from("search_suggestions")
-        .insert(row);
-
-    } catch (error) {
-      console.warn(
-        "Could not save search:",
-        error
-      );
+    if (
+      code === 1 ||
+      code === 2
+    ) {
+      return "🌤️";
     }
+
+    if (code === 3) {
+      return "☁️";
+    }
+
+    if (
+      code >= 45 &&
+      code <= 48
+    ) {
+      return "🌫️";
+    }
+
+    if (
+      code >= 51 &&
+      code <= 67
+    ) {
+      return "🌧️";
+    }
+
+    if (
+      code >= 71 &&
+      code <= 77
+    ) {
+      return "❄️";
+    }
+
+    if (
+      code >= 80 &&
+      code <= 82
+    ) {
+      return "🌦️";
+    }
+
+    if (
+      code >= 95
+    ) {
+      return "⛈️";
+    }
+
+    return "🌤️";
   }
 
 
-  /* ===============================
-     Database Search
-  =============================== */
+  function weatherText(code) {
 
-  async function searchDatabase(query) {
-    if (!supabaseClient) {
-      return [];
-    }
+    const map = {
+      0: "Clear sky",
+      1: "Mainly clear",
+      2: "Partly cloudy",
+      3: "Overcast",
+      45: "Fog",
+      48: "Fog",
+      51: "Light drizzle",
+      53: "Drizzle",
+      55: "Heavy drizzle",
+      61: "Light rain",
+      63: "Rain",
+      65: "Heavy rain",
+      71: "Light snow",
+      73: "Snow",
+      75: "Heavy snow",
+      80: "Rain showers",
+      81: "Rain showers",
+      82: "Heavy showers",
+      95: "Thunderstorm",
+      96: "Thunderstorm",
+      99: "Thunderstorm"
+    };
 
-    try {
+    return map[code] || "Current weather";
+  }
 
-      const fields = [
-        "title",
-        "keywords",
-        "description"
-      ];
 
-      const responses =
-        await Promise.all(
-          fields.map(field =>
-            supabaseClient
-              .from("websites")
-              .select(
-                "id,title,url,description,keywords"
-              )
-              .ilike(
-                field,
-                `%${query}%`
-              )
-              .limit(10)
-          )
-        );
+  async function getLocation() {
 
-      const map = new Map();
+    return new Promise(
+      (resolve) => {
 
-      responses.forEach(response => {
-
-        if (
-          response.error ||
-          !response.data
-        ) {
+        if (!navigator.geolocation) {
+          resolve(null);
           return;
         }
 
-        response.data.forEach(item => {
+        navigator.geolocation.getCurrentPosition(
+          position => {
 
-          const url =
-            normalizeUrl(item.url);
+            resolve({
+              lat:
+                position.coords.latitude,
 
-          const key =
-            item.id ||
-            url ||
-            item.title;
+              lon:
+                position.coords.longitude
+            });
 
-          if (
-            key &&
-            !map.has(key)
-          ) {
-            map.set(key, item);
+          },
+
+          () => {
+            resolve(null);
+          },
+
+          {
+            enableHighAccuracy: false,
+            timeout: 8000,
+            maximumAge: 600000
           }
+        );
 
-        });
-      });
+      }
+    );
+  }
 
-      return [...map.values()]
-        .slice(0, 20);
+
+  async function loadWeather() {
+
+    if (!weatherCard) return;
+
+    weatherCard.innerHTML = `
+      <div class="weather-loading">
+        Loading weather...
+      </div>
+    `;
+
+
+    try {
+
+      let location =
+        await getLocation();
+
+
+      /*
+       * Default location is used only
+       * when the browser does not provide
+       * a location.
+       */
+
+      if (!location) {
+
+        location = {
+          lat: 23.8103,
+          lon: 90.4125
+        };
+      }
+
+
+      const weatherUrl =
+        "https://api.open-meteo.com/v1/forecast" +
+        `?latitude=${location.lat}` +
+        `&longitude=${location.lon}` +
+        "&current=temperature_2m,weather_code" +
+        "&timezone=auto";
+
+
+      const response =
+        await fetch(weatherUrl);
+
+
+      if (!response.ok) {
+        throw new Error(
+          "Weather request failed"
+        );
+      }
+
+
+      const data =
+        await response.json();
+
+
+      const current =
+        data.current;
+
+
+      const temperature =
+        Math.round(
+          current.temperature_2m
+        );
+
+
+      const code =
+        current.weather_code;
+
+
+      weatherCard.innerHTML = `
+        <div class="weather-main">
+
+          <div>
+
+            <div class="weather-location">
+              Current weather
+            </div>
+
+            <div class="weather-temperature">
+              ${temperature}°C
+            </div>
+
+            <div class="weather-condition">
+              ${weatherText(code)}
+            </div>
+
+          </div>
+
+          <div class="weather-icon">
+            ${weatherIcon(code)}
+          </div>
+
+        </div>
+      `;
 
     } catch (error) {
 
       console.warn(
-        "Database search failed:",
+        "Weather unavailable:",
         error
       );
 
-      return [];
+      weatherCard.innerHTML = `
+        <div class="weather-loading">
+          Weather is currently unavailable.
+        </div>
+      `;
     }
   }
 
 
-  /* ===============================
-     Web API Search
-  =============================== */
+  refreshWeatherBtn?.addEventListener(
+    "click",
+    loadWeather
+  );
 
-  async function searchWebAPI(
-    query,
-    mode
-  ) {
+
+  /* ================================
+     News
+  ================================= */
+
+  const fallbackNews = [
+    {
+      title:
+        "Latest technology and innovation news",
+      source:
+        "Technology"
+    },
+
+    {
+      title:
+        "Artificial intelligence continues to evolve",
+      source:
+        "AI"
+    },
+
+    {
+      title:
+        "Global science and technology updates",
+      source:
+        "Science"
+    }
+  ];
+
+
+  function escapeHtml(value) {
+
+    return String(value || "")
+      .replace(
+        /&/g,
+        "&amp;"
+      )
+      .replace(
+        /</g,
+        "&lt;"
+      )
+      .replace(
+        />/g,
+        "&gt;"
+      )
+      .replace(
+        /"/g,
+        "&quot;"
+      )
+      .replace(
+        /'/g,
+        "&#039;"
+      );
+  }
+
+
+  async function loadNews() {
+
+    if (!newsList) return;
+
 
     try {
 
-      const url =
-        `/api/search-web?q=${encodeURIComponent(
-          query
-        )}&type=${encodeURIComponent(
-          mode
-        )}`;
+      /*
+       * Your existing backend can provide
+       * live news through /api/search-web.
+       */
 
       const response =
-        await fetch(url, {
-          headers: {
-            Accept:
-              "application/json"
+        await fetch(
+          "/api/search-web?q=latest%20news&type=news",
+          {
+            headers: {
+              Accept:
+                "application/json"
+            }
           }
-        });
+        );
+
 
       if (!response.ok) {
-        return [];
+        throw new Error(
+          "News API unavailable"
+        );
       }
+
 
       const data =
         await response.json();
+
 
       const results =
         Array.isArray(data)
@@ -750,1148 +537,123 @@
               []
             );
 
-      return results.map(item => ({
-        title:
-          item.title ||
-          item.name ||
-          "Untitled result",
 
-        url:
-          item.url ||
-          item.link ||
-          item.href ||
-          "",
+      if (!results.length) {
+        throw new Error(
+          "No news results"
+        );
+      }
 
-        description:
-          item.description ||
-          item.snippet ||
-          item.summary ||
-          "",
 
-        image:
-          item.image ||
-          item.thumbnail ||
-          item.thumbnailUrl ||
-          "",
+      newsList.innerHTML =
+        results
+          .slice(0, 5)
+          .map(item => {
 
-        video:
-          item.video ||
-          item.videoUrl ||
-          "",
+            const title =
+              item.title ||
+              item.name ||
+              "Latest news";
 
-        source:
-          item.source ||
-          item.site ||
-          ""
-      }));
+            const source =
+              item.source ||
+              item.site ||
+              "Web";
+
+            const url =
+              item.url ||
+              item.link ||
+              "#";
+
+
+            return `
+              <a
+                class="news-item"
+                href="${escapeHtml(url)}"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+
+                <div class="news-source">
+                  ${escapeHtml(source)}
+                </div>
+
+                <div class="news-title">
+                  ${escapeHtml(title)}
+                </div>
+
+              </a>
+            `;
+          })
+          .join("");
+
 
     } catch (error) {
 
       console.warn(
-        "Web API unavailable:",
+        "News unavailable:",
         error
       );
 
-      return [];
-    }
-  }
 
-
-  /* ===============================
-     Wikipedia fallback
-  =============================== */
-
-  async function wikipediaSearch(query) {
-
-    try {
-
-      const url =
-        "https://en.wikipedia.org/w/api.php" +
-        "?action=query" +
-        "&format=json" +
-        "&origin=*" +
-        "&generator=search" +
-        "&gsrsearch=" +
-        encodeURIComponent(query) +
-        "&gsrlimit=8" +
-        "&prop=extracts|info" +
-        "&exintro=1" +
-        "&explaintext=1" +
-        "&inprop=url";
-
-      const response =
-        await fetch(url);
-
-      if (!response.ok) {
-        return [];
-      }
-
-      const data =
-        await response.json();
-
-      const pages =
-        data?.query?.pages || {};
-
-      return Object.values(pages)
-        .map(page => ({
-          title:
-            page.title,
-
-          url:
-            page.fullurl ||
-            `https://en.wikipedia.org/wiki/${encodeURIComponent(
-              page.title
-            )}`,
-
-          description:
-            page.extract || "",
-
-          source:
-            "Wikipedia"
-        }));
-
-    } catch {
-      return [];
-    }
-  }
-
-
-  /* ===============================
-     Loading UI
-  =============================== */
-
-  function showLoading() {
-
-    resultsWrapper.innerHTML = `
-      <div class="loading-card">
-        <div class="skeleton short"></div>
-        <br>
-        <div class="skeleton medium"></div>
-        <br>
-        <div class="skeleton long"></div>
-        <br>
-        <div class="skeleton medium"></div>
-      </div>
-
-      <div class="loading-card">
-        <div class="skeleton short"></div>
-        <br>
-        <div class="skeleton long"></div>
-        <br>
-        <div class="skeleton medium"></div>
-      </div>
-    `;
-  }
-
-
-  /* ===============================
-     Render Result
-  =============================== */
-
-  function renderResultCard(item) {
-
-    const url =
-      normalizeUrl(item.url);
-
-    if (!url) return "";
-
-    const domain =
-      getDomain(url);
-
-    const title =
-      item.title ||
-      "Untitled result";
-
-    const description =
-      item.description ||
-      "No description available.";
-
-    const favicon =
-      `https://www.google.com/s2/favicons?domain=${encodeURIComponent(
-        domain
-      )}&sz=64`;
-
-    const viewUrl =
-      `/view.html?url=${encodeURIComponent(
-        url
-      )}&title=${encodeURIComponent(
-        title
-      )}`;
-
-    return `
-      <article class="result-card">
-
-        <div class="result-top">
-
-          <img
-            class="site-icon"
-            src="${favicon}"
-            alt=""
-            loading="lazy"
-          >
-
-          <div class="result-source">
-            <strong>
-              ${escapeHtml(domain)}
-            </strong>
-
-            <small>
-              ${escapeHtml(
-                item.source || "Web"
-              )}
-            </small>
-          </div>
-
-        </div>
-
-
-        <a
-          class="result-title"
-          href="${viewUrl}"
-        >
-          ${escapeHtml(title)}
-        </a>
-
-
-        <p class="result-description">
-          ${escapeHtml(description)}
-        </p>
-
-
-        <div class="result-actions">
-
-          <a
-            class="result-action"
-            href="${viewUrl}"
-          >
-            Open
-          </a>
-
-          <a
-            class="result-action"
-            href="${url}"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Visit site
-          </a>
-
-        </div>
-
-      </article>
-    `;
-  }
-
-
-  /* ===============================
-     Render Media
-  =============================== */
-
-  function renderMediaCard(item) {
-
-    const url =
-      normalizeUrl(item.url);
-
-    if (!url) return "";
-
-    const image =
-      item.image ||
-      item.thumbnail;
-
-    if (!image) {
-      return renderResultCard(item);
-    }
-
-    const title =
-      item.title ||
-      "Untitled";
-
-    return `
-      <article class="media-card">
-
-        <a
-          href="${url}"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-
-          <img
-            class="media-image"
-            src="${escapeHtml(image)}"
-            alt="${escapeHtml(title)}"
-            loading="lazy"
-            onerror="this.style.display='none'"
-          >
-
-        </a>
-
-        <div class="media-content">
-
-          <div class="media-title">
-            ${escapeHtml(title)}
-          </div>
-
-          <div class="media-source">
-            ${escapeHtml(
-              item.source ||
-              getDomain(url)
-            )}
-          </div>
-
-        </div>
-
-      </article>
-    `;
-  }
-
-
-  function renderResults(
-    results,
-    mode
-  ) {
-
-    if (!results.length) {
-
-      resultsWrapper.innerHTML = `
-        <div class="empty-state">
-
-          <div class="empty-state-icon">
-            🔎
-          </div>
-
-          <h3>
-            No results found
-          </h3>
-
-          <p>
-            Try another search or a different keyword.
-          </p>
-
-        </div>
-      `;
-
-      return;
-    }
-
-
-    if (
-      mode === "images" ||
-      mode === "videos"
-    ) {
-
-      resultsWrapper.innerHTML =
-        results
-          .map(renderMediaCard)
+      newsList.innerHTML =
+        fallbackNews
+          .map(item => `
+            <button
+              class="news-item"
+              type="button"
+              data-news-query="${escapeHtml(
+                item.title
+              )}"
+            >
+
+              <div class="news-source">
+                ${escapeHtml(
+                  item.source
+                )}
+              </div>
+
+              <div class="news-title">
+                ${escapeHtml(
+                  item.title
+                )}
+              </div>
+
+            </button>
+          `)
           .join("");
 
-    } else {
 
-      resultsWrapper.innerHTML =
-        results
-          .map(renderResultCard)
-          .join("");
-    }
-  }
-
-
-  /* ===============================
-     Direct URL
-  =============================== */
-
-  function looksLikeUrl(value) {
-
-    return (
-      /^https?:\/\//i.test(value) ||
-      /^www\./i.test(value) ||
-      /^[a-z0-9.-]+\.[a-z]{2,}$/i.test(
-        value
-      )
-    );
-  }
-
-
-  function renderUrlResult(value) {
-
-    const url =
-      normalizeUrl(value);
-
-    if (!url) return false;
-
-    const domain =
-      getDomain(url);
-
-    resultsWrapper.innerHTML = `
-      <article class="result-card">
-
-        <div class="result-top">
-
-          <img
-            class="site-icon"
-            src="https://www.google.com/s2/favicons?domain=${encodeURIComponent(
-              domain
-            )}&sz=64"
-            alt=""
-          >
-
-          <div class="result-source">
-            <strong>
-              ${escapeHtml(domain)}
-            </strong>
-
-            <small>
-              Direct website
-            </small>
-          </div>
-
-        </div>
-
-        <a
-          class="result-title"
-          href="${url}"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Open ${escapeHtml(domain)}
-        </a>
-
-        <p class="result-description">
-          You entered a website address.
-        </p>
-
-        <div class="result-actions">
-
-          <a
-            class="result-action"
-            href="${url}"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Visit website
-          </a>
-
-        </div>
-
-      </article>
-    `;
-
-    return true;
-  }
-
-
-  /* ===============================
-     Main Search
-  =============================== */
-
-  async function executeSearch(
-    query,
-    mode = currentMode
-  ) {
-
-    query =
-      String(query || "").trim();
-
-    if (!query) {
-      showToast(
-        "Please enter something to search."
-      );
-
-      searchInput.focus();
-
-      return;
-    }
-
-
-    currentMode = mode;
-
-    hideSuggestions();
-
-
-    document
-      .querySelectorAll(".tab")
-      .forEach(tab => {
-        tab.classList.toggle(
-          "active",
-          tab.dataset.mode === mode
-        );
-      });
-
-
-    trendingBox.style.display =
-      "none";
-
-
-    searchPerfMeta.hidden = false;
-
-    searchPerfMeta.textContent =
-      "Searching...";
-
-
-    const started =
-      performance.now();
-
-
-    clearBtn.classList.remove(
-      "hidden"
-    );
-
-
-    await saveSearchWord(query);
-
-
-    if (looksLikeUrl(query)) {
-
-      const success =
-        renderUrlResult(query);
-
-      if (success) {
-
-        const time =
-          Math.round(
-            performance.now() -
-              started
-          );
-
-        searchPerfMeta.textContent =
-          `Website • ${time} ms`;
-
-        return;
-      }
-    }
-
-
-    showLoading();
-
-
-    let results = [];
-
-    let source = "Wareligent";
-
-
-    /* 1. Database */
-
-    results =
-      await searchDatabase(query);
-
-
-    /* 2. Web API */
-
-    if (!results.length) {
-
-      results =
-        await searchWebAPI(
-          query,
-          mode
-        );
-
-      if (results.length) {
-        source = "Live Web";
-      }
-    }
-
-
-    /* 3. Wikipedia fallback */
-
-    if (
-      !results.length &&
-      (
-        mode === "all" ||
-        mode === "news" ||
-        mode === "web"
-      )
-    ) {
-
-      results =
-        await wikipediaSearch(query);
-
-      if (results.length) {
-        source = "Wikipedia";
-      }
-    }
-
-
-    renderResults(
-      results,
-      mode
-    );
-
-
-    const time =
-      Math.round(
-        performance.now() -
-          started
-      );
-
-
-    searchPerfMeta.textContent =
-      `${results.length} result${
-        results.length === 1
-          ? ""
-          : "s"
-      } • ${source} • ${time} ms`;
-  }
-
-
-  /* ===============================
-     Search Form
-  =============================== */
-
-  searchForm?.addEventListener(
-    "submit",
-    event => {
-
-      event.preventDefault();
-
-      executeSearch(
-        searchInput.value,
-        currentMode
-      );
-    }
-  );
-
-
-  /* ===============================
-     Clear
-  =============================== */
-
-  clearBtn?.addEventListener(
-    "click",
-    () => {
-
-      searchInput.value = "";
-
-      clearBtn.classList.add(
-        "hidden"
-      );
-
-      hideSuggestions();
-
-      resultsWrapper.innerHTML = "";
-
-      searchPerfMeta.hidden = true;
-
-      trendingBox.style.display =
-        "";
-
-      currentMode = "all";
-
-      document
-        .querySelectorAll(".tab")
-        .forEach(tab => {
-          tab.classList.toggle(
-            "active",
-            tab.dataset.mode === "all"
-          );
-        });
-
-      searchInput.focus();
-    }
-  );
-
-
-  /* ===============================
-     Category Tabs
-  =============================== */
-
-  categoryTabs
-    ?.querySelectorAll(".tab")
-    .forEach(tab => {
-
-      tab.addEventListener(
-        "click",
-        () => {
-
-          const mode =
-            tab.dataset.mode;
-
-          currentMode = mode;
-
-          categoryTabs
-            .querySelectorAll(".tab")
-            .forEach(item => {
-              item.classList.remove(
-                "active"
-              );
-            });
-
-          tab.classList.add(
-            "active"
-          );
-
-
-          const query =
-            searchInput.value.trim();
-
-          if (!query) {
-
-            showToast(
-              "Search something first."
-            );
-
-            return;
-          }
-
-          executeSearch(
-            query,
-            mode
-          );
-        }
-      );
-    });
-
-
-  /* ===============================
-     Quick Cards
-  =============================== */
-
-  document
-    .querySelectorAll(".quick-card")
-    .forEach(card => {
-
-      card.addEventListener(
-        "click",
-        () => {
-
-          const action =
-            card.dataset.action;
-
-          if (action === "images") {
-
-            imageInput?.click();
-
-            return;
-          }
-
-
-          if (action === "news") {
-
-            searchInput.value =
-              "latest news";
-
-            executeSearch(
-              "latest news",
-              "news"
-            );
-
-            return;
-          }
-
-
-          if (action === "trending") {
-
-            trendingBox.scrollIntoView({
-              behavior: "smooth"
-            });
-
-            return;
-          }
-
-
-          if (action === "rewards") {
-
-            showToast(
-              "Rewards feature is coming soon."
-            );
-
-          }
-
-        }
-      );
-    });
-
-
-  /* ===============================
-     Image Search
-  =============================== */
-
-  imageBtn?.addEventListener(
-    "click",
-    () => {
-      imageInput?.click();
-    }
-  );
-
-
-  imageInput?.addEventListener(
-    "change",
-    async () => {
-
-      const file =
-        imageInput.files?.[0];
-
-      if (!file) return;
-
-
-      if (!file.type.startsWith("image/")) {
-
-        showToast(
-          "Please select an image."
-        );
-
-        return;
-      }
-
-
-      if (
-        file.size >
-        8 * 1024 * 1024
-      ) {
-
-        showToast(
-          "Image must be smaller than 8MB."
-        );
-
-        return;
-      }
-
-
-      showToast(
-        "Image selected."
-      );
-
-
-      /*
-       * If /api/image-search exists,
-       * real image search can be used.
-       */
-
-      try {
-
-        const formData =
-          new FormData();
-
-        formData.append(
-          "image",
-          file
-        );
-
-
-        const response =
-          await fetch(
-            "/api/image-search",
-            {
-              method: "POST",
-              body: formData
-            }
-          );
-
-
-        if (response.ok) {
-
-          const data =
-            await response.json();
-
-          const results =
-            Array.isArray(data)
-              ? data
-              : (
-                  data.results ||
-                  []
-                );
-
-          if (results.length) {
-
-            searchInput.value =
-              file.name;
-
-            trendingBox.style.display =
-              "none";
-
-            renderResults(
-              results,
-              "images"
-            );
-
-            searchPerfMeta.hidden =
-              false;
-
-            searchPerfMeta.textContent =
-              `${results.length} image results`;
-
-            return;
-          }
-        }
-
-      } catch {
-        // Fallback below
-      }
-
-
-      /*
-       * Backend না থাকলে filename search.
-       */
-
-      const filename =
-        file.name
-          .replace(/\.[^/.]+$/, "")
-          .replace(/[_-]+/g, " ")
-          .trim();
-
-
-      if (filename) {
-
-        searchInput.value =
-          filename;
-
-        executeSearch(
-          filename,
-          "images"
-        );
-      }
-
-    }
-  );
-
-
-  /* ===============================
-     Voice Search
-  =============================== */
-
-  let recognition = null;
-
-  const SpeechRecognition =
-    window.SpeechRecognition ||
-    window.webkitSpeechRecognition;
-
-
-  if (SpeechRecognition) {
-
-    recognition =
-      new SpeechRecognition();
-
-    recognition.continuous = false;
-
-    recognition.interimResults = false;
-
-    recognition.lang = "bn-BD";
-
-
-    recognition.onstart = () => {
-
-      voiceBtn.classList.add(
-        "listening"
-      );
-
-      showToast(
-        "Listening..."
-      );
-    };
-
-
-    recognition.onresult =
-      event => {
-
-        const text =
-          event.results[0][0]
-            .transcript;
-
-        searchInput.value =
-          text;
-
-        clearBtn.classList.remove(
-          "hidden"
-        );
-
-        executeSearch(
-          text
-        );
-      };
-
-
-    recognition.onerror =
-      () => {
-
-        showToast(
-          "Voice search could not start."
-        );
-      };
-
-
-    recognition.onend = () => {
-
-      voiceBtn.classList.remove(
-        "listening"
-      );
-    };
-
-
-    voiceBtn?.addEventListener(
-      "click",
-      () => {
-
-        try {
-          recognition.start();
-        } catch {
-          // Already running
-        }
-
-      }
-    );
-
-  } else {
-
-    voiceBtn?.addEventListener(
-      "click",
-      () => {
-
-        showToast(
-          "Voice search is not supported in this browser."
-        );
-
-      }
-    );
-
-  }
-
-
-  /* ===============================
-     Bottom Navigation
-  =============================== */
-
-  document
-    .querySelectorAll(".bottom-item")
-    .forEach(item => {
-
-      item.addEventListener(
-        "click",
-        () => {
-
-          const nav =
-            item.dataset.nav;
-
-          document
-            .querySelectorAll(
-              ".bottom-item"
-            )
-            .forEach(button => {
-              button.classList.remove(
-                "active"
-              );
-            });
-
-          item.classList.add(
-            "active"
-          );
-
-
-          if (nav === "home") {
-
-            window.scrollTo({
-              top: 0,
-              behavior: "smooth"
-            });
-
-            return;
-          }
-
-
-          if (
-            nav === "images"
-          ) {
-
-            imageInput?.click();
-
-            return;
-          }
-
-
-          if (
-            nav === "videos"
-          ) {
-
-            const query =
-              searchInput.value.trim();
-
-            if (!query) {
-
-              showToast(
-                "Search something first."
-              );
-
-              return;
-            }
-
-            executeSearch(
-              query,
-              "videos"
-            );
-
-            return;
-          }
-
-
-          if (
-            nav === "history"
-          ) {
-
-            showToast(
-              "Search history will be available here."
-            );
-
-            return;
-          }
-
-
-          if (
-            nav === "more"
-          ) {
-
-            showToast(
-              "More features coming soon."
-            );
-
-          }
-
-        }
-      );
-    });
-
-
-  /* ===============================
-     See All Trending
-  =============================== */
-
-  document
-    .getElementById(
-      "seeTrendingBtn"
-    )
-    ?.addEventListener(
-      "click",
-      () => {
-
-        trendingBox.scrollIntoView({
-          behavior: "smooth"
-        });
-
-      }
-    );
-
-
-  /* ===============================
-     Outside click
-  =============================== */
-
-  document.addEventListener(
-    "click",
-    event => {
-
-      if (
-        !event.target.closest(
-          ".search-section"
+      newsList
+        .querySelectorAll(
+          "[data-news-query]"
         )
-      ) {
-        hideSuggestions();
-      }
+        .forEach(button => {
 
+          button.addEventListener(
+            "click",
+            () => {
+
+              openSearchPage(
+                button.dataset.newsQuery
+              );
+
+            }
+          );
+
+        });
     }
-  );
+  }
 
 
-  /* ===============================
+  /* ================================
      Init
-  =============================== */
+  ================================= */
 
   initTheme();
 
-  loadTrending();
+  loadWeather();
+
+  loadNews();
 
 })();
