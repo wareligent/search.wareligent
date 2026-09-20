@@ -1,38 +1,70 @@
 (() => {
   "use strict";
 
+
   /* =========================================
      ELEMENTS
   ========================================= */
 
-  const searchInput = document.getElementById("searchInput");
-  const searchForm = document.getElementById("searchForm");
-  const clearBtn = document.getElementById("clearBtn");
+  const searchInput =
+    document.getElementById("searchInput");
 
-  const queryTitle = document.getElementById("queryTitle");
-  const resultCount = document.getElementById("resultCount");
+  const searchForm =
+    document.getElementById("searchForm");
 
-  const loadingState = document.getElementById("loadingState");
-  const resultsList = document.getElementById("resultsList");
+  const clearBtn =
+    document.getElementById("clearBtn");
 
-  const emptyState = document.getElementById("emptyState");
-  const errorState = document.getElementById("errorState");
-  const errorMessage = document.getElementById("errorMessage");
+  const queryTitle =
+    document.getElementById("queryTitle");
 
-  const retryBtn = document.getElementById("retryBtn");
-  const emptyHomeBtn = document.getElementById("emptyHomeBtn");
+  const resultCount =
+    document.getElementById("resultCount");
 
-  const mobileHomeBtn = document.getElementById("mobileHomeBtn");
-  const homeLogo = document.getElementById("homeLogo");
+  const loadingState =
+    document.getElementById("loadingState");
 
-  const routeLoader = document.getElementById("routeLoader");
+  const resultsList =
+    document.getElementById("resultsList");
 
-  const settingsBtn = document.getElementById("settingsBtn");
-  const settingsOverlay = document.getElementById("settingsOverlay");
-  const closeSettings = document.getElementById("closeSettings");
+  const emptyState =
+    document.getElementById("emptyState");
 
-  const themeToggle = document.getElementById("themeToggle");
-  const themeStatus = document.getElementById("themeStatus");
+  const errorState =
+    document.getElementById("errorState");
+
+  const errorMessage =
+    document.getElementById("errorMessage");
+
+  const retryBtn =
+    document.getElementById("retryBtn");
+
+  const emptyHomeBtn =
+    document.getElementById("emptyHomeBtn");
+
+  const mobileHomeBtn =
+    document.getElementById("mobileHomeBtn");
+
+  const homeLogo =
+    document.getElementById("homeLogo");
+
+  const routeLoader =
+    document.getElementById("routeLoader");
+
+  const settingsBtn =
+    document.getElementById("settingsBtn");
+
+  const settingsOverlay =
+    document.getElementById("settingsOverlay");
+
+  const closeSettings =
+    document.getElementById("closeSettings");
+
+  const themeToggle =
+    document.getElementById("themeToggle");
+
+  const themeStatus =
+    document.getElementById("themeStatus");
 
   const settingsHomeBtn =
     document.getElementById("settingsHomeBtn");
@@ -42,12 +74,13 @@
      QUERY
   ========================================= */
 
-  const params = new URLSearchParams(
-    window.location.search
-  );
+  const urlParams =
+    new URLSearchParams(
+      window.location.search
+    );
 
   const currentQuery =
-    (params.get("q") || "").trim();
+    (urlParams.get("q") || "").trim();
 
 
   /* =========================================
@@ -58,12 +91,16 @@
     window.WARELIGENT_CONFIG || {};
 
   const SUPABASE_URL =
-    String(CONFIG.SUPABASE_URL || "")
+    String(
+      CONFIG.SUPABASE_URL || ""
+    )
       .trim()
       .replace(/\/+$/, "");
 
   const SUPABASE_KEY =
-    String(CONFIG.SUPABASE_KEY || "")
+    String(
+      CONFIG.SUPABASE_KEY || ""
+    )
       .trim();
 
 
@@ -71,7 +108,8 @@
      INITIAL UI
   ========================================= */
 
-  searchInput.value = currentQuery;
+  searchInput.value =
+    currentQuery;
 
   queryTitle.textContent =
     currentQuery || "Wareligent";
@@ -91,14 +129,14 @@
       dark
     );
 
-    if (themeStatus) {
-      themeStatus.textContent =
-        dark ? "On" : "Off";
-    }
+    themeStatus.textContent =
+      dark ? "On" : "Off";
 
     localStorage.setItem(
       "wareligent-theme",
-      dark ? "dark" : "light"
+      dark
+        ? "dark"
+        : "light"
     );
 
     const meta =
@@ -107,8 +145,11 @@
       );
 
     if (meta) {
+
       meta.content =
-        dark ? "#0d1014" : "#ffffff";
+        dark
+          ? "#0d1014"
+          : "#ffffff";
     }
   }
 
@@ -128,25 +169,23 @@
   }
 
 
-  if (themeToggle) {
+  themeToggle.addEventListener(
+    "click",
+    () => {
 
-    themeToggle.addEventListener(
-      "click",
-      () => {
-
-        const isDark =
-          document.body.classList.contains(
-            "dark-theme"
-          );
-
-        setTheme(
-          isDark
-            ? "light"
-            : "dark"
+      const dark =
+        document.body.classList.contains(
+          "dark-theme"
         );
-      }
-    );
-  }
+
+      setTheme(
+        dark
+          ? "light"
+          : "dark"
+      );
+
+    }
+  );
 
 
   /* =========================================
@@ -154,8 +193,6 @@
   ========================================= */
 
   function openSettings() {
-
-    if (!settingsOverlay) return;
 
     settingsOverlay.classList.add(
       "open"
@@ -170,8 +207,6 @@
 
   function closeSettingsPanel() {
 
-    if (!settingsOverlay) return;
-
     settingsOverlay.classList.remove(
       "open"
     );
@@ -183,38 +218,33 @@
   }
 
 
-  if (settingsBtn) {
-    settingsBtn.addEventListener(
-      "click",
-      openSettings
-    );
-  }
+  settingsBtn.addEventListener(
+    "click",
+    openSettings
+  );
 
 
-  if (closeSettings) {
-    closeSettings.addEventListener(
-      "click",
-      closeSettingsPanel
-    );
-  }
+  closeSettings.addEventListener(
+    "click",
+    closeSettingsPanel
+  );
 
 
-  if (settingsOverlay) {
+  settingsOverlay.addEventListener(
+    "click",
+    event => {
 
-    settingsOverlay.addEventListener(
-      "click",
-      event => {
+      if (
+        event.target ===
+        settingsOverlay
+      ) {
 
-        if (
-          event.target ===
-          settingsOverlay
-        ) {
-          closeSettingsPanel();
-        }
+        closeSettingsPanel();
 
       }
-    );
-  }
+
+    }
+  );
 
 
   /* =========================================
@@ -223,14 +253,12 @@
 
   function startRouteLoader() {
 
-    if (routeLoader) {
-      routeLoader.classList.add(
-        "active"
-      );
-    }
-
     document.body.classList.add(
       "page-leave"
+    );
+
+    routeLoader.classList.add(
+      "active"
     );
   }
 
@@ -239,9 +267,12 @@
 
     startRouteLoader();
 
-    setTimeout(() => {
-      window.location.href = "/";
-    }, 260);
+    setTimeout(
+      () => {
+        window.location.href = "/";
+      },
+      260
+    );
   }
 
 
@@ -254,102 +285,93 @@
 
     startRouteLoader();
 
-    setTimeout(() => {
-
-      window.location.href =
-        "/search.html?q=" +
-        encodeURIComponent(query);
-
-    }, 260);
-  }
-
-
-  if (homeLogo) {
-
-    homeLogo.addEventListener(
-      "click",
-      event => {
-
-        event.preventDefault();
-
-        goHome();
-      }
-    );
-  }
-
-
-  if (mobileHomeBtn) {
-
-    mobileHomeBtn.addEventListener(
-      "click",
-      goHome
-    );
-  }
-
-
-  if (emptyHomeBtn) {
-
-    emptyHomeBtn.addEventListener(
-      "click",
-      goHome
-    );
-  }
-
-
-  if (settingsHomeBtn) {
-
-    settingsHomeBtn.addEventListener(
-      "click",
+    setTimeout(
       () => {
 
-        closeSettingsPanel();
+        window.location.href =
+          "/search.html?q=" +
+          encodeURIComponent(query);
 
-        setTimeout(
-          goHome,
-          100
-        );
-
-      }
+      },
+      260
     );
   }
+
+
+  homeLogo.addEventListener(
+    "click",
+    event => {
+
+      event.preventDefault();
+
+      goHome();
+
+    }
+  );
+
+
+  mobileHomeBtn.addEventListener(
+    "click",
+    goHome
+  );
+
+
+  emptyHomeBtn.addEventListener(
+    "click",
+    goHome
+  );
+
+
+  settingsHomeBtn.addEventListener(
+    "click",
+    () => {
+
+      closeSettingsPanel();
+
+      setTimeout(
+        goHome,
+        100
+      );
+
+    }
+  );
 
 
   /* =========================================
      SEARCH FORM
   ========================================= */
 
-  if (searchForm) {
+  searchForm.addEventListener(
+    "submit",
+    event => {
 
-    searchForm.addEventListener(
-      "submit",
-      event => {
+      event.preventDefault();
 
-        event.preventDefault();
+      const query =
+        searchInput.value.trim();
 
-        const query =
-          searchInput.value.trim();
+      if (!query) {
 
-        if (!query) {
+        searchInput.focus();
 
-          searchInput.focus();
-
-          return;
-        }
-
-        if (
-          query === currentQuery
-        ) {
-
-          searchSites(query);
-
-          return;
-        }
-
-        goSearch(query);
-
+        return;
       }
-    );
-  }
+
+
+      if (
+        query === currentQuery
+      ) {
+
+        searchSites(query);
+
+        return;
+      }
+
+
+      goSearch(query);
+
+    }
+  );
 
 
   /* =========================================
@@ -385,20 +407,40 @@
 
 
   /* =========================================
-     HELPERS
+     HTML SAFETY
   ========================================= */
 
   function escapeHTML(value) {
 
-    return String(value ?? "")
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
-
+    return String(
+      value ?? ""
+    )
+      .replace(
+        /&/g,
+        "&amp;"
+      )
+      .replace(
+        /</g,
+        "&lt;"
+      )
+      .replace(
+        />/g,
+        "&gt;"
+      )
+      .replace(
+        /"/g,
+        "&quot;"
+      )
+      .replace(
+        /'/g,
+        "&#039;"
+      );
   }
 
+
+  /* =========================================
+     SAFE URL
+  ========================================= */
 
   function safeURL(value) {
 
@@ -421,13 +463,20 @@
   }
 
 
+  /* =========================================
+     HOSTNAME
+  ========================================= */
+
   function getHostname(value) {
 
     try {
 
       return new URL(value)
         .hostname
-        .replace(/^www\./, "");
+        .replace(
+          /^www\./,
+          ""
+        );
 
     } catch (error) {
 
@@ -437,24 +486,207 @@
   }
 
 
-  function normalizeKeywords(value) {
+  /* =========================================
+     WEBSITE ICONS
+  ========================================= */
 
-    if (!value) {
-      return [];
+  function getWebsiteIcon(url) {
+
+    const hostname =
+      getHostname(url)
+        .toLowerCase();
+
+
+    /* FACEBOOK */
+
+    if (
+      hostname === "facebook.com" ||
+      hostname.endsWith(".facebook.com")
+    ) {
+
+      return `
+        <svg
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path
+            fill="#1877F2"
+            d="M13.5 21v-8h2.7l.4-3h-3.1V8.1c0-.9.3-1.6 1.6-1.6h1.7V3.8c-.3 0-1.3-.1-2.5-.1-2.5 0-4.2 1.5-4.2 4.3V10H7.3v3h2.8v8z"
+          />
+        </svg>
+      `;
     }
 
-    if (Array.isArray(value)) {
-      return value;
+
+    /* YOUTUBE */
+
+    if (
+      hostname === "youtube.com" ||
+      hostname.endsWith(".youtube.com")
+    ) {
+
+      return `
+        <svg
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <rect
+            x="2"
+            y="5"
+            width="20"
+            height="14"
+            rx="4"
+            fill="#FF0000"
+          />
+          <path
+            d="M10 9l6 3-6 3z"
+            fill="#fff"
+          />
+        </svg>
+      `;
     }
 
-    return String(value)
-      .split(/[,\s]+/)
-      .map(
-        item => item.trim()
-      )
-      .filter(Boolean)
-      .slice(0, 8);
 
+    /* INSTAGRAM */
+
+    if (
+      hostname === "instagram.com" ||
+      hostname.endsWith(".instagram.com")
+    ) {
+
+      return `
+        <svg
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <rect
+            x="3"
+            y="3"
+            width="18"
+            height="18"
+            rx="5"
+            fill="none"
+            stroke="#C13584"
+            stroke-width="2"
+          />
+          <circle
+            cx="12"
+            cy="12"
+            r="4"
+            fill="none"
+            stroke="#C13584"
+            stroke-width="2"
+          />
+          <circle
+            cx="17.3"
+            cy="6.8"
+            r="1.2"
+            fill="#C13584"
+          />
+        </svg>
+      `;
+    }
+
+
+    /* GITHUB */
+
+    if (
+      hostname === "github.com" ||
+      hostname.endsWith(".github.com")
+    ) {
+
+      return `
+        <svg
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path
+            fill="currentColor"
+            d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.69c-2.78.6-3.37-1.34-3.37-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.9 1.53 2.36 1.09 2.94.83.09-.65.35-1.09.64-1.34-2.22-.25-4.56-1.11-4.56-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.02A9.6 9.6 0 0 1 12 6.85c.85 0 1.7.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.38.2 2.4.1 2.65.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85V21c0 .27.18.58.69.48A10 10 0 0 0 12 2z"
+          />
+        </svg>
+      `;
+    }
+
+
+    /* MICROSOFT */
+
+    if (
+      hostname === "microsoft.com" ||
+      hostname.endsWith(".microsoft.com")
+    ) {
+
+      return `
+        <svg
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <rect x="3" y="3" width="8" height="8" fill="#f35325"/>
+          <rect x="13" y="3" width="8" height="8" fill="#81bc06"/>
+          <rect x="3" y="13" width="8" height="8" fill="#05a6f0"/>
+          <rect x="13" y="13" width="8" height="8" fill="#ffba08"/>
+        </svg>
+      `;
+    }
+
+
+    /* GOOGLE */
+
+    if (
+      hostname === "google.com" ||
+      hostname.endsWith(".google.com")
+    ) {
+
+      return `
+        <svg
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path
+            fill="#4285F4"
+            d="M21.6 12.23c0-.71-.06-1.4-.18-2.06H12v3.9h5.38a4.6 4.6 0 0 1-1.99 3.02v2.51h3.22c1.89-1.74 2.99-4.3 2.99-7.37z"
+          />
+          <path
+            fill="#34A853"
+            d="M12 22c2.7 0 4.96-.9 6.61-2.4l-3.22-2.51c-.9.6-2.04.96-3.39.96-2.61 0-4.82-1.76-5.61-4.13H3.06v2.59A9.99 9.99 0 0 0 12 22z"
+          />
+          <path
+            fill="#FBBC05"
+            d="M6.39 13.92A6.01 6.01 0 0 1 6.08 12c0-.67.11-1.32.31-1.92V7.49H3.06A10 10 0 0 0 2 12c0 1.61.39 3.13 1.06 4.51z"
+          />
+          <path
+            fill="#EA4335"
+            d="M12 5.95c1.47 0 2.79.51 3.83 1.51l2.87-2.87C16.96 2.92 14.7 2 12 2a9.99 9.99 0 0 0-8.94 5.49l3.33 2.59C7.18 7.71 9.39 5.95 12 5.95z"
+          />
+        </svg>
+      `;
+    }
+
+
+    /* DEFAULT WEBSITE ICON */
+
+    return `
+      <svg
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+      >
+        <circle
+          cx="12"
+          cy="12"
+          r="9"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.7"
+        />
+
+        <path
+          d="M3 12h18M12 3c2.3 2.5 3.4 5.5 3.4 9S14.3 18.5 12 21M12 3c-2.3 2.5-3.4 5.5-3.4 9s1.1 6.5 3.4 9"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.4"
+        />
+      </svg>
+    `;
   }
 
 
@@ -479,7 +711,6 @@
     );
 
     resultCount.textContent = "";
-
   }
 
 
@@ -501,7 +732,6 @@
 
     resultCount.textContent =
       "0 results";
-
   }
 
 
@@ -525,7 +755,6 @@
       message;
 
     resultCount.textContent = "";
-
   }
 
 
@@ -557,18 +786,6 @@
     }
 
 
-    /*
-      IMPORTANT:
-
-      The OR filter is built as one parameter
-      and URLSearchParams handles encoding.
-
-      This searches:
-      - title
-      - description
-      - keywords
-    */
-
     const pattern =
       `*${cleanQuery}*`;
 
@@ -581,27 +798,30 @@
       `)`;
 
 
-    const params =
+    const requestParams =
       new URLSearchParams();
 
-    params.set(
+
+    requestParams.set(
       "select",
       "id,title,url,description,keywords"
     );
 
-    params.set(
+
+    requestParams.set(
       "or",
       orFilter
     );
 
-    params.set(
+
+    requestParams.set(
       "limit",
       "50"
     );
 
 
     const endpoint =
-      `${SUPABASE_URL}/rest/v1/websites?${params.toString()}`;
+      `${SUPABASE_URL}/rest/v1/websites?${requestParams.toString()}`;
 
 
     console.log(
@@ -669,17 +889,17 @@
       await response.json();
 
 
-    if (!Array.isArray(data)) {
+    if (
+      !Array.isArray(data)
+    ) {
 
       throw new Error(
         "Supabase returned an unexpected response."
       );
-
     }
 
 
     return data;
-
   }
 
 
@@ -743,23 +963,10 @@
               );
 
 
-            const keywords =
-              normalizeKeywords(
-                site.keywords
+            const icon =
+              getWebsiteIcon(
+                site.url
               );
-
-
-            const keywordHTML =
-              keywords
-                .map(
-                  keyword =>
-                    `<span class="keyword">${
-                      escapeHTML(
-                        keyword
-                      )
-                    }</span>`
-                )
-                .join("");
 
 
             return `
@@ -776,19 +983,26 @@
 
                 <div class="result-source">
 
-                  <div class="source-icon">
-                    W
+                  <div
+                    class="source-icon"
+                    aria-hidden="true"
+                  >
+                    ${icon}
                   </div>
+
 
                   <span class="source-name">
                     ${hostname || "Website"}
                   </span>
 
+
                   ${
                     hostname
-                      ? `<span class="source-url">
-                           · ${hostname}
-                         </span>`
+                      ? `
+                        <span class="source-url">
+                          · ${hostname}
+                        </span>
+                      `
                       : ""
                   }
 
@@ -804,24 +1018,11 @@
                   ${description}
                 </div>
 
-
-                ${
-                  keywordHTML
-                    ? `
-                      <div class="result-keywords">
-                        ${keywordHTML}
-                      </div>
-                    `
-                    : ""
-                }
-
               </a>
             `;
-
           }
         )
         .join("");
-
   }
 
 
@@ -885,9 +1086,7 @@
         error.message ||
         "Unable to connect to Supabase."
       );
-
     }
-
   }
 
 
@@ -895,27 +1094,23 @@
      RETRY
   ========================================= */
 
-  if (retryBtn) {
+  retryBtn.addEventListener(
+    "click",
+    () => {
 
-    retryBtn.addEventListener(
-      "click",
-      () => {
+      if (currentQuery) {
 
-        if (currentQuery) {
-
-          searchSites(
-            currentQuery
-          );
-
-        }
+        searchSites(
+          currentQuery
+        );
 
       }
-    );
-  }
+    }
+  );
 
 
   /* =========================================
-     ESCAPE KEY
+     ESCAPE
   ========================================= */
 
   document.addEventListener(
@@ -930,7 +1125,6 @@
 
 
       if (
-        settingsOverlay &&
         settingsOverlay.classList.contains(
           "open"
         )
@@ -939,7 +1133,6 @@
         closeSettingsPanel();
 
       }
-
     }
   );
 
