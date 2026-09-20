@@ -5,7 +5,7 @@
 (() => {
   "use strict";
 
-  const topSearchInput = document.getElementById("topSearchInput");
+  const searchInput = document.getElementById("searchInput");
   const menuBtn = document.getElementById("menuBtn");
   const closeMenuBtn = document.getElementById("closeMenuBtn");
   const menuModal = document.getElementById("menuModal");
@@ -31,16 +31,16 @@
   });
 
   /* Search handle */
-  topSearchInput?.addEventListener("keypress", (e) => {
+  searchInput?.addEventListener("keypress", (e) => {
     if (e.key === "Enter") {
-      const q = topSearchInput.value.trim();
+      const q = searchInput.value.trim();
       if (q) {
         window.location.href = `/search.html?q=${encodeURIComponent(q)}`;
       }
     }
   });
 
-  /* Menu modal */
+  /* Menu Modal */
   menuBtn?.addEventListener("click", () => menuModal.classList.remove("hidden"));
   closeMenuBtn?.addEventListener("click", () => menuModal.classList.add("hidden"));
 
