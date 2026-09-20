@@ -1,216 +1,109 @@
-/* =====================================================
-   WARELIGENT
-   Professional Search Results Engine
-===================================================== */
-
 (() => {
-
   "use strict";
 
 
-  /* ===================================================
+  /* =========================================
+     ELEMENTS
+  ========================================= */
+
+  const searchInput = document.getElementById("searchInput");
+  const searchForm = document.getElementById("searchForm");
+
+  const clearBtn = document.getElementById("clearBtn");
+
+  const queryTitle = document.getElementById("queryTitle");
+  const resultCount = document.getElementById("resultCount");
+
+  const loadingState = document.getElementById("loadingState");
+  const resultsList = document.getElementById("resultsList");
+
+  const emptyState = document.getElementById("emptyState");
+  const errorState = document.getElementById("errorState");
+
+  const errorMessage = document.getElementById("errorMessage");
+
+  const retryBtn = document.getElementById("retryBtn");
+  const emptyHomeBtn = document.getElementById("emptyHomeBtn");
+
+  const mobileHomeBtn = document.getElementById("mobileHomeBtn");
+  const homeLogo = document.getElementById("homeLogo");
+
+  const routeLoader = document.getElementById("routeLoader");
+
+  const settingsBtn = document.getElementById("settingsBtn");
+  const settingsOverlay = document.getElementById("settingsOverlay");
+  const closeSettings = document.getElementById("closeSettings");
+
+  const themeToggle = document.getElementById("themeToggle");
+  const themeStatus = document.getElementById("themeStatus");
+
+  const settingsHomeBtn =
+    document.getElementById("settingsHomeBtn");
+
+
+  /* =========================================
+     QUERY
+  ========================================= */
+
+  const params = new URLSearchParams(window.location.search);
+
+  const currentQuery =
+    (params.get("q") || "").trim();
+
+
+  /* =========================================
      CONFIG
-  =================================================== */
+  ========================================= */
 
-  /*
-     IMPORTANT:
-
-     Do NOT put a Supabase service-role key here.
-
-     For the real frontend connection, use your
-     publishable/anon key with proper RLS policies.
-
-     Example:
-
-     const SUPABASE_URL =
-       "https://xveccsbdrysuiwyuvodw.supabase.co/rest/v1/";
-
-     const SUPABASE_KEY =
-       "sb_publishable_HkyRE170ylT0kkdZxbwUSQ_ihHrS_Ra";
-  */
+  const CONFIG = window.WARELIGENT_CONFIG || {};
 
   const SUPABASE_URL =
-    window.WARELIGENT_CONFIG?.SUPABASE_URL || "";
+    String(CONFIG.SUPABASE_URL || "").replace(/\/+$/, "");
 
   const SUPABASE_KEY =
-    window.WARELIGENT_CONFIG?.SUPABASE_KEY || "";
+    String(CONFIG.SUPABASE_KEY || "");
 
 
-  /* ===================================================
-     ELEMENTS
-  =================================================== */
+  /* =========================================
+     INITIAL UI
+  ========================================= */
 
-  const body =
-    document.body;
+  searchInput.value = currentQuery;
 
-  const queryInput =
-    document.getElementById(
-      "queryInput"
-    );
-
-  const searchForm =
-    document.getElementById(
-      "searchForm"
-    );
-
-  const clearQueryBtn =
-    document.getElementById(
-      "clearQueryBtn"
-    );
-
-  const homeBtn =
-    document.getElementById(
-      "homeBtn"
-    );
-
-  const backHomeBtn =
-    document.getElementById(
-      "backHomeBtn"
-    );
-
-  const resultsList =
-    document.getElementById(
-      "resultsList"
-    );
-
-  const loadingState =
-    document.getElementById(
-      "loadingState"
-    );
-
-  const emptyState =
-    document.getElementById(
-      "emptyState"
-    );
-
-  const errorState =
-    document.getElementById(
-      "errorState"
-    );
-
-  const resultCount =
-    document.getElementById(
-      "resultCount"
-    );
-
-  const queryLabel =
-    document.getElementById(
-      "queryLabel"
-    );
-
-  const tryAgainBtn =
-    document.getElementById(
-      "tryAgainBtn"
-    );
-
-  const retryBtn =
-    document.getElementById(
-      "retryBtn"
-    );
-
-  const pageTransition =
-    document.getElementById(
-      "pageTransition"
-    );
-
-  const routeLoader =
-    document.getElementById(
-      "routeLoader"
-    );
-
-  const settingsBtn =
-    document.getElementById(
-      "settingsBtn"
-    );
-
-  const settingsModal =
-    document.getElementById(
-      "settingsModal"
-    );
-
-  const closeSettingsBtn =
-    document.getElementById(
-      "closeSettingsBtn"
-    );
-
-  const themeBtn =
-    document.getElementById(
-      "themeBtn"
-    );
-
-  const themeStatus =
-    document.getElementById(
-      "themeStatus"
-    );
+  queryTitle.textContent =
+    currentQuery || "Wareligent";
 
 
-  /* ===================================================
-     QUERY
-  =================================================== */
-
-  function getQuery() {
-
-    const params =
-      new URLSearchParams(
-        window.location.search
-      );
-
-    return (
-      params.get("q") || ""
-    ).trim();
-
-  }
-
-
-  let currentQuery =
-    getQuery();
-
-
-  /* ===================================================
+  /* =========================================
      THEME
-  =================================================== */
+  ========================================= */
 
   function setTheme(theme) {
 
-    const isDark =
-      theme === "dark";
+    const dark = theme === "dark";
 
-
-    body.classList.toggle(
+    document.body.classList.toggle(
       "dark-theme",
-      isDark
+      dark
     );
 
-
     themeStatus.textContent =
-      isDark
-        ? "On"
-        : "Off";
-
+      dark ? "On" : "Off";
 
     localStorage.setItem(
       "wareligent-theme",
-      isDark
-        ? "dark"
-        : "light"
+      dark ? "dark" : "light"
     );
-
 
     const meta =
       document.querySelector(
         'meta[name="theme-color"]'
       );
 
-
     if (meta) {
-
       meta.content =
-        isDark
-          ? "#0f1114"
-          : "#ffffff";
-
+        dark ? "#0d1014" : "#ffffff";
     }
-
   }
 
 
@@ -221,25 +114,22 @@
         "wareligent-theme"
       );
 
-
     setTheme(
       saved === "dark"
         ? "dark"
         : "light"
     );
-
   }
 
 
-  themeBtn.addEventListener(
+  themeToggle.addEventListener(
     "click",
     () => {
 
       const isDark =
-        body.classList.contains(
+        document.body.classList.contains(
           "dark-theme"
         );
-
 
       setTheme(
         isDark
@@ -251,35 +141,29 @@
   );
 
 
-  /* ===================================================
+  /* =========================================
      SETTINGS
-  =================================================== */
+  ========================================= */
 
   function openSettings() {
 
-    settingsModal.classList.add(
-      "open"
-    );
+    settingsOverlay.classList.add("open");
 
-    settingsModal.setAttribute(
+    settingsOverlay.setAttribute(
       "aria-hidden",
       "false"
     );
-
   }
 
 
-  function closeSettings() {
+  function closeSettingsPanel() {
 
-    settingsModal.classList.remove(
-      "open"
-    );
+    settingsOverlay.classList.remove("open");
 
-    settingsModal.setAttribute(
+    settingsOverlay.setAttribute(
       "aria-hidden",
       "true"
     );
-
   }
 
 
@@ -288,629 +172,568 @@
     openSettings
   );
 
-
-  closeSettingsBtn.addEventListener(
+  closeSettings.addEventListener(
     "click",
-    closeSettings
+    closeSettingsPanel
   );
 
 
-  settingsModal.addEventListener(
+  settingsOverlay.addEventListener(
     "click",
-    (event) => {
+    event => {
 
       if (
         event.target ===
-        settingsModal
+        settingsOverlay
       ) {
-
-        closeSettings();
-
+        closeSettingsPanel();
       }
 
     }
   );
 
 
-  /* ===================================================
-     CLEAR QUERY
-  =================================================== */
-
-  function updateClearButton() {
-
-    clearQueryBtn.style.display =
-      queryInput.value.trim()
-        ? "grid"
-        : "none";
-
-  }
-
-
-  clearQueryBtn.addEventListener(
-    "click",
-    () => {
-
-      queryInput.value = "";
-
-      updateClearButton();
-
-      queryInput.focus();
-
-    }
-  );
-
-
-  /* ===================================================
+  /* =========================================
      NAVIGATION
-  =================================================== */
+  ========================================= */
 
   function goHome() {
 
-    body.classList.add(
+    document.body.classList.add(
       "page-leave"
     );
-
-
-    setTimeout(
-      () => {
-
-        window.location.href =
-          "/";
-
-      },
-      320
-    );
-
-  }
-
-
-  homeBtn.addEventListener(
-    "click",
-    (event) => {
-
-      event.preventDefault();
-
-      goHome();
-
-    }
-  );
-
-
-  backHomeBtn.addEventListener(
-    "click",
-    () => {
-
-      goHome();
-
-    }
-  );
-
-
-  /* ===================================================
-     SEARCH NAVIGATION
-  =================================================== */
-
-  function goSearch(query) {
-
-    query =
-      query.trim();
-
-
-    if (!query) {
-
-      queryInput.focus();
-
-      return;
-
-    }
-
 
     routeLoader.classList.add(
       "active"
     );
 
-    body.classList.add(
-      "page-leave"
-    );
-
-
-    setTimeout(
-      () => {
-
-        window.location.href =
-          "/search.html?q=" +
-          encodeURIComponent(
-            query
-          );
-
-      },
-      280
-    );
-
+    setTimeout(() => {
+      window.location.href = "/";
+    }, 260);
   }
 
 
-  searchForm.addEventListener(
-    "submit",
-    (event) => {
+  function goSearch(query) {
+
+    query = query.trim();
+
+    if (!query) {
+      return;
+    }
+
+    document.body.classList.add(
+      "page-leave"
+    );
+
+    routeLoader.classList.add(
+      "active"
+    );
+
+    setTimeout(() => {
+
+      window.location.href =
+        "/search.html?q=" +
+        encodeURIComponent(query);
+
+    }, 260);
+  }
+
+
+  homeLogo.addEventListener(
+    "click",
+    event => {
 
       event.preventDefault();
 
-      goSearch(
-        queryInput.value
+      goHome();
+
+    }
+  );
+
+
+  mobileHomeBtn.addEventListener(
+    "click",
+    goHome
+  );
+
+
+  emptyHomeBtn.addEventListener(
+    "click",
+    goHome
+  );
+
+
+  settingsHomeBtn.addEventListener(
+    "click",
+    () => {
+
+      closeSettingsPanel();
+
+      setTimeout(
+        goHome,
+        100
       );
 
     }
   );
 
 
-  queryInput.addEventListener(
-    "keydown",
-    (event) => {
+  /* =========================================
+     SEARCH FORM
+  ========================================= */
+
+  searchForm.addEventListener(
+    "submit",
+    event => {
+
+      event.preventDefault();
+
+      const query =
+        searchInput.value.trim();
+
+      if (!query) {
+        searchInput.focus();
+        return;
+      }
 
       if (
-        event.key === "Escape"
+        query === currentQuery
       ) {
-
-        queryInput.blur();
-
+        searchSites(query);
+        return;
       }
+
+      goSearch(query);
 
     }
   );
 
 
-  /* ===================================================
-     SUPABASE SEARCH
-  =================================================== */
+  /* =========================================
+     INPUT
+  ========================================= */
 
-  async function searchSupabase(
-    query
-  ) {
+  searchInput.addEventListener(
+    "input",
+    () => {
+
+      clearBtn.style.display =
+        searchInput.value.trim()
+          ? "grid"
+          : "none";
+
+    }
+  );
+
+
+  clearBtn.addEventListener(
+    "click",
+    () => {
+
+      searchInput.value = "";
+
+      clearBtn.style.display =
+        "none";
+
+      searchInput.focus();
+
+    }
+  );
+
+
+  /* =========================================
+     HELPERS
+  ========================================= */
+
+  function escapeHTML(value) {
+
+    return String(value ?? "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+
+  }
+
+
+  function safeURL(value) {
+
+    try {
+
+      const url =
+        new URL(value);
+
+      if (
+        url.protocol === "http:" ||
+        url.protocol === "https:"
+      ) {
+        return url.href;
+      }
+
+    } catch (error) {}
+
+    return "#";
+  }
+
+
+  function getHostname(value) {
+
+    try {
+
+      return new URL(value)
+        .hostname
+        .replace(/^www\./, "");
+
+    } catch (error) {
+
+      return "";
+
+    }
+  }
+
+
+  function normalizeKeywords(value) {
+
+    if (!value) {
+      return [];
+    }
+
+    if (Array.isArray(value)) {
+      return value;
+    }
+
+    return String(value)
+      .split(/[,\s]+/)
+      .map(item => item.trim())
+      .filter(Boolean)
+      .slice(0, 8);
+
+  }
+
+
+  /* =========================================
+     UI STATES
+  ========================================= */
+
+  function showLoading() {
+
+    loadingState.classList.remove(
+      "hidden"
+    );
+
+    resultsList.innerHTML = "";
+
+    emptyState.classList.add(
+      "hidden"
+    );
+
+    errorState.classList.add(
+      "hidden"
+    );
+
+    resultCount.textContent = "";
+
+  }
+
+
+  function showEmpty() {
+
+    loadingState.classList.add(
+      "hidden"
+    );
+
+    resultsList.innerHTML = "";
+
+    emptyState.classList.remove(
+      "hidden"
+    );
+
+    errorState.classList.add(
+      "hidden"
+    );
+
+    resultCount.textContent =
+      "0 results";
+
+  }
+
+
+  function showError(message) {
+
+    loadingState.classList.add(
+      "hidden"
+    );
+
+    resultsList.innerHTML = "";
+
+    emptyState.classList.add(
+      "hidden"
+    );
+
+    errorState.classList.remove(
+      "hidden"
+    );
+
+    errorMessage.textContent =
+      message;
+
+    resultCount.textContent = "";
+
+  }
+
+
+  /* =========================================
+     SUPABASE SEARCH
+  ========================================= */
+
+  async function searchSupabase(query) {
 
     if (
       !SUPABASE_URL ||
       !SUPABASE_KEY
     ) {
 
-      /*
-        Demo fallback.
-
-        Remove this fallback after
-        connecting your real Supabase config.
-      */
-
-      return [];
+      throw new Error(
+        "Supabase configuration is missing. Please check config.js."
+      );
 
     }
 
 
-    const encodedQuery =
-      encodeURIComponent(
-        query
-      );
-
-
     /*
-      Search across:
+      We search:
+      - title
+      - description
+      - keywords
 
-      title
-      description
-      keywords
-
-      using PostgREST OR filtering.
+      PostgreSQL/PostgREST OR syntax.
     */
+
+    const searchValue =
+      `*${query.replace(/[*]/g, "")}*`;
+
 
     const filter =
       [
-        `title.ilike.*${encodedQuery}*`,
-        `description.ilike.*${encodedQuery}*`,
-        `keywords.ilike.*${encodedQuery}*`
+        `title.ilike.${searchValue}`,
+        `description.ilike.${searchValue}`,
+        `keywords.ilike.${searchValue}`
       ].join(",");
 
 
-    const url =
-      `${SUPABASE_URL}/rest/v1/websites` +
-      `?or=(${filter})` +
-      `&select=id,title,url,description,keywords` +
-      `&limit=30`;
+    const endpoint =
+      SUPABASE_URL +
+      "/rest/v1/websites?" +
+      new URLSearchParams({
+
+        select:
+          "id,title,url,description,keywords",
+
+        or: filter,
+
+        limit: "50"
+
+      }).toString();
 
 
     const response =
       await fetch(
-        url,
+        endpoint,
         {
           method: "GET",
 
           headers: {
 
-            apikey:
+            "apikey":
               SUPABASE_KEY,
 
-            Authorization:
-              `Bearer ${SUPABASE_KEY}`
+            "Authorization":
+              `Bearer ${SUPABASE_KEY}`,
+
+            "Accept":
+              "application/json"
 
           }
         }
       );
 
 
-    if (
-      !response.ok
-    ) {
+    if (!response.ok) {
+
+      let detail = "";
+
+      try {
+
+        const data =
+          await response.json();
+
+        detail =
+          data.message ||
+          data.hint ||
+          data.details ||
+          "";
+
+      } catch (error) {}
+
 
       throw new Error(
-        `Search request failed: ${response.status}`
+        `Supabase returned HTTP ${response.status}` +
+        (detail
+          ? ` — ${detail}`
+          : "")
       );
 
     }
 
 
-    return await response.json();
+    const data =
+      await response.json();
+
+
+    if (!Array.isArray(data)) {
+
+      throw new Error(
+        "Supabase returned an unexpected response."
+      );
+
+    }
+
+
+    return data;
 
   }
 
 
-  /* ===================================================
-     FALLBACK DEMO DATA
-  =================================================== */
+  /* =========================================
+     RENDER RESULTS
+  ========================================= */
 
-  function demoSearch(
-    query
-  ) {
+  function renderResults(results) {
 
-    const q =
-      query.toLowerCase();
-
-
-    const demo =
-      [
-        {
-          id: "demo-1",
-
-          title:
-            "Internet Assigned Numbers Authority",
-
-          url:
-            "https://www.iana.org/",
-
-          description:
-            "The Internet Assigned Numbers Authority coordinates some of the key elements that keep the Internet running smoothly.",
-
-          keywords:
-            "internet, domains, protocols, numbers"
-        },
-
-        {
-          id: "demo-2",
-
-          title:
-            "Example Domain",
-
-          url:
-            "https://example.com/",
-
-          description:
-            "This domain is provided for use in documentation examples without needing permission.",
-
-          keywords:
-            "example, web, domain"
-        }
-
-      ];
-
-
-    return demo.filter(
-      item => {
-
-        const text =
-          [
-            item.title,
-            item.description,
-            item.keywords,
-            item.url
-          ]
-            .join(" ")
-            .toLowerCase();
-
-
-        return text.includes(q);
-
-      }
+    loadingState.classList.add(
+      "hidden"
     );
 
-  }
+    emptyState.classList.add(
+      "hidden"
+    );
+
+    errorState.classList.add(
+      "hidden"
+    );
 
 
-  /* ===================================================
-     URL HELPERS
-  =================================================== */
-
-  function getHostname(
-    url
-  ) {
-
-    try {
-
-      return new URL(
-        url
-      ).hostname
-        .replace(
-          /^www\./,
-          ""
-        );
-
-    } catch {
-
-      return url || "";
-
-    }
-
-  }
+    resultCount.textContent =
+      `${results.length} result${results.length === 1 ? "" : "s"}`;
 
 
-  function getInitial(
-    title
-  ) {
+    resultsList.innerHTML =
+      results.map(
+        (site, index) => {
 
-    if (!title) {
+          const title =
+            escapeHTML(
+              site.title ||
+              "Untitled website"
+            );
 
-      return "W";
+          const description =
+            escapeHTML(
+              site.description ||
+              "No description available."
+            );
 
-    }
+          const url =
+            safeURL(
+              site.url
+            );
 
-
-    return title
-      .trim()
-      .charAt(0)
-      .toUpperCase();
-
-  }
-
-
-  function safeUrl(
-    value
-  ) {
-
-    try {
-
-      const url =
-        new URL(
-          value
-        );
+          const hostname =
+            escapeHTML(
+              getHostname(
+                site.url
+              )
+            );
 
 
-      if (
-        url.protocol !==
-          "http:" &&
-        url.protocol !==
-          "https:"
-      ) {
-
-        return "#";
-
-      }
+          const keywords =
+            normalizeKeywords(
+              site.keywords
+            );
 
 
-      return url.href;
-
-    } catch {
-
-      return "#";
-
-    }
-
-  }
-
-
-  function escapeHTML(
-    value
-  ) {
-
-    return String(
-      value ?? ""
-    )
-      .replace(
-        /&/g,
-        "&amp;"
-      )
-      .replace(
-        /</g,
-        "&lt;"
-      )
-      .replace(
-        />/g,
-        "&gt;"
-      )
-      .replace(
-        /"/g,
-        "&quot;"
-      )
-      .replace(
-        /'/g,
-        "&#039;"
-      );
-
-  }
-
-
-  /* ===================================================
-     RESULT CARD
-  =================================================== */
-
-  function createResult(
-    item
-  ) {
-
-    const title =
-      escapeHTML(
-        item.title ||
-        "Untitled page"
-      );
-
-
-    const url =
-      safeUrl(
-        item.url || "#"
-      );
-
-
-    const hostname =
-      escapeHTML(
-        getHostname(
-          item.url || ""
-        )
-      );
-
-
-    const description =
-      escapeHTML(
-        item.description ||
-        "No description available for this result."
-      );
-
-
-    const keywords =
-      String(
-        item.keywords || ""
-      )
-        .split(",")
-        .map(
-          keyword =>
-            keyword.trim()
-        )
-        .filter(Boolean)
-        .slice(0, 5);
-
-
-    const keywordHTML =
-      keywords.length
-        ? `
-          <div class="result-keywords">
-
-            ${keywords
+          const keywordHTML =
+            keywords
               .map(
                 keyword =>
-                  `<span class="keyword">
-                    ${escapeHTML(keyword)}
-                  </span>`
+                  `<span class="keyword">${escapeHTML(keyword)}</span>`
               )
-              .join("")
-            }
-
-          </div>
-        `
-        : "";
+              .join("");
 
 
-    const article =
-      document.createElement(
-        "article"
-      );
+          return `
+            <a
+              class="result-card"
+              href="${url}"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="animation-delay:${Math.min(index * 45, 450)}ms"
+            >
+
+              <div class="result-source">
+
+                <div class="source-icon">
+                  W
+                </div>
+
+                <span class="source-name">
+                  ${hostname || "Website"}
+                </span>
+
+                ${
+                  hostname
+                    ? `<span class="source-url">· ${hostname}</span>`
+                    : ""
+                }
+
+              </div>
 
 
-    article.className =
-      "result-card";
+              <div class="result-title">
+                ${title}
+              </div>
 
 
-    article.innerHTML =
-      `
-
-        <div class="result-source">
-
-          <div class="source-icon">
-            ${escapeHTML(
-              getInitial(
-                item.title
-              )
-            )}
-          </div>
-
-          <div class="source-info">
-
-            <div class="source-name">
-              ${escapeHTML(
-                item.title ||
-                hostname
-              )}
-            </div>
-
-            <div class="source-url">
-              ${hostname}
-            </div>
-
-          </div>
-
-        </div>
+              <div class="result-description">
+                ${description}
+              </div>
 
 
-        <a
-          class="result-title"
-          href="${url}"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          ${title}
-        </a>
+              ${
+                keywordHTML
+                  ? `<div class="result-keywords">${keywordHTML}</div>`
+                  : ""
+              }
 
+            </a>
+          `;
 
-        <p class="result-description">
-          ${description}
-        </p>
-
-
-        ${keywordHTML}
-
-      `;
-
-
-    return article;
+        }
+      ).join("");
 
   }
 
 
-  /* ===================================================
-     SHOW / HIDE STATES
-  =================================================== */
+  /* =========================================
+     MAIN SEARCH
+  ========================================= */
 
-  function showLoading() {
+  async function searchSites(query) {
 
-    loadingState.hidden =
-      false;
+    query = query.trim();
 
-    resultsList.innerHTML =
-      "";
-
-    emptyState.hidden =
-      true;
-
-    errorState.hidden =
-      true;
-
-  }
-
-
-  function showResults(
-    results
-  ) {
-
-    loadingState.hidden =
-      true;
-
-    emptyState.hidden =
-      true;
-
-    errorState.hidden =
-      true;
-
-
-    resultsList.innerHTML =
-      "";
-
-
-    if (
-      !results.length
-    ) {
+    if (!query) {
 
       showEmpty();
 
@@ -919,101 +742,8 @@
     }
 
 
-    results.forEach(
-      item => {
-
-        resultsList.appendChild(
-          createResult(item)
-        );
-
-      }
-    );
-
-
-    resultCount.textContent =
-      `${results.length} ${
-        results.length === 1
-          ? "result"
-          : "results"
-      }`;
-
-  }
-
-
-  function showEmpty() {
-
-    loadingState.hidden =
-      true;
-
-    resultsList.innerHTML =
-      "";
-
-    errorState.hidden =
-      true;
-
-    emptyState.hidden =
-      false;
-
-    resultCount.textContent =
-      "0 results";
-
-  }
-
-
-  function showError() {
-
-    loadingState.hidden =
-      true;
-
-    resultsList.innerHTML =
-      "";
-
-    emptyState.hidden =
-      true;
-
-    errorState.hidden =
-      false;
-
-    resultCount.textContent =
-      "Search unavailable";
-
-  }
-
-
-  /* ===================================================
-     PERFORM SEARCH
-  =================================================== */
-
-  async function performSearch() {
-
-    currentQuery =
-      getQuery();
-
-
-    queryInput.value =
-      currentQuery;
-
-
-    updateClearButton();
-
-
-    queryLabel.textContent =
-      currentQuery
-        ? `Results for “${currentQuery}”`
-        : "";
-
-
-    if (!currentQuery) {
-
-      loadingState.hidden =
-        true;
-
-      resultCount.textContent =
-        "Search Wareligent";
-
-      return;
-
-    }
+    queryTitle.textContent =
+      query;
 
 
     showLoading();
@@ -1021,96 +751,85 @@
 
     try {
 
-      let results =
+      const results =
         await searchSupabase(
-          currentQuery
+          query
         );
 
 
-      /*
-        If Supabase isn't configured,
-        use local demo data so the UI
-        can still be tested.
-      */
-
       if (
-        !SUPABASE_URL ||
-        !SUPABASE_KEY
+        !results ||
+        results.length === 0
       ) {
 
-        results =
-          demoSearch(
-            currentQuery
-          );
-
-      }
-
-
-      showResults(
-        results
-      );
-
-    } catch (
-      error
-    ) {
-
-      console.error(
-        "Wareligent search error:",
-        error
-      );
-
-
-      showError();
-
-    }
-
-  }
-
-
-  /* ===================================================
-     RETRY
-  =================================================== */
-
-  retryBtn.addEventListener(
-    "click",
-    performSearch
-  );
-
-
-  tryAgainBtn.addEventListener(
-    "click",
-    () => {
-
-      queryInput.focus();
-
-    }
-  );
-
-
-  /* ===================================================
-     KEYBOARD
-  =================================================== */
-
-  document.addEventListener(
-    "keydown",
-    event => {
-
-      if (
-        event.key !== "Escape"
-      ) {
+        showEmpty();
 
         return;
 
       }
 
 
+      renderResults(
+        results
+      );
+
+    } catch (error) {
+
+      console.error(
+        "Wareligent Search Error:",
+        error
+      );
+
+
+      showError(
+        error.message ||
+        "Unable to connect to Supabase."
+      );
+
+    }
+
+  }
+
+
+  /* =========================================
+     RETRY
+  ========================================= */
+
+  retryBtn.addEventListener(
+    "click",
+    () => {
+
+      if (currentQuery) {
+        searchSites(
+          currentQuery
+        );
+      }
+
+    }
+  );
+
+
+  /* =========================================
+     ESCAPE KEY
+  ========================================= */
+
+  document.addEventListener(
+    "keydown",
+    event => {
+
       if (
-        settingsModal.classList.contains(
-          "open"
-        )
+        event.key === "Escape"
       ) {
 
-        closeSettings();
+        if (
+          settingsOverlay.classList.contains(
+            "open"
+          )
+        ) {
+
+          closeSettingsPanel();
+
+        }
 
       }
 
@@ -1118,39 +837,30 @@
   );
 
 
-  /* ===================================================
-     INITIAL PAGE ANIMATION
-  =================================================== */
-
-  function startPageAnimation() {
-
-    body.classList.add(
-      "page-enter"
-    );
-
-
-    setTimeout(
-      () => {
-
-        body.classList.remove(
-          "page-enter"
-        );
-
-      },
-      700
-    );
-
-  }
-
-
-  /* ===================================================
-     INIT
-  =================================================== */
+  /* =========================================
+     INITIALIZE
+  ========================================= */
 
   loadTheme();
 
-  startPageAnimation();
 
-  performSearch();
+  clearBtn.style.display =
+    currentQuery
+      ? "grid"
+      : "none";
+
+
+  if (currentQuery) {
+
+    searchSites(
+      currentQuery
+    );
+
+  } else {
+
+    showEmpty();
+
+  }
+
 
 })();
