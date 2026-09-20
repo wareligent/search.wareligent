@@ -190,33 +190,47 @@ body {
 }
 
 /* ====================================
-   SEARCH FOCUS MODE (DuckDuckGo Behavior)
+   SEARCH FOCUS MODE (Absolute Top Fixed)
 ==================================== */
+
+/* ১. সার্চ ফোকাস হলে হেডার পুরো গায়েব হয়ে যাবে */
 body.search-focused #mainHeader {
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(-20px);
+  display: none !important;
 }
 
+/* ২. মেন কন্টেইনারের প্যাডিং বাদ */
 body.search-focused .ddg-main {
-  padding-top: 12px;
+  padding-top: 8px !important;
+  padding-left: 8px !important;
+  padding-right: 8px !important;
 }
 
+/* ৩. টাইটেল হাইড */
 body.search-focused #brandTitle {
-  display: none;
+  display: none !important;
+}
+
+/* ৪. সার্চ বার পজিশনিং (একদম উপরে টপে পজিশন হবে) */
+body.search-focused .brand-search-wrapper {
+  max-width: 100% !important;
+  width: 100% !important;
+  margin: 0 !important;
 }
 
 body.search-focused .google-search-bar {
-  border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  border-radius: 12px; /* অ্যাপের মতো হালকা রাউন্ডেড */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  height: 48px;
+  padding: 0 12px;
 }
 
+/* ৫. ব্যাক বাটন ও আইকন দৃশ্যমানতা */
 body.search-focused .search-icon {
-  display: none;
+  display: none !important;
 }
 
 body.search-focused .back-btn {
-  display: grid;
+  display: grid !important;
 }
 
 /* Menu Modal Styles */
