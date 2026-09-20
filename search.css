@@ -1,17 +1,25 @@
 :root {
   --bg: #ffffff;
   --card: #ffffff;
-  --text: #17191c;
-  --muted: #69717d;
+  --text: #15181c;
+  --muted: #69727e;
   --border: #e5e9ef;
 
   --primary: #1769ff;
   --primary-soft: #eef4ff;
 
+  --danger: #e54848;
+  --danger-soft: #fff1f1;
+
   --shadow: 0 8px 30px rgba(20, 30, 50, 0.07);
 
   --header-height: 76px;
 }
+
+
+/* =========================================
+   RESET
+========================================= */
 
 * {
   box-sizing: border-box;
@@ -25,8 +33,10 @@ html {
 
 body {
   min-height: 100vh;
+
   background: var(--bg);
   color: var(--text);
+
   font-family:
     Inter,
     -apple-system,
@@ -37,16 +47,16 @@ body {
     sans-serif;
 
   transition:
-    background 0.35s ease,
-    color 0.35s ease;
+    background .3s ease,
+    color .3s ease;
 
   overflow-x: hidden;
 }
 
 
-/* =========================
+/* =========================================
    DARK MODE
-========================= */
+========================================= */
 
 body.dark-theme {
   --bg: #0d1014;
@@ -57,28 +67,38 @@ body.dark-theme {
 
   --primary-soft: #18253c;
 
-  --shadow: 0 10px 35px rgba(0, 0, 0, 0.25);
+  --danger-soft: #301b1b;
+
+  --shadow:
+    0 12px 40px rgba(0, 0, 0, .28);
 }
 
 
-/* =========================
+/* =========================================
    PAGE TRANSITION
-========================= */
+========================================= */
 
 .page-transition {
   position: fixed;
   inset: 0;
-  background: var(--bg);
+
   z-index: 9999;
+
+  background: var(--bg);
+
   pointer-events: none;
 
   opacity: 1;
 
-  animation: pageEnter 0.45s cubic-bezier(.2,.8,.2,1) forwards;
+  animation:
+    pageEnter .42s
+    cubic-bezier(.2,.8,.2,1)
+    forwards;
 }
 
 body.page-leave .page-transition {
-  animation: pageLeave 0.35s ease forwards;
+  animation:
+    pageLeave .28s ease forwards;
 }
 
 @keyframes pageEnter {
@@ -102,56 +122,70 @@ body.page-leave .page-transition {
 }
 
 
-/* =========================
+/* =========================================
    HEADER
-========================= */
+========================================= */
 
 .search-header {
-  height: var(--header-height);
-
   position: sticky;
   top: 0;
   z-index: 100;
 
+  height: var(--header-height);
+
   display: grid;
-  grid-template-columns: 240px minmax(300px, 720px) 240px;
+
+  grid-template-columns:
+    240px
+    minmax(300px, 720px)
+    240px;
+
   align-items: center;
   justify-content: center;
+
   gap: 25px;
 
   padding: 0 28px;
 
-  background: rgba(255, 255, 255, 0.86);
-  border-bottom: 1px solid var(--border);
+  background:
+    rgba(255,255,255,.88);
+
+  border-bottom:
+    1px solid var(--border);
 
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
 
-  transition: background .3s ease;
+  transition:
+    background .3s ease;
 }
 
 .dark-theme .search-header {
-  background: rgba(13, 16, 20, .86);
+  background:
+    rgba(13,16,20,.88);
 }
 
 
-/* =========================
-   BRAND
-========================= */
+/* =========================================
+   MINI BRAND
+========================================= */
 
 .mini-brand {
   display: inline-flex;
   align-items: center;
+
+  width: max-content;
+
   gap: 10px;
 
   color: var(--text);
+
   text-decoration: none;
 
   font-size: 18px;
   font-weight: 800;
-  letter-spacing: -0.5px;
 
-  width: max-content;
+  letter-spacing: -.5px;
 }
 
 .mini-mark {
@@ -161,6 +195,7 @@ body.page-leave .page-transition {
   display: flex;
   align-items: center;
   justify-content: center;
+
   gap: 3px;
 
   transform: rotate(-12deg);
@@ -168,15 +203,20 @@ body.page-leave .page-transition {
 
 .mini-mark span {
   width: 6px;
+
   border-radius: 8px;
 
-  background: linear-gradient(
-    180deg,
-    #2c7cff,
-    #7d42ff
-  );
+  background:
+    linear-gradient(
+      180deg,
+      #2c7cff,
+      #7d42ff
+    );
 
-  animation: logoPulse 2.4s ease-in-out infinite;
+  animation:
+    logoPulse 2.4s
+    ease-in-out
+    infinite;
 }
 
 .mini-mark span:nth-child(1) {
@@ -185,16 +225,20 @@ body.page-leave .page-transition {
 
 .mini-mark span:nth-child(2) {
   height: 22px;
+
   animation-delay: .15s;
 }
 
 .mini-mark span:nth-child(3) {
   height: 17px;
+
   animation-delay: .3s;
 }
 
 @keyframes logoPulse {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: scaleY(.88);
   }
 
@@ -204,9 +248,9 @@ body.page-leave .page-transition {
 }
 
 
-/* =========================
+/* =========================================
    SEARCH FORM
-========================= */
+========================================= */
 
 .header-center {
   width: 100%;
@@ -222,27 +266,32 @@ body.page-leave .page-transition {
   padding: 0 7px 0 17px;
 
   background: var(--card);
-  border: 1px solid var(--border);
 
-  border-radius: 18px;
+  border:
+    1px solid var(--border);
+
+  border-radius: 16px;
 
   box-shadow:
     0 2px 8px rgba(0,0,0,.025);
 
   transition:
-    border .25s ease,
-    box-shadow .25s ease,
-    transform .25s ease;
+    border-color .22s ease,
+    box-shadow .22s ease,
+    transform .22s ease;
 }
 
 .search-form:focus-within {
-  border-color: rgba(23,105,255,.5);
+  border-color:
+    rgba(23,105,255,.45);
 
   box-shadow:
-    0 0 0 4px rgba(23,105,255,.08),
+    0 0 0 4px
+    rgba(23,105,255,.08),
     var(--shadow);
 
-  transform: translateY(-1px);
+  transform:
+    translateY(-1px);
 }
 
 .search-icon {
@@ -260,6 +309,8 @@ body.page-leave .page-transition {
 
   height: 100%;
 
+  padding: 0 12px;
+
   border: 0;
   outline: 0;
 
@@ -269,8 +320,6 @@ body.page-leave .page-transition {
 
   font-size: 15px;
   font-weight: 500;
-
-  padding: 0 12px;
 }
 
 .search-form input::placeholder {
@@ -282,26 +331,51 @@ body.page-leave .page-transition {
 }
 
 
-/* =========================
-   CLEAR
-========================= */
+/* =========================================
+   MOBILE HOME
+========================================= */
 
-.clear-btn {
-  width: 34px;
+.mobile-home-btn {
+  display: none;
+
+  width: 32px;
   height: 34px;
 
   border: 0;
-  border-radius: 50%;
-
-  display: none;
-  place-items: center;
 
   background: transparent;
 
   color: var(--muted);
 
-  font-size: 23px;
-  line-height: 1;
+  cursor: pointer;
+}
+
+.mobile-home-btn svg {
+  width: 20px;
+  height: 20px;
+
+  fill: currentColor;
+}
+
+
+/* =========================================
+   CLEAR BUTTON
+========================================= */
+
+.clear-btn {
+  width: 34px;
+  height: 34px;
+
+  display: none;
+
+  place-items: center;
+
+  border: 0;
+  border-radius: 9px;
+
+  background: transparent;
+
+  color: var(--muted);
 
   cursor: pointer;
 
@@ -310,53 +384,65 @@ body.page-leave .page-transition {
     color .2s ease;
 }
 
+.clear-btn svg {
+  width: 16px;
+  height: 16px;
+
+  fill: currentColor;
+}
+
 .clear-btn:hover {
   background: var(--primary-soft);
   color: var(--primary);
 }
 
 
-/* =========================
-   SEARCH BUTTON
-========================= */
+/* =========================================
+   SEARCH SUBMIT
+========================================= */
 
 .search-submit {
   width: 38px;
   height: 38px;
 
-  border: 0;
-  border-radius: 13px;
-
   display: grid;
   place-items: center;
 
+  border: 0;
+  border-radius: 12px;
+
   background: var(--primary);
+
   cursor: pointer;
 
   transition:
-    transform .2s ease,
-    filter .2s ease;
+    transform .18s ease,
+    filter .18s ease;
 }
 
 .search-submit:hover {
   filter: brightness(1.07);
-  transform: scale(1.04);
+
+  transform:
+    scale(1.04);
 }
 
 .search-submit:active {
-  transform: scale(.94);
+  transform:
+    scale(.94);
 }
 
 .search-submit svg {
   width: 18px;
   height: 18px;
-  fill: white;
+
+  fill: #fff;
 }
 
 
-/* =========================
-   SETTINGS
-========================= */
+/* =========================================
+   SETTINGS BUTTON
+========================================= */
 
 .header-right {
   display: flex;
@@ -371,7 +457,7 @@ body.page-leave .page-transition {
   place-items: center;
 
   border: 1px solid transparent;
-  border-radius: 13px;
+  border-radius: 12px;
 
   background: transparent;
 
@@ -384,48 +470,45 @@ body.page-leave .page-transition {
 
 .settings-btn:hover {
   background: var(--primary-soft);
-  transform: rotate(10deg);
+
+  transform:
+    rotate(7deg);
 }
 
 .settings-btn svg {
   width: 21px;
   height: 21px;
+
   fill: var(--muted);
 }
 
 
-/* =========================
-   MOBILE HOME
-========================= */
-
-.mobile-home-btn {
-  display: none;
-
-  border: 0;
-  background: transparent;
-
-  color: var(--muted);
-
-  font-size: 21px;
-
-  cursor: pointer;
-}
-
-
-/* =========================
-   RESULTS
-========================= */
+/* =========================================
+   RESULTS PAGE
+========================================= */
 
 .results-page {
-  width: min(100% - 40px, 900px);
+  width:
+    min(
+      calc(100% - 40px),
+      900px
+    );
 
-  margin: 0 auto;
+  margin:
+    0 auto;
 
-  padding: 38px 0 90px;
+  padding:
+    38px 0 90px;
 }
+
+
+/* =========================================
+   RESULTS TOP
+========================================= */
 
 .results-top {
   display: flex;
+
   align-items: flex-end;
   justify-content: space-between;
 
@@ -435,20 +518,21 @@ body.page-leave .page-transition {
 }
 
 .result-label {
+  margin-bottom: 6px;
+
   color: var(--muted);
 
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
 
-  letter-spacing: .04em;
-  text-transform: uppercase;
+  letter-spacing: .07em;
 
-  margin-bottom: 6px;
+  text-transform: uppercase;
 }
 
 #queryTitle {
   font-size: 25px;
-  line-height: 1.2;
+  line-height: 1.25;
 
   font-weight: 750;
 
@@ -459,83 +543,122 @@ body.page-leave .page-transition {
 
 .result-count {
   color: var(--muted);
+
   font-size: 13px;
+
   white-space: nowrap;
 }
 
 
-/* =========================
-   RESULT CARDS
-========================= */
+/* =========================================
+   RESULTS LIST
+========================================= */
 
 .results-list {
   display: flex;
+
   flex-direction: column;
 
-  gap: 13px;
+  gap: 12px;
 }
+
+
+/* =========================================
+   RESULT CARD
+========================================= */
 
 .result-card {
   display: block;
 
   padding: 20px 22px;
 
-  border: 1px solid var(--border);
-  border-radius: 18px;
+  border:
+    1px solid var(--border);
+
+  border-radius: 16px;
 
   background: var(--card);
 
-  text-decoration: none;
   color: inherit;
 
+  text-decoration: none;
+
   box-shadow:
-    0 2px 7px rgba(20,30,50,.025);
+    0 2px 8px
+    rgba(20,30,50,.025);
 
   opacity: 0;
-  transform: translateY(12px);
+
+  transform:
+    translateY(10px);
 
   animation:
-    resultIn .45s cubic-bezier(.2,.8,.2,1)
+    resultIn .42s
+    cubic-bezier(.2,.8,.2,1)
     forwards;
 
   transition:
-    border-color .25s ease,
-    box-shadow .25s ease,
-    transform .25s ease;
+    border-color .22s ease,
+    box-shadow .22s ease,
+    transform .22s ease;
 }
 
 .result-card:hover {
-  border-color: rgba(23,105,255,.3);
+  border-color:
+    rgba(23,105,255,.28);
 
   box-shadow:
-    0 12px 35px rgba(20,30,50,.08);
+    0 12px 32px
+    rgba(20,30,50,.075);
 
-  transform: translateY(-3px);
+  transform:
+    translateY(-2px);
 }
 
 @keyframes resultIn {
   to {
     opacity: 1;
-    transform: translateY(0);
+
+    transform:
+      translateY(0);
   }
 }
 
+
+/* =========================================
+   SOURCE
+========================================= */
+
 .result-source {
   display: flex;
+
   align-items: center;
+
   gap: 9px;
+
+  min-width: 0;
 
   margin-bottom: 8px;
 }
 
-.source-icon {
-  width: 25px;
-  height: 25px;
 
-  border-radius: 8px;
+/* WEBSITE LOGO */
+
+.source-icon {
+  width: 30px;
+  height: 30px;
+
+  flex: 0 0 30px;
 
   display: grid;
   place-items: center;
+
+  overflow: hidden;
+
+  border:
+    1px solid var(--border);
+
+  border-radius: 9px;
 
   background: var(--primary-soft);
 
@@ -545,22 +668,47 @@ body.page-leave .page-transition {
   font-weight: 800;
 }
 
+.source-icon svg {
+  width: 20px;
+  height: 20px;
+
+  display: block;
+}
+
+
+/* SOURCE NAME */
+
 .source-name {
+  min-width: 0;
+
+  overflow: hidden;
+
   color: var(--text);
 
   font-size: 13px;
   font-weight: 650;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .source-url {
+  min-width: 0;
+
+  overflow: hidden;
+
   color: var(--muted);
 
   font-size: 12px;
 
-  overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+
+/* =========================================
+   RESULT TITLE
+========================================= */
 
 .result-title {
   color: var(--primary);
@@ -570,47 +718,35 @@ body.page-leave .page-transition {
 
   font-weight: 700;
 
+  letter-spacing: -.15px;
+
   margin-bottom: 7px;
 }
 
+
+/* =========================================
+   DESCRIPTION
+========================================= */
+
 .result-description {
+  max-width: 780px;
+
   color: var(--muted);
 
   font-size: 14px;
   line-height: 1.65;
-
-  max-width: 780px;
-
-  margin-bottom: 11px;
-}
-
-.result-keywords {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.keyword {
-  padding: 4px 8px;
-
-  border-radius: 7px;
-
-  background: var(--primary-soft);
-
-  color: var(--primary);
-
-  font-size: 10px;
-  font-weight: 650;
 }
 
 
-/* =========================
+/* =========================================
    STATES
-========================= */
+========================================= */
 
 .state {
+  padding:
+    72px 20px;
+
   text-align: center;
-  padding: 70px 20px;
 }
 
 .hidden {
@@ -618,46 +754,54 @@ body.page-leave .page-transition {
 }
 
 
-/* =========================
+/* =========================================
    LOADING
-========================= */
+========================================= */
 
 .loader-logo {
   height: 34px;
 
   display: flex;
-  justify-content: center;
+
   align-items: center;
+  justify-content: center;
 
   gap: 4px;
 }
 
 .loader-logo span {
-  width: 7px;
+  width: 6px;
 
-  border-radius: 10px;
+  border-radius: 8px;
 
   background: var(--primary);
 
-  animation: loaderBars .9s ease-in-out infinite;
+  animation:
+    loaderBars .9s
+    ease-in-out
+    infinite;
 }
 
 .loader-logo span:nth-child(1) {
-  height: 17px;
+  height: 16px;
 }
 
 .loader-logo span:nth-child(2) {
-  height: 29px;
+  height: 28px;
+
   animation-delay: .12s;
 }
 
 .loader-logo span:nth-child(3) {
-  height: 21px;
+  height: 20px;
+
   animation-delay: .24s;
 }
 
 @keyframes loaderBars {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: scaleY(.65);
     opacity: .55;
   }
@@ -669,7 +813,7 @@ body.page-leave .page-transition {
 }
 
 .loading-state p {
-  margin-top: 14px;
+  margin-top: 15px;
 
   color: var(--muted);
 
@@ -677,48 +821,65 @@ body.page-leave .page-transition {
 }
 
 
-/* =========================
-   EMPTY / ERROR
-========================= */
+/* =========================================
+   STATE ICON
+========================================= */
 
-.empty-icon,
-.error-icon {
-  width: 56px;
-  height: 56px;
+.state-icon {
+  width: 58px;
+  height: 58px;
 
   display: grid;
   place-items: center;
 
-  margin: 0 auto 18px;
+  margin:
+    0 auto 18px;
 
-  border-radius: 17px;
+  border:
+    1px solid var(--border);
 
-  background: var(--primary-soft);
+  border-radius: 16px;
+
+  background:
+    var(--primary-soft);
 
   color: var(--primary);
-
-  font-size: 29px;
-  font-weight: 700;
 }
 
-.error-icon {
-  background: #fff1f1;
-  color: #e54848;
+.state-icon svg {
+  width: 27px;
+  height: 27px;
+
+  fill: currentColor;
 }
 
-.dark-theme .error-icon {
-  background: #301b1b;
+.error-state-icon {
+  background: var(--danger-soft);
+
+  color: var(--danger);
 }
+
+
+/* =========================================
+   STATE TEXT
+========================================= */
 
 .state h2 {
-  font-size: 21px;
   margin-bottom: 8px;
+
+  font-size: 21px;
+  line-height: 1.3;
+
+  font-weight: 700;
+
+  letter-spacing: -.25px;
 }
 
 .state p {
   max-width: 480px;
 
-  margin: 0 auto 22px;
+  margin:
+    0 auto 22px;
 
   color: var(--muted);
 
@@ -726,31 +887,49 @@ body.page-leave .page-transition {
   line-height: 1.6;
 }
 
+
+/* =========================================
+   STATE BUTTON
+========================================= */
+
 .state button {
-  padding: 11px 17px;
+  padding:
+    11px 17px;
 
   border: 0;
-  border-radius: 11px;
+
+  border-radius: 10px;
 
   background: var(--primary);
 
-  color: white;
+  color: #fff;
 
+  font-size: 13px;
   font-weight: 650;
 
   cursor: pointer;
 
-  transition: transform .2s ease;
+  transition:
+    transform .18s ease,
+    filter .18s ease;
 }
 
 .state button:hover {
-  transform: translateY(-1px);
+  filter: brightness(1.06);
+
+  transform:
+    translateY(-1px);
+}
+
+.state button:active {
+  transform:
+    translateY(0);
 }
 
 
-/* =========================
-   SETTINGS PANEL
-========================= */
+/* =========================================
+   SETTINGS OVERLAY
+========================================= */
 
 .settings-overlay {
   position: fixed;
@@ -759,29 +938,40 @@ body.page-leave .page-transition {
   z-index: 500;
 
   display: flex;
+
   justify-content: flex-end;
 
-  padding: 84px 22px 22px;
+  padding:
+    84px 22px 22px;
 
-  background: rgba(0,0,0,.12);
+  background:
+    rgba(0,0,0,.12);
 
   opacity: 0;
   visibility: hidden;
 
   transition:
-    opacity .25s ease,
-    visibility .25s ease;
+    opacity .22s ease,
+    visibility .22s ease;
 
-  backdrop-filter: blur(3px);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 }
 
 .settings-overlay.open {
   opacity: 1;
+
   visibility: visible;
 }
 
+
+/* =========================================
+   SETTINGS PANEL
+========================================= */
+
 .settings-panel {
-  width: min(330px, 100%);
+  width:
+    min(330px, 100%);
 
   height: max-content;
 
@@ -789,27 +979,44 @@ body.page-leave .page-transition {
 
   background: var(--card);
 
-  border: 1px solid var(--border);
+  border:
+    1px solid var(--border);
 
-  border-radius: 18px;
+  border-radius: 16px;
 
   box-shadow: var(--shadow);
 
-  transform: translateY(-8px) scale(.98);
+  transform:
+    translateY(-8px)
+    scale(.98);
 
-  transition: transform .25s ease;
+  transition:
+    transform .22s
+    cubic-bezier(.2,.8,.2,1);
 }
 
-.settings-overlay.open .settings-panel {
-  transform: translateY(0) scale(1);
+.settings-overlay.open
+.settings-panel {
+  transform:
+    translateY(0)
+    scale(1);
 }
+
+
+/* =========================================
+   SETTINGS TITLE
+========================================= */
 
 .settings-title {
   display: flex;
+
   align-items: center;
   justify-content: space-between;
 
-  padding: 9px 10px 12px;
+  padding:
+    9px 10px 12px;
+
+  font-size: 15px;
 
   font-weight: 750;
 }
@@ -818,17 +1025,35 @@ body.page-leave .page-transition {
   width: 32px;
   height: 32px;
 
+  display: grid;
+  place-items: center;
+
   border: 0;
+
   border-radius: 9px;
 
   background: transparent;
 
   color: var(--muted);
 
-  font-size: 22px;
-
   cursor: pointer;
 }
+
+.settings-title button:hover {
+  background: var(--primary-soft);
+}
+
+.settings-title svg {
+  width: 16px;
+  height: 16px;
+
+  fill: currentColor;
+}
+
+
+/* =========================================
+   SETTING ROW
+========================================= */
 
 .setting-row {
   width: 100%;
@@ -836,13 +1061,16 @@ body.page-leave .page-transition {
   min-height: 48px;
 
   display: flex;
+
   align-items: center;
   justify-content: space-between;
 
-  padding: 0 12px;
+  padding:
+    0 12px;
 
   border: 0;
-  border-radius: 11px;
+
+  border-radius: 10px;
 
   background: transparent;
 
@@ -856,13 +1084,18 @@ body.page-leave .page-transition {
 }
 
 .setting-row:hover {
-  background: var(--primary-soft);
+  background:
+    var(--primary-soft);
+}
+
+.setting-arrow {
+  color: var(--muted);
 }
 
 
-/* =========================
+/* =========================================
    ROUTE LOADER
-========================= */
+========================================= */
 
 .route-loader {
   position: fixed;
@@ -878,26 +1111,30 @@ body.page-leave .page-transition {
   opacity: 0;
   visibility: hidden;
 
-  transition: opacity .25s ease;
+  transition:
+    opacity .2s ease;
 }
 
 .route-loader.active {
   opacity: 1;
+
   visibility: visible;
 }
 
 
-/* =========================
+/* =========================================
    RESPONSIVE
-========================= */
+========================================= */
 
 @media (max-width: 850px) {
 
   .search-header {
     grid-template-columns: 1fr;
+
     height: 70px;
 
-    padding: 0 16px;
+    padding:
+      0 16px;
   }
 
   .header-left,
@@ -910,15 +1147,24 @@ body.page-leave .page-transition {
   }
 
   .mobile-home-btn {
-    display: block;
+    display: grid;
+
+    place-items: center;
   }
 
   .search-form {
     height: 48px;
+
+    padding-left: 9px;
   }
 
   .results-page {
-    width: min(100% - 28px, 720px);
+    width:
+      min(
+        calc(100% - 28px),
+        720px
+      );
+
     padding-top: 28px;
   }
 
@@ -931,16 +1177,26 @@ body.page-leave .page-transition {
 @media (max-width: 520px) {
 
   .results-page {
-    width: calc(100% - 22px);
+    width:
+      calc(100% - 22px);
+  }
+
+  .results-top {
+    margin-bottom: 21px;
   }
 
   #queryTitle {
     font-size: 21px;
   }
 
+  .result-label {
+    font-size: 11px;
+  }
+
   .result-card {
     padding: 17px;
-    border-radius: 15px;
+
+    border-radius: 14px;
   }
 
   .result-title {
@@ -949,21 +1205,45 @@ body.page-leave .page-transition {
 
   .result-description {
     font-size: 13px;
+
+    line-height: 1.6;
+  }
+
+  .source-icon {
+    width: 28px;
+    height: 28px;
+
+    flex-basis: 28px;
+  }
+
+  .source-icon svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .source-url {
+    display: none;
   }
 
   .settings-overlay {
-    padding: 75px 10px 10px;
+    padding:
+      75px 10px 10px;
   }
 
   .settings-panel {
     width: 100%;
   }
+
+  .state {
+    padding:
+      62px 16px;
+  }
 }
 
 
-/* =========================
+/* =========================================
    REDUCED MOTION
-========================= */
+========================================= */
 
 @media (prefers-reduced-motion: reduce) {
 
@@ -971,9 +1251,11 @@ body.page-leave .page-transition {
   *::before,
   *::after {
     animation-duration: .01ms !important;
+
     animation-iteration-count: 1 !important;
+
     transition-duration: .01ms !important;
+
     scroll-behavior: auto !important;
   }
-
 }
