@@ -2,173 +2,52 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
+  <meta name="theme-color" content="#ffffff">
 
-  <meta
-    name="theme-color"
-    content="#ffffff"
-  >
+  <title>Wareligent</title>
 
-  <meta
-    name="description"
-    content="Wareligent Search"
-  >
-
-  <title>Search — Wareligent</title>
-
-  <link
-    rel="stylesheet"
-    href="search.css"
-  >
-
-  <script
-    src="search.js"
-    defer
-  ></script>
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
 </head>
 
 <body>
 
-  <!-- Page transition -->
-  <div
-    id="pageTransition"
-    class="page-transition"
-  ></div>
+  <div class="app">
+
+    <!-- Background animation -->
+    <div class="ambient ambient-one"></div>
+    <div class="ambient ambient-two"></div>
 
 
-  <div class="search-app">
+    <!-- Header -->
+    <header class="topbar">
 
+      <div></div>
 
-    <!-- =========================================
-         HEADER
-    ========================================== -->
+      <div class="top-actions">
 
-    <header class="results-header">
-
-      <div class="header-inner">
-
-
-        <!-- Home -->
-        <a
-          href="/"
-          id="homeBtn"
-          class="home-btn"
-          aria-label="Go to Wareligent home"
-        >
-
-          <span class="mini-logo">
-            <i></i>
-            <i></i>
-            <i></i>
-          </span>
-
-          <span class="home-label">
-            Wareligent
-          </span>
-
-        </a>
-
-
-        <!-- Search -->
-        <form
-          id="searchForm"
-          class="results-search"
-          role="search"
-        >
-
-          <button
-            type="button"
-            id="backHomeBtn"
-            class="back-home-btn"
-            aria-label="Back to home"
-          >
-
-            <svg
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <path
-                d="M20 11H7.83l5.59-5.59L12 4l-1.41 1.41L14.17 11H4v2h10.17l-7.58 7.59L8 22l12-8-12-8-1.41 1.41L12.17 11H20z"
-              />
-            </svg>
-
-          </button>
-
-
-          <svg
-            class="results-search-icon"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-          >
-            <path
-              d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5a6.5 6.5 0 1 0-6.5 6.5c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zM9.5 14C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"
-            />
-          </svg>
-
-
-          <input
-            id="queryInput"
-            type="search"
-            name="q"
-            placeholder="Search the web"
-            autocomplete="off"
-            autocapitalize="off"
-            spellcheck="false"
-            aria-label="Search"
-          >
-
-
-          <button
-            type="button"
-            id="clearQueryBtn"
-            class="clear-query"
-            aria-label="Clear search"
-          >
-            ×
-          </button>
-
-
-          <button
-            type="submit"
-            class="submit-search"
-            aria-label="Search"
-          >
-
-            <svg
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <path
-                d="M9.5 3a6.5 6.5 0 0 0 0 13c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5-.79-.01-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 0 0 9.5 3zm0 2C11.99 5 14 7.01 14 9.5S11.99 14 9.5 14 5 11.99 5 9.5 7.01 5 9.5 5z"
-              />
-            </svg>
-
-          </button>
-
-        </form>
-
-
-        <!-- Settings -->
         <button
-          id="settingsBtn"
-          class="settings-btn"
+          id="fireBtn"
+          class="top-btn"
+          type="button"
+          aria-label="Clear"
+        >
+          <svg viewBox="0 0 24 24">
+            <path d="M13.5.7s-2.6 2.2-2.6 4.7c0 1.3.5 2.4 1.3 3.2-1.8 0-3.3 1.5-3.3 3.3 0 .3 0 .5.1.8-1-.7-1.7-1.8-1.7-3.2 0-.2 0-.5.1-.7-2.3 1.6-3.7 4.1-3.7 7.1 0 4.8 3.9 8.7 8.7 8.7s8.7-3.9 8.7-8.7c0-5.8-4.4-10.6-7.6-15.2z"/>
+          </svg>
+        </button>
+
+        <button
+          id="menuBtn"
+          class="top-btn"
           type="button"
           aria-label="Settings"
         >
-
-          <svg
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-          >
-            <path
-              d="M19.43 12.98c.04-.32.07-.65.07-.98s-.02-.66-.07-.98l2.11-1.65-2-3.46-2.49 1a7.8 7.8 0 0 0-1.69-.98L15 3h-4l-.36 2.53c-.61.25-1.18.58-1.69.98l-2.49-1-2 3.46 2.11 1.65c-.04.32-.08.65-.08.98s.03.66.08.98l-2.11 1.65 2 3.46 2.49-1c.51.4 1.08.73 1.69.98L11 21h4l.36-2.53c.61-.25 1.18-.58 1.69-.98l2.49 1 2-3.46-2.11-1.65zM13 15.5A3.5 3.5 0 1 1 13 8a3.5 3.5 0 0 1 0 7.5z"
-            />
+          <svg viewBox="0 0 24 24">
+            <path d="M19.43 12.98c.04-.32.07-.65.07-.98s-.02-.66-.07-.98l2.11-1.65-2-3.46-2.49 1a7.8 7.8 0 0 0-1.69-.98L15 3h-4l-.36 2.53c-.61.25-1.18.58-1.69.98l-2.49-1-2 3.46 2.11 1.65c-.04.32-.08.65-.08.98s.03.66.08.98l-2.11 1.65 2 3.46 2.49-1c.51.4 1.08.73 1.69.98L11 21h4l.36-2.53c.61-.25 1.18-.58 1.69-.98l2.49 1 2-3.46-2.11-1.65zM13 15.5A3.5 3.5 0 1 1 13 8a3.5 3.5 0 0 1 0 7.5z"/>
           </svg>
-
         </button>
 
       </div>
@@ -176,169 +55,148 @@
     </header>
 
 
+    <!-- Main -->
+    <main class="main">
 
-    <!-- =========================================
-         MAIN RESULTS
-    ========================================== -->
+      <section class="search-section">
 
-    <main class="results-main">
+        <!-- Brand -->
+        <div class="brand">
 
-      <div class="results-container">
-
-
-        <!-- Search information -->
-        <section
-          id="resultsInfo"
-          class="results-info"
-          aria-live="polite"
-        >
-
-          <div class="results-info-top">
-
-            <span
-              id="resultCount"
-              class="result-count"
-            >
-              Searching...
-            </span>
-
+          <div class="brand-mark">
+            <span></span>
+            <span></span>
+            <span></span>
           </div>
 
-          <div
-            id="queryLabel"
-            class="query-label"
-          ></div>
+          <h1>Wareligent</h1>
 
-        </section>
+        </div>
 
 
-        <!-- Loading -->
-        <section
-          id="loadingState"
-          class="loading-state"
-          aria-live="polite"
+        <!-- Search -->
+        <div
+          id="searchBox"
+          class="search-box"
         >
 
-          <div class="loading-logo">
-
-            <span></span>
-            <span></span>
-            <span></span>
-
-          </div>
-
-          <p>
-            Searching Wareligent
-          </p>
-
-        </section>
-
-
-        <!-- Results -->
-        <section
-          id="resultsList"
-          class="results-list"
-          aria-label="Search results"
-        ></section>
-
-
-        <!-- Empty -->
-        <section
-          id="emptyState"
-          class="empty-state"
-          hidden
-        >
-
-          <div class="empty-icon">
-
-            <svg
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <path
-                d="M9.5 3a6.5 6.5 0 0 0 0 13c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5-.79-.01-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 0 0 9.5 3zm0 2C11.99 5 14 7.01 14 9.5S11.99 14 9.5 14 5 11.99 5 9.5 7.01 5 9.5 5z"
-              />
+          <button
+            id="backBtn"
+            class="back-btn"
+            type="button"
+            aria-label="Back"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
             </svg>
-
-          </div>
-
-          <h2>
-            No results found
-          </h2>
-
-          <p>
-            We couldn't find anything matching
-            your search.
-          </p>
-
-          <button
-            id="tryAgainBtn"
-            type="button"
-          >
-            Try another search
           </button>
 
-        </section>
+
+          <svg
+            class="search-icon"
+            viewBox="0 0 24 24"
+          >
+            <path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5a6.5 6.5 0 1 0-6.5 6.5c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zM9.5 14C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+          </svg>
 
 
-        <!-- Error -->
-        <section
-          id="errorState"
-          class="error-state"
-          hidden
+          <input
+            id="searchInput"
+            type="text"
+            placeholder="Search the web"
+            autocomplete="off"
+            autocapitalize="off"
+            spellcheck="false"
+            enterkeyhint="search"
+          >
+
+
+          <button
+            id="clearBtn"
+            class="clear-btn"
+            type="button"
+            aria-label="Clear"
+          >
+            ×
+          </button>
+
+
+          <button
+            id="aiSparkBtn"
+            class="ai-btn"
+            type="button"
+            aria-label="AI Search"
+          >
+            <svg viewBox="0 0 24 24">
+              <path d="M12 2l1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8L12 2zm7 14l.7 2.3L22 19l-2.3.7L19 22l-.7-2.3L16 19l2.3-.7L19 16z"/>
+            </svg>
+          </button>
+
+        </div>
+
+
+        <!-- Trending -->
+        <div
+          id="trending"
+          class="trending"
         >
 
-          <div class="error-icon">
-            !
+          <div class="trending-head">
+
+            <span class="trend-dot"></span>
+
+            <span>Trending</span>
+
           </div>
 
-          <h2>
-            Something went wrong
-          </h2>
 
-          <p>
-            Wareligent couldn't complete
-            this search right now.
-          </p>
+          <div class="trend-scroll">
 
-          <button
-            id="retryBtn"
-            type="button"
-          >
-            Try again
-          </button>
+            <button class="trend-item" type="button">
+              Technology
+            </button>
 
-        </section>
+            <button class="trend-item" type="button">
+              AI
+            </button>
 
+            <button class="trend-item" type="button">
+              Bangladesh
+            </button>
 
-      </div>
+            <button class="trend-item" type="button">
+              Sports
+            </button>
+
+            <button class="trend-item" type="button">
+              Science
+            </button>
+
+          </div>
+
+        </div>
+
+      </section>
 
     </main>
 
 
-
-    <!-- =========================================
-         SETTINGS
-    ========================================== -->
-
+    <!-- Settings -->
     <div
-      id="settingsModal"
-      class="settings-modal"
+      id="menuModal"
+      class="menu-modal"
       aria-hidden="true"
     >
 
-      <div class="settings-panel">
+      <div class="menu">
 
-        <div class="settings-header">
+        <div class="menu-header">
 
-          <strong>
-            Settings
-          </strong>
+          <span>Settings</span>
 
           <button
-            id="closeSettingsBtn"
+            id="closeMenuBtn"
             type="button"
-            aria-label="Close settings"
           >
             ×
           </button>
@@ -347,56 +205,23 @@
 
 
         <button
-          id="themeBtn"
-          class="setting-row"
+          id="themeToggleBtn"
+          class="setting"
           type="button"
         >
-
-          <span>
-            Dark mode
-          </span>
-
-          <span
-            id="themeStatus"
-            class="setting-value"
-          >
-            Off
-          </span>
-
+          <span>Dark mode</span>
+          <span id="themeStatus">Off</span>
         </button>
 
 
         <a
-          class="setting-row"
           href="https://about-wareligent.vercel.app"
+          class="setting"
           target="_blank"
           rel="noopener noreferrer"
         >
-
-          <span>
-            About Wareligent
-          </span>
-
-          <span>
-            →
-          </span>
-
-        </a>
-
-
-        <a
-          class="setting-row"
-          href="/"
-        >
-
-          <span>
-            Home
-          </span>
-
-          <span>
-            ⌂
-          </span>
-
+          <span>About Wareligent</span>
+          <span>→</span>
         </a>
 
       </div>
@@ -404,15 +229,11 @@
     </div>
 
 
-    <!-- Page loader -->
+    <!-- Fire -->
     <div
-      id="routeLoader"
-      class="route-loader"
-    >
-
-      <div class="loader-line"></div>
-
-    </div>
+      id="fireOverlay"
+      class="fire-overlay"
+    ></div>
 
   </div>
 
