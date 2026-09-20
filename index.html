@@ -2,156 +2,75 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0"
-  />
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <title>Wareligent</title>
-
-  <link rel="stylesheet" href="/style.css" />
-
+  <link rel="stylesheet" href="style.css" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/script.js" defer></script>
+  <script src="script.js" defer></script>
 </head>
-
 <body>
 
   <div class="home-app">
 
-    <!-- Header -->
+    <!-- Header (Profile Button on Top Right) -->
     <header class="home-header">
+      <div class="header-left"></div>
+      
+      <div class="header-right">
+        <!-- Theme Toggle -->
+        <button id="themeToggleBtn" class="theme-button" aria-label="Toggle theme">
+          <span id="themeIcon">☾</span>
+        </button>
 
-      <div class="wareligent-logo">
-        <span class="logo-mark">W</span>
-        <span class="logo-text">Wareligent</span>
+        <!-- Profile Button / Avatar -->
+        <button id="profileBtn" class="profile-button" aria-label="Account profile">
+          <div id="profileAvatar" class="avatar-default">👤</div>
+        </button>
       </div>
-
-      <button
-        id="themeToggleBtn"
-        class="theme-button"
-        aria-label="Toggle theme"
-      >
-        <span id="themeIcon">☾</span>
-      </button>
-
     </header>
 
-
-    <!-- Main -->
+    <!-- Main Content -->
     <main class="home-main">
 
-      <!-- Brand -->
-      <section class="hero">
-
-        <div class="hero-logo">
-          W
-        </div>
-
-        <h1>Wareligent</h1>
-
-        <p>
-          Search the web. Discover more.
-        </p>
-
+      <!-- Brand Section -->
+      <section class="brand-section">
+        <h1 class="brand-logo">Wareligent</h1>
       </section>
 
-
-      <!-- Search -->
+      <!-- Simple Search Bar -->
       <section class="home-search-section">
-
-        <button
-          id="homeSearchButton"
-          class="home-search-bar"
-          type="button"
-          aria-label="Open search"
-        >
-
+        <button id="homeSearchButton" class="home-search-bar" type="button">
           <svg viewBox="0 0 24 24">
             <circle cx="11" cy="11" r="7"></circle>
             <path d="M20 20l-4-4"></path>
           </svg>
-
-          <span>Search the web</span>
-
-          <span class="search-arrow">→</span>
-
+          <span>Search the web...</span>
         </button>
-
       </section>
 
-
-      <!-- Weather -->
-      <section class="home-section">
-
-        <div class="section-title-row">
-
-          <div>
-            <span class="section-icon">☀</span>
-            <h2>Weather</h2>
-          </div>
-
-          <button
-            id="refreshWeatherBtn"
-            class="small-action"
-            type="button"
-          >
-            Refresh
-          </button>
-
-        </div>
-
+      <!-- Simple Weather Widget -->
+      <section class="weather-section">
         <div id="weatherCard" class="weather-card">
-
-          <div class="weather-loading">
-            Loading weather...
-          </div>
-
+          <div class="weather-loading">Loading weather...</div>
         </div>
-
-      </section>
-
-
-      <!-- News -->
-      <section class="home-section">
-
-        <div class="section-title-row">
-
-          <div>
-            <span class="section-icon">📰</span>
-            <h2>News</h2>
-          </div>
-
-          <button
-            id="openNewsSearch"
-            class="small-action"
-            type="button"
-          >
-            See all
-          </button>
-
-        </div>
-
-        <div id="newsList" class="news-list">
-
-          <article class="news-loading">
-            Loading latest news...
-          </article>
-
-        </div>
-
       </section>
 
     </main>
 
+  </div>
 
-    <!-- Footer -->
-    <footer class="home-footer">
-      <span>Wareligent Search</span>
-      <span>•</span>
-      <span>Explore the web</span>
-    </footer>
+  <!-- Profile / Auth Modal Overlay -->
+  <div id="profileModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Account Profile</h3>
+        <button id="closeModalBtn" class="close-btn">&times;</button>
+      </div>
 
+      <div id="authContent" class="modal-body">
+        <!-- Content dynamically injected via script.js -->
+      </div>
+    </div>
   </div>
 
 </body>
