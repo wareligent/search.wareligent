@@ -1,5 +1,5 @@
 /* ====================================
-   Wareligent - DuckDuckGo / Google Hybrid UI
+   Wareligent - Smooth Animated UI
 ==================================== */
 
 :root {
@@ -9,7 +9,8 @@
   --muted: #5f6368;
   --border: #e0e0e0;
   --search-bg: #ffffff;
-  --shadow: 0 2px 8px rgba(32,33,36,0.1);
+  --shadow: 0 2px 8px rgba(32,33,36,0.08);
+  --accent-glow: rgba(66, 133, 244, 0.25);
 }
 
 body.dark-theme {
@@ -20,6 +21,7 @@ body.dark-theme {
   --border: #3c4043;
   --search-bg: #303134;
   --shadow: 0 2px 8px rgba(0,0,0,0.4);
+  --accent-glow: rgba(138, 180, 248, 0.2);
 }
 
 * {
@@ -34,12 +36,29 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   background: var(--bg);
   color: var(--text);
+  overflow-x: hidden;
+  transition: background-color 0.4s ease, color 0.4s ease;
 }
 
 .ddg-container {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+}
+
+/* Screen Flash overlay for Fire Burn Effect */
+.fire-overlay {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle, rgba(255,87,34,0.8) 0%, rgba(239,108,0,0) 80%);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 9999;
+  transition: opacity 0.5s ease-out;
+}
+
+.fire-overlay.active {
+  opacity: 1;
 }
 
 /* Header Action Bar */
@@ -65,7 +84,17 @@ body {
   display: grid;
   place-items: center;
   color: var(--text);
-  padding: 4px;
+  padding: 6px;
+  border-radius: 50%;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s ease;
+}
+
+.action-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.action-btn:active {
+  transform: scale(0.88);
 }
 
 .action-btn svg {
@@ -75,23 +104,35 @@ body {
 }
 
 .tab-badge {
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   border: 2px solid var(--text);
-  border-radius: 6px;
+  border-radius: 7px;
   font-size: 11px;
   font-weight: 700;
   display: grid;
   place-items: center;
 }
 
-/* Main Content Area (Positioned like Google App) */
+/* Animated Fire Button */
+.fire-btn:hover svg {
+  fill: #ff5722;
+  transform: scale(1.1);
+  transition: all 0.3s ease;
+}
+
+.fire-btn.burning svg {
+  animation: burnShake 0.5s ease-in-out infinite alternate;
+  fill: #e65100;
+}
+
+/* Main Content Area */
 .ddg-main {
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 40px 16px 0; /* Positioned at the top third */
+  padding: 40px 16px 0;
 }
 
 .brand-search-wrapper {
@@ -103,16 +144,17 @@ body {
   gap: 20px;
 }
 
-/* Wareligent Pure Text Logo */
+/* Wareligent Animated Title */
 .brand-title {
-  font-size: clamp(36px, 8vw, 44px);
+  font-size: clamp(38px, 8vw, 46px);
   font-weight: 700;
   color: var(--text);
   letter-spacing: -0.8px;
   font-family: 'Product Sans', -apple-system, sans-serif;
+  user-select: none;
 }
 
-/* Google-Style Search Bar */
+/* Google-Style Animated Search Bar */
 .google-search-bar {
   width: 100%;
   height: 52px;
@@ -124,11 +166,17 @@ body {
   padding: 0 16px;
   gap: 12px;
   box-shadow: var(--shadow);
-  transition: all 0.2s ease-in-out;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.google-search-bar:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  transform: translateY(-1px);
 }
 
 .google-search-bar:focus-within {
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transform: scale(1.015);
+  box-shadow: 0 6px 20px var(--accent-glow);
   border-color: transparent;
 }
 
@@ -137,6 +185,12 @@ body {
   height: 20px;
   fill: var(--muted);
   flex-shrink: 0;
+  transition: transform 0.3s ease;
+}
+
+.google-search-bar:focus-within .search-icon {
+  transform: rotate(90deg) scale(1.1);
+  fill: var(--text);
 }
 
 .google-search-bar input {
@@ -154,49 +208,73 @@ body {
   cursor: pointer;
   display: grid;
   place-items: center;
+  animation: pulseSpark 3s infinite ease-in-out;
 }
 
 .ai-spark-btn svg {
   width: 20px;
   height: 20px;
   fill: var(--muted);
+  transition: fill 0.3s ease;
 }
 
-/* Slide Menu Overlay */
+.ai-spark-btn:hover svg {
+  fill: #ffb703;
+}
+
+/* Slide Menu Overlay with Animations */
 .menu-modal {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.4);
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(3px);
   display: flex;
   justify-content: flex-end;
   z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
 }
 
-.hidden { display: none !important; }
+.menu-modal.open {
+  opacity: 1;
+  pointer-events: auto;
+}
 
 .menu-content {
   width: 280px;
   height: 100%;
   background: var(--header-bg);
-  padding: 20px;
+  padding: 24px 20px;
   display: flex;
   flex-direction: column;
   box-shadow: -4px 0 20px rgba(0,0,0,0.15);
+  transform: translateX(100%);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.menu-modal.open .menu-content {
+  transform: translateX(0);
 }
 
 .menu-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .close-btn {
-  font-size: 24px;
+  font-size: 26px;
   border: none;
   background: none;
   color: var(--text);
   cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.close-btn:active {
+  transform: scale(0.8);
 }
 
 .menu-body {
@@ -209,8 +287,8 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 14px 12px;
-  border-radius: 10px;
+  padding: 14px 14px;
+  border-radius: 12px;
   background: var(--bg);
   color: var(--text);
   text-decoration: none;
@@ -218,4 +296,43 @@ body {
   cursor: pointer;
   font-size: 15px;
   font-weight: 500;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.menu-item:hover {
+  transform: translateX(-3px);
+}
+
+/* Keyframe Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-header {
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+
+.animate-title {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.animate-search {
+  animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes pulseSpark {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.15); opacity: 1; }
+}
+
+@keyframes burnShake {
+  0% { transform: rotate(-5deg) scale(1); }
+  100% { transform: rotate(5deg) scale(1.2); }
 }
