@@ -1,5 +1,5 @@
 /* ====================================
-   Wareligent - Smooth Animated UI
+   Wareligent - Focus/Transition UI
 ==================================== */
 
 :root {
@@ -10,7 +10,6 @@
   --border: #e0e0e0;
   --search-bg: #ffffff;
   --shadow: 0 2px 8px rgba(32,33,36,0.08);
-  --accent-glow: rgba(66, 133, 244, 0.25);
 }
 
 body.dark-theme {
@@ -21,7 +20,6 @@ body.dark-theme {
   --border: #3c4043;
   --search-bg: #303134;
   --shadow: 0 2px 8px rgba(0,0,0,0.4);
-  --accent-glow: rgba(138, 180, 248, 0.2);
 }
 
 * {
@@ -37,7 +35,7 @@ body {
   background: var(--bg);
   color: var(--text);
   overflow-x: hidden;
-  transition: background-color 0.4s ease, color 0.4s ease;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .ddg-container {
@@ -46,7 +44,7 @@ body {
   flex-direction: column;
 }
 
-/* Screen Flash overlay for Fire Burn Effect */
+/* Fire Overlay */
 .fire-overlay {
   position: fixed;
   inset: 0;
@@ -54,20 +52,19 @@ body {
   opacity: 0;
   pointer-events: none;
   z-index: 9999;
-  transition: opacity 0.5s ease-out;
+  transition: opacity 0.4s ease;
 }
 
-.fire-overlay.active {
-  opacity: 1;
-}
+.fire-overlay.active { opacity: 1; }
 
-/* Header Action Bar */
+/* Header Bar */
 .ddg-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 16px;
   background: transparent;
+  transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
 .header-actions {
@@ -86,22 +83,9 @@ body {
   color: var(--text);
   padding: 6px;
   border-radius: 50%;
-  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background-color 0.2s ease;
 }
 
-.action-btn:hover {
-  background: rgba(0, 0, 0, 0.05);
-}
-
-.action-btn:active {
-  transform: scale(0.88);
-}
-
-.action-btn svg {
-  width: 22px;
-  height: 22px;
-  fill: var(--text);
-}
+.action-btn svg { width: 22px; height: 22px; fill: var(--text); }
 
 .tab-badge {
   width: 24px;
@@ -114,19 +98,7 @@ body {
   place-items: center;
 }
 
-/* Animated Fire Button */
-.fire-btn:hover svg {
-  fill: #ff5722;
-  transform: scale(1.1);
-  transition: all 0.3s ease;
-}
-
-.fire-btn.burning svg {
-  animation: burnShake 0.5s ease-in-out infinite alternate;
-  fill: #e65100;
-}
-
-/* Main Content Area */
+/* Main Section */
 .ddg-main {
   flex: 1;
   display: flex;
@@ -142,9 +114,10 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 20px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Wareligent Animated Title */
+/* Cyan to Violet Gradient Title */
 .brand-title {
   font-size: clamp(38px, 8vw, 48px);
   font-weight: 800;
@@ -153,9 +126,10 @@ body {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   user-select: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
-/* Google-Style Animated Search Bar */
+/* Google Style Search Bar */
 .google-search-bar {
   width: 100%;
   height: 52px;
@@ -167,18 +141,7 @@ body {
   padding: 0 16px;
   gap: 12px;
   box-shadow: var(--shadow);
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
-}
-
-.google-search-bar:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-  transform: translateY(-1px);
-}
-
-.google-search-bar:focus-within {
-  transform: scale(1.015);
-  box-shadow: 0 6px 20px var(--accent-glow);
-  border-color: transparent;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .search-icon {
@@ -186,11 +149,20 @@ body {
   height: 20px;
   fill: var(--muted);
   flex-shrink: 0;
-  transition: transform 0.3s ease;
 }
 
-.google-search-bar:focus-within .search-icon {
-  transform: rotate(90deg) scale(1.1);
+.back-btn {
+  border: none;
+  background: none;
+  cursor: pointer;
+  display: none;
+  place-items: center;
+  padding: 4px;
+}
+
+.back-btn svg {
+  width: 20px;
+  height: 20px;
   fill: var(--text);
 }
 
@@ -209,21 +181,45 @@ body {
   cursor: pointer;
   display: grid;
   place-items: center;
-  animation: pulseSpark 3s infinite ease-in-out;
 }
 
 .ai-spark-btn svg {
   width: 20px;
   height: 20px;
   fill: var(--muted);
-  transition: fill 0.3s ease;
 }
 
-.ai-spark-btn:hover svg {
-  fill: #ffb703;
+/* ====================================
+   SEARCH FOCUS MODE (DuckDuckGo Behavior)
+==================================== */
+body.search-focused #mainHeader {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-20px);
 }
 
-/* Slide Menu Overlay with Animations */
+body.search-focused .ddg-main {
+  padding-top: 12px;
+}
+
+body.search-focused #brandTitle {
+  display: none;
+}
+
+body.search-focused .google-search-bar {
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+
+body.search-focused .search-icon {
+  display: none;
+}
+
+body.search-focused .back-btn {
+  display: grid;
+}
+
+/* Menu Modal Styles */
 .menu-modal {
   position: fixed;
   inset: 0;
@@ -254,9 +250,7 @@ body {
   transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.menu-modal.open .menu-content {
-  transform: translateX(0);
-}
+.menu-modal.open .menu-content { transform: translateX(0); }
 
 .menu-header {
   display: flex;
@@ -271,11 +265,6 @@ body {
   background: none;
   color: var(--text);
   cursor: pointer;
-  transition: transform 0.2s ease;
-}
-
-.close-btn:active {
-  transform: scale(0.8);
 }
 
 .menu-body {
@@ -288,7 +277,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 14px 14px;
+  padding: 14px;
   border-radius: 12px;
   background: var(--bg);
   color: var(--text);
@@ -297,43 +286,4 @@ body {
   cursor: pointer;
   font-size: 15px;
   font-weight: 500;
-  transition: transform 0.2s ease, background-color 0.2s ease;
-}
-
-.menu-item:hover {
-  transform: translateX(-3px);
-}
-
-/* Keyframe Animations */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-header {
-  animation: fadeInUp 0.5s ease-out forwards;
-}
-
-.animate-title {
-  animation: fadeInUp 0.6s ease-out forwards;
-}
-
-.animate-search {
-  animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-@keyframes pulseSpark {
-  0%, 100% { transform: scale(1); opacity: 0.8; }
-  50% { transform: scale(1.15); opacity: 1; }
-}
-
-@keyframes burnShake {
-  0% { transform: rotate(-5deg) scale(1); }
-  100% { transform: rotate(5deg) scale(1.2); }
 }
