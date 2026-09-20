@@ -1,14 +1,12 @@
 (() => {
   "use strict";
 
-
   /* =========================================
      ELEMENTS
   ========================================= */
 
   const searchInput = document.getElementById("searchInput");
   const searchForm = document.getElementById("searchForm");
-
   const clearBtn = document.getElementById("clearBtn");
 
   const queryTitle = document.getElementById("queryTitle");
@@ -19,7 +17,6 @@
 
   const emptyState = document.getElementById("emptyState");
   const errorState = document.getElementById("errorState");
-
   const errorMessage = document.getElementById("errorMessage");
 
   const retryBtn = document.getElementById("retryBtn");
@@ -45,7 +42,9 @@
      QUERY
   ========================================= */
 
-  const params = new URLSearchParams(window.location.search);
+  const params = new URLSearchParams(
+    window.location.search
+  );
 
   const currentQuery =
     (params.get("q") || "").trim();
@@ -55,13 +54,17 @@
      CONFIG
   ========================================= */
 
-  const CONFIG = window.WARELIGENT_CONFIG || {};
+  const CONFIG =
+    window.WARELIGENT_CONFIG || {};
 
   const SUPABASE_URL =
-    String(CONFIG.SUPABASE_URL || "").replace(/\/+$/, "");
+    String(CONFIG.SUPABASE_URL || "")
+      .trim()
+      .replace(/\/+$/, "");
 
   const SUPABASE_KEY =
-    String(CONFIG.SUPABASE_KEY || "");
+    String(CONFIG.SUPABASE_KEY || "")
+      .trim();
 
 
   /* =========================================
@@ -80,15 +83,18 @@
 
   function setTheme(theme) {
 
-    const dark = theme === "dark";
+    const dark =
+      theme === "dark";
 
     document.body.classList.toggle(
       "dark-theme",
       dark
     );
 
-    themeStatus.textContent =
-      dark ? "On" : "Off";
+    if (themeStatus) {
+      themeStatus.textContent =
+        dark ? "On" : "Off";
+    }
 
     localStorage.setItem(
       "wareligent-theme",
@@ -122,23 +128,25 @@
   }
 
 
-  themeToggle.addEventListener(
-    "click",
-    () => {
+  if (themeToggle) {
 
-      const isDark =
-        document.body.classList.contains(
-          "dark-theme"
+    themeToggle.addEventListener(
+      "click",
+      () => {
+
+        const isDark =
+          document.body.classList.contains(
+            "dark-theme"
+          );
+
+        setTheme(
+          isDark
+            ? "light"
+            : "dark"
         );
-
-      setTheme(
-        isDark
-          ? "light"
-          : "dark"
-      );
-
-    }
-  );
+      }
+    );
+  }
 
 
   /* =========================================
@@ -147,7 +155,11 @@
 
   function openSettings() {
 
-    settingsOverlay.classList.add("open");
+    if (!settingsOverlay) return;
+
+    settingsOverlay.classList.add(
+      "open"
+    );
 
     settingsOverlay.setAttribute(
       "aria-hidden",
@@ -158,7 +170,11 @@
 
   function closeSettingsPanel() {
 
-    settingsOverlay.classList.remove("open");
+    if (!settingsOverlay) return;
+
+    settingsOverlay.classList.remove(
+      "open"
+    );
 
     settingsOverlay.setAttribute(
       "aria-hidden",
@@ -167,45 +183,61 @@
   }
 
 
-  settingsBtn.addEventListener(
-    "click",
-    openSettings
-  );
-
-  closeSettings.addEventListener(
-    "click",
-    closeSettingsPanel
-  );
+  if (settingsBtn) {
+    settingsBtn.addEventListener(
+      "click",
+      openSettings
+    );
+  }
 
 
-  settingsOverlay.addEventListener(
-    "click",
-    event => {
+  if (closeSettings) {
+    closeSettings.addEventListener(
+      "click",
+      closeSettingsPanel
+    );
+  }
 
-      if (
-        event.target ===
-        settingsOverlay
-      ) {
-        closeSettingsPanel();
+
+  if (settingsOverlay) {
+
+    settingsOverlay.addEventListener(
+      "click",
+      event => {
+
+        if (
+          event.target ===
+          settingsOverlay
+        ) {
+          closeSettingsPanel();
+        }
+
       }
-
-    }
-  );
+    );
+  }
 
 
   /* =========================================
      NAVIGATION
   ========================================= */
 
-  function goHome() {
+  function startRouteLoader() {
+
+    if (routeLoader) {
+      routeLoader.classList.add(
+        "active"
+      );
+    }
 
     document.body.classList.add(
       "page-leave"
     );
+  }
 
-    routeLoader.classList.add(
-      "active"
-    );
+
+  function goHome() {
+
+    startRouteLoader();
 
     setTimeout(() => {
       window.location.href = "/";
@@ -215,19 +247,12 @@
 
   function goSearch(query) {
 
-    query = query.trim();
+    query =
+      String(query || "").trim();
 
-    if (!query) {
-      return;
-    }
+    if (!query) return;
 
-    document.body.classList.add(
-      "page-leave"
-    );
-
-    routeLoader.classList.add(
-      "active"
-    );
+    startRouteLoader();
 
     setTimeout(() => {
 
@@ -239,74 +264,92 @@
   }
 
 
-  homeLogo.addEventListener(
-    "click",
-    event => {
+  if (homeLogo) {
 
-      event.preventDefault();
+    homeLogo.addEventListener(
+      "click",
+      event => {
 
-      goHome();
+        event.preventDefault();
 
-    }
-  );
-
-
-  mobileHomeBtn.addEventListener(
-    "click",
-    goHome
-  );
+        goHome();
+      }
+    );
+  }
 
 
-  emptyHomeBtn.addEventListener(
-    "click",
-    goHome
-  );
+  if (mobileHomeBtn) {
+
+    mobileHomeBtn.addEventListener(
+      "click",
+      goHome
+    );
+  }
 
 
-  settingsHomeBtn.addEventListener(
-    "click",
-    () => {
+  if (emptyHomeBtn) {
 
-      closeSettingsPanel();
+    emptyHomeBtn.addEventListener(
+      "click",
+      goHome
+    );
+  }
 
-      setTimeout(
-        goHome,
-        100
-      );
 
-    }
-  );
+  if (settingsHomeBtn) {
+
+    settingsHomeBtn.addEventListener(
+      "click",
+      () => {
+
+        closeSettingsPanel();
+
+        setTimeout(
+          goHome,
+          100
+        );
+
+      }
+    );
+  }
 
 
   /* =========================================
      SEARCH FORM
   ========================================= */
 
-  searchForm.addEventListener(
-    "submit",
-    event => {
+  if (searchForm) {
 
-      event.preventDefault();
+    searchForm.addEventListener(
+      "submit",
+      event => {
 
-      const query =
-        searchInput.value.trim();
+        event.preventDefault();
 
-      if (!query) {
-        searchInput.focus();
-        return;
+        const query =
+          searchInput.value.trim();
+
+        if (!query) {
+
+          searchInput.focus();
+
+          return;
+        }
+
+        if (
+          query === currentQuery
+        ) {
+
+          searchSites(query);
+
+          return;
+        }
+
+        goSearch(query);
+
       }
-
-      if (
-        query === currentQuery
-      ) {
-        searchSites(query);
-        return;
-      }
-
-      goSearch(query);
-
-    }
-  );
+    );
+  }
 
 
   /* =========================================
@@ -368,6 +411,7 @@
         url.protocol === "http:" ||
         url.protocol === "https:"
       ) {
+
         return url.href;
       }
 
@@ -405,7 +449,9 @@
 
     return String(value)
       .split(/[,\s]+/)
-      .map(item => item.trim())
+      .map(
+        item => item.trim()
+      )
       .filter(Boolean)
       .slice(0, 8);
 
@@ -497,44 +543,71 @@
       throw new Error(
         "Supabase configuration is missing. Please check config.js."
       );
+    }
 
+
+    const cleanQuery =
+      String(query || "")
+        .trim()
+        .replace(/[*]/g, "");
+
+
+    if (!cleanQuery) {
+      return [];
     }
 
 
     /*
-      We search:
+      IMPORTANT:
+
+      The OR filter is built as one parameter
+      and URLSearchParams handles encoding.
+
+      This searches:
       - title
       - description
       - keywords
-
-      PostgreSQL/PostgREST OR syntax.
     */
 
-    const searchValue =
-      `*${query.replace(/[*]/g, "")}*`;
+    const pattern =
+      `*${cleanQuery}*`;
 
 
-    const filter =
-      [
-        `title.ilike.${searchValue}`,
-        `description.ilike.${searchValue}`,
-        `keywords.ilike.${searchValue}`
-      ].join(",");
+    const orFilter =
+      `(` +
+      `title.ilike.${pattern},` +
+      `description.ilike.${pattern},` +
+      `keywords.ilike.${pattern}` +
+      `)`;
+
+
+    const params =
+      new URLSearchParams();
+
+    params.set(
+      "select",
+      "id,title,url,description,keywords"
+    );
+
+    params.set(
+      "or",
+      orFilter
+    );
+
+    params.set(
+      "limit",
+      "50"
+    );
 
 
     const endpoint =
-      SUPABASE_URL +
-      "/rest/v1/websites?" +
-      new URLSearchParams({
+      `${SUPABASE_URL}/rest/v1/websites?${params.toString()}`;
 
-        select:
-          "id,title,url,description,keywords",
 
-        or: filter,
-
-        limit: "50"
-
-      }).toString();
+    console.log(
+      "Wareligent Supabase endpoint:",
+      endpoint
+    );
 
 
     const response =
@@ -552,7 +625,10 @@
               `Bearer ${SUPABASE_KEY}`,
 
             "Accept":
-              "application/json"
+              "application/json",
+
+            "Accept-Profile":
+              "public"
 
           }
         }
@@ -572,6 +648,7 @@
           data.message ||
           data.hint ||
           data.details ||
+          data.error ||
           "";
 
       } catch (error) {}
@@ -579,11 +656,12 @@
 
       throw new Error(
         `Supabase returned HTTP ${response.status}` +
-        (detail
-          ? ` — ${detail}`
-          : "")
+        (
+          detail
+            ? ` — ${detail}`
+            : ""
+        )
       );
-
     }
 
 
@@ -625,102 +703,124 @@
 
 
     resultCount.textContent =
-      `${results.length} result${results.length === 1 ? "" : "s"}`;
+      `${results.length} result${
+        results.length === 1
+          ? ""
+          : "s"
+      }`;
 
 
     resultsList.innerHTML =
-      results.map(
-        (site, index) => {
+      results
+        .map(
+          (site, index) => {
 
-          const title =
-            escapeHTML(
-              site.title ||
-              "Untitled website"
-            );
+            const title =
+              escapeHTML(
+                site.title ||
+                "Untitled website"
+              );
 
-          const description =
-            escapeHTML(
-              site.description ||
-              "No description available."
-            );
 
-          const url =
-            safeURL(
-              site.url
-            );
+            const description =
+              escapeHTML(
+                site.description ||
+                "No description available."
+              );
 
-          const hostname =
-            escapeHTML(
-              getHostname(
+
+            const url =
+              safeURL(
                 site.url
-              )
-            );
+              );
 
 
-          const keywords =
-            normalizeKeywords(
-              site.keywords
-            );
+            const hostname =
+              escapeHTML(
+                getHostname(
+                  site.url
+                )
+              );
 
 
-          const keywordHTML =
-            keywords
-              .map(
-                keyword =>
-                  `<span class="keyword">${escapeHTML(keyword)}</span>`
-              )
-              .join("");
+            const keywords =
+              normalizeKeywords(
+                site.keywords
+              );
 
 
-          return `
-            <a
-              class="result-card"
-              href="${url}"
-              target="_blank"
-              rel="noopener noreferrer"
-              style="animation-delay:${Math.min(index * 45, 450)}ms"
-            >
+            const keywordHTML =
+              keywords
+                .map(
+                  keyword =>
+                    `<span class="keyword">${
+                      escapeHTML(
+                        keyword
+                      )
+                    }</span>`
+                )
+                .join("");
 
-              <div class="result-source">
 
-                <div class="source-icon">
-                  W
+            return `
+              <a
+                class="result-card"
+                href="${url}"
+                target="_blank"
+                rel="noopener noreferrer"
+                style="animation-delay:${Math.min(
+                  index * 45,
+                  450
+                )}ms"
+              >
+
+                <div class="result-source">
+
+                  <div class="source-icon">
+                    W
+                  </div>
+
+                  <span class="source-name">
+                    ${hostname || "Website"}
+                  </span>
+
+                  ${
+                    hostname
+                      ? `<span class="source-url">
+                           · ${hostname}
+                         </span>`
+                      : ""
+                  }
+
                 </div>
 
-                <span class="source-name">
-                  ${hostname || "Website"}
-                </span>
+
+                <div class="result-title">
+                  ${title}
+                </div>
+
+
+                <div class="result-description">
+                  ${description}
+                </div>
+
 
                 ${
-                  hostname
-                    ? `<span class="source-url">· ${hostname}</span>`
+                  keywordHTML
+                    ? `
+                      <div class="result-keywords">
+                        ${keywordHTML}
+                      </div>
+                    `
                     : ""
                 }
 
-              </div>
+              </a>
+            `;
 
-
-              <div class="result-title">
-                ${title}
-              </div>
-
-
-              <div class="result-description">
-                ${description}
-              </div>
-
-
-              ${
-                keywordHTML
-                  ? `<div class="result-keywords">${keywordHTML}</div>`
-                  : ""
-              }
-
-            </a>
-          `;
-
-        }
-      ).join("");
+          }
+        )
+        .join("");
 
   }
 
@@ -731,14 +831,15 @@
 
   async function searchSites(query) {
 
-    query = query.trim();
+    query =
+      String(query || "").trim();
+
 
     if (!query) {
 
       showEmpty();
 
       return;
-
     }
 
 
@@ -765,7 +866,6 @@
         showEmpty();
 
         return;
-
       }
 
 
@@ -795,18 +895,23 @@
      RETRY
   ========================================= */
 
-  retryBtn.addEventListener(
-    "click",
-    () => {
+  if (retryBtn) {
 
-      if (currentQuery) {
-        searchSites(
-          currentQuery
-        );
+    retryBtn.addEventListener(
+      "click",
+      () => {
+
+        if (currentQuery) {
+
+          searchSites(
+            currentQuery
+          );
+
+        }
+
       }
-
-    }
-  );
+    );
+  }
 
 
   /* =========================================
@@ -818,18 +923,20 @@
     event => {
 
       if (
-        event.key === "Escape"
+        event.key !== "Escape"
+      ) {
+        return;
+      }
+
+
+      if (
+        settingsOverlay &&
+        settingsOverlay.classList.contains(
+          "open"
+        )
       ) {
 
-        if (
-          settingsOverlay.classList.contains(
-            "open"
-          )
-        ) {
-
-          closeSettingsPanel();
-
-        }
+        closeSettingsPanel();
 
       }
 
@@ -861,6 +968,5 @@
     showEmpty();
 
   }
-
 
 })();
