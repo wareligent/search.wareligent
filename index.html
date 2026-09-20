@@ -11,36 +11,37 @@
 
   <div class="ddg-container">
 
-    <!-- Top Action Icons Bar -->
+    <!-- Top DuckDuckGo Style Header Bar -->
     <header class="ddg-header">
       <div class="header-left"></div>
+
       <div class="header-actions">
-        <!-- Fire / Clear Icon -->
-        <button class="action-btn" id="fireBtn" title="Clear Tabs/Data">
+        <!-- DuckDuckGo Fire Icon -->
+        <button class="action-btn" id="fireBtn" title="Clear Tabs & Data">
           <svg viewBox="0 0 24 24"><path d="M13.5 0.67c0 0-2.58 2.22-2.58 4.77 0 1.25.5 2.39 1.32 3.23 -1.82 0-3.29 1.47-3.29 3.29 0 .28.04.55.11.81 -1.02-.68-1.7-1.84-1.7-3.16 0-.25.02-.49.07-.73 -2.25 1.58-3.73 4.14-3.73 7.05 0 4.8 3.89 8.69 8.69 8.69s8.69-3.89 8.69-8.69c0-5.83-4.38-10.63-7.58-15.26z"/></svg>
         </button>
-        <!-- Tab Count Badge -->
-        <button class="action-btn tab-badge">1</button>
-        <!-- Menu Icon -->
-        <button class="action-btn" id="menuBtn">
+        <!-- Tab Counter Badge -->
+        <button class="action-btn tab-badge" id="tabCountBtn">1</button>
+        <!-- Menu Hamburger Icon -->
+        <button class="action-btn" id="menuBtn" title="Menu">
           <svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
         </button>
       </div>
     </header>
 
-    <!-- Main Content Area -->
+    <!-- Main Section (Google Style Top-Center Placement) -->
     <main class="ddg-main">
-      <div class="center-content">
-        <!-- Brand Name (No Logo) -->
+      <div class="brand-search-wrapper">
+        <!-- Simple Text Brand (No Logo Image) -->
         <h1 class="brand-title">Wareligent</h1>
 
-        <!-- Google Style Search Bar in Center -->
+        <!-- Google Style Search Bar -->
         <div class="google-search-bar">
           <svg class="search-icon" viewBox="0 0 24 24">
             <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
           </svg>
           <input type="text" id="searchInput" placeholder="Search Wareligent or type a URL" />
-          <button class="ai-spark-btn" aria-label="AI Search">
+          <button class="ai-spark-btn" id="aiSparkBtn" title="AI Search">
             <svg viewBox="0 0 24 24"><path d="M12 2L9.19 8.63 2 12l7.19 3.37L12 22l2.81-6.63L22 12l-7.19-3.37z"/></svg>
           </button>
         </div>
@@ -49,19 +50,19 @@
 
   </div>
 
-  <!-- Settings Slide-out Menu -->
+  <!-- Settings Slide Menu -->
   <div id="menuModal" class="menu-modal hidden">
     <div class="menu-content">
       <div class="menu-header">
         <h3>Settings</h3>
-        <button id="closeMenuBtn">&times;</button>
+        <button id="closeMenuBtn" class="close-btn">&times;</button>
       </div>
       <div class="menu-body">
         <button id="themeToggleBtn" class="menu-item">
           <span>Dark Theme</span>
           <span id="themeStatus">Off</span>
         </button>
-        <a href="https://about-wareligent.vercel.app" class="menu-item" target="_blank">
+        <a href="https://about-wareligent.vercel.app" class="menu-item" target="_blank" rel="noopener">
           <span>About Wareligent</span>
           <span>&rarr;</span>
         </a>
