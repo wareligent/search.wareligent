@@ -1,24 +1,24 @@
 /* ====================================
-   Wareligent - Minimal Centered UI
+   Wareligent - DuckDuckGo / Google Hybrid UI
 ==================================== */
 
 :root {
-  --bg: #f7f7f7;
+  --bg: #f8f9fa;
   --header-bg: #ffffff;
-  --text: #222222;
-  --muted: #757575;
-  --border: #dadce0;
+  --text: #202124;
+  --muted: #5f6368;
+  --border: #e0e0e0;
   --search-bg: #ffffff;
-  --shadow: 0 2px 8px rgba(0,0,0,0.08);
+  --shadow: 0 2px 8px rgba(32,33,36,0.1);
 }
 
 body.dark-theme {
-  --bg: #1e1e1e;
-  --header-bg: #252526;
-  --text: #ffffff;
-  --muted: #aaaaaa;
-  --border: #333333;
-  --search-bg: #2d2d2d;
+  --bg: #171717;
+  --header-bg: #202124;
+  --text: #e8eaed;
+  --muted: #9aa0a6;
+  --border: #3c4043;
+  --search-bg: #303134;
   --shadow: 0 2px 8px rgba(0,0,0,0.4);
 }
 
@@ -31,7 +31,7 @@ body.dark-theme {
 
 body {
   min-height: 100vh;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   background: var(--bg);
   color: var(--text);
 }
@@ -42,12 +42,12 @@ body {
   flex-direction: column;
 }
 
-/* Header */
+/* Header Action Bar */
 .ddg-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 16px;
+  padding: 16px;
   background: transparent;
 }
 
@@ -65,6 +65,7 @@ body {
   display: grid;
   place-items: center;
   color: var(--text);
+  padding: 4px;
 }
 
 .action-btn svg {
@@ -84,40 +85,38 @@ body {
   place-items: center;
 }
 
-/* Main Content Center */
+/* Main Content Area (Positioned like Google App) */
 .ddg-main {
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 0 16px;
-  margin-top: -80px; /* Positions it nicely slightly above absolute center */
+  padding: 40px 16px 0; /* Positioned at the top third */
 }
 
-.center-content {
+.brand-search-wrapper {
   width: 100%;
   max-width: 580px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 24px;
+  gap: 20px;
 }
 
-/* Brand Title (No Logo) */
+/* Wareligent Pure Text Logo */
 .brand-title {
-  font-size: clamp(38px, 8vw, 48px);
+  font-size: clamp(36px, 8vw, 44px);
   font-weight: 700;
   color: var(--text);
-  letter-spacing: -1px;
+  letter-spacing: -0.8px;
   font-family: 'Product Sans', -apple-system, sans-serif;
 }
 
 /* Google-Style Search Bar */
 .google-search-bar {
   width: 100%;
-  height: 50px;
-  border-radius: 25px;
+  height: 52px;
+  border-radius: 26px;
   background: var(--search-bg);
   border: 1px solid var(--border);
   display: flex;
@@ -125,11 +124,12 @@ body {
   padding: 0 16px;
   gap: 12px;
   box-shadow: var(--shadow);
-  transition: all 0.2s ease;
+  transition: all 0.2s ease-in-out;
 }
 
 .google-search-bar:focus-within {
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  border-color: transparent;
 }
 
 .search-icon {
@@ -162,14 +162,14 @@ body {
   fill: var(--muted);
 }
 
-/* Menu Modal */
+/* Slide Menu Overlay */
 .menu-modal {
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.4);
   display: flex;
   justify-content: flex-end;
-  z-index: 100;
+  z-index: 1000;
 }
 
 .hidden { display: none !important; }
@@ -181,6 +181,7 @@ body {
   padding: 20px;
   display: flex;
   flex-direction: column;
+  box-shadow: -4px 0 20px rgba(0,0,0,0.15);
 }
 
 .menu-header {
@@ -190,7 +191,7 @@ body {
   margin-bottom: 20px;
 }
 
-#closeMenuBtn {
+.close-btn {
   font-size: 24px;
   border: none;
   background: none;
@@ -208,12 +209,13 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px;
-  border-radius: 8px;
+  padding: 14px 12px;
+  border-radius: 10px;
   background: var(--bg);
   color: var(--text);
   text-decoration: none;
   border: none;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 15px;
+  font-weight: 500;
 }
