@@ -1,6 +1,6 @@
 /* =====================================================
    WARELIGENT
-   Minimal Search Interaction
+   Animated Minimal Search
 ===================================================== */
 
 (() => {
@@ -75,6 +75,11 @@
       "themeStatus"
     );
 
+  const trendItems =
+    document.querySelectorAll(
+      ".trend-item"
+    );
+
 
   /* ===================================================
      SEARCH FOCUS
@@ -128,8 +133,6 @@
 
   function updateClear() {
 
-    if (!clearBtn) return;
-
     if (
       searchInput.value.trim()
     ) {
@@ -168,13 +171,15 @@
 
 
   /* ===================================================
-     NORMAL SEARCH
+     SEARCH
   =================================================== */
 
-  function search() {
+  function executeSearch(
+    query = searchInput.value
+  ) {
 
-    const query =
-      searchInput.value.trim();
+    query =
+      query.trim();
 
 
     if (!query) {
@@ -203,7 +208,7 @@
 
         event.preventDefault();
 
-        search();
+        executeSearch();
 
       }
 
@@ -223,7 +228,7 @@
 
 
   /* ===================================================
-     AI SEARCH
+     AI
   =================================================== */
 
   aiBtn.addEventListener(
@@ -243,15 +248,40 @@
       }
 
 
-      /*
-        AI backend এখনো connected নয়।
-        তাই query-টি search page-এ পাঠানো হচ্ছে।
-      */
-
       window.location.href =
         "/search.html?q=" +
         encodeURIComponent(query) +
         "&mode=ai";
+
+    }
+  );
+
+
+  /* ===================================================
+     TRENDING TOPICS
+  =================================================== */
+
+  trendItems.forEach(
+    (item) => {
+
+      item.addEventListener(
+        "click",
+        () => {
+
+          const topic =
+            item.textContent.trim();
+
+
+          searchInput.value =
+            topic;
+
+
+          updateClear();
+
+          executeSearch(topic);
+
+        }
+      );
 
     }
   );
@@ -265,13 +295,9 @@
     "click",
     () => {
 
-      if (fireOverlay) {
-
-        fireOverlay.classList.add(
-          "active"
-        );
-
-      }
+      fireOverlay.classList.add(
+        "active"
+      );
 
 
       searchInput.value = "";
@@ -282,12 +308,12 @@
       setTimeout(
         () => {
 
-          fireOverlay?.classList.remove(
+          fireOverlay.classList.remove(
             "active"
           );
 
         },
-        400
+        450
       );
 
     }
@@ -356,29 +382,45 @@
 
 
   /* ===================================================
-     THEME
+     DARK MODE
   =================================================== */
 
   function setTheme(theme) {
 
-    const dark =
+    const isDark =
       theme === "dark";
 
 
     body.classList.toggle(
       "dark-theme",
-      dark
+      isDark
     );
 
 
     themeStatus.textContent =
-      dark ? "On" : "Off";
+      isDark ? "On" : "Off";
 
 
     localStorage.setItem(
       "wareligent-theme",
       theme
     );
+
+
+    const meta =
+      document.querySelector(
+        'meta[name="theme-color"]'
+      );
+
+
+    if (meta) {
+
+      meta.content =
+        isDark
+          ? "#0f1114"
+          : "#ffffff";
+
+    }
 
   }
 
@@ -391,19 +433,11 @@
       );
 
 
-    if (
-      saved === "dark" ||
-      saved === "light"
-    ) {
-
-      setTheme(saved);
-
-      return;
-
-    }
-
-
-    setTheme("light");
+    setTheme(
+      saved === "dark"
+        ? "dark"
+        : "light"
+    );
 
   }
 
@@ -412,14 +446,14 @@
     "click",
     () => {
 
-      const dark =
+      const isDark =
         body.classList.contains(
           "dark-theme"
         );
 
 
       setTheme(
-        dark
+        isDark
           ? "light"
           : "dark"
       );
@@ -429,7 +463,7 @@
 
 
   /* ===================================================
-     KEYBOARD
+     ESCAPE
   =================================================== */
 
   document.addEventListener(
@@ -483,12 +517,11 @@
 
 
   /* ===================================================
-     INITIALIZE
+     INIT
   =================================================== */
 
   loadTheme();
 
   updateClear();
-
 
 })();
