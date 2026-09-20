@@ -1,32 +1,32 @@
 /* =====================================================
    WARELIGENT
-   Minimal Search Interface
+   Minimal Animated Search UI
 ===================================================== */
 
 :root {
   --bg: #ffffff;
+  --surface: rgba(255,255,255,.92);
   --text: #17191c;
   --muted: #73777d;
-  --border: #e5e7eb;
-  --search: #ffffff;
-  --hover: #f4f5f7;
+  --border: #e4e7eb;
+  --hover: #f4f6f8;
   --primary: #1769ff;
 
   --shadow:
-    0 4px 18px rgba(0, 0, 0, 0.06);
+    0 8px 30px rgba(20,30,50,.08);
 }
 
 body.dark-theme {
-  --bg: #101214;
+  --bg: #0f1114;
+  --surface: rgba(22,25,29,.94);
   --text: #f2f4f7;
   --muted: #9299a3;
-  --border: #2c3036;
-  --search: #171a1e;
-  --hover: #20242a;
+  --border: #2b3037;
+  --hover: #1c2025;
   --primary: #6b9cff;
 
   --shadow:
-    0 5px 22px rgba(0, 0, 0, 0.28);
+    0 8px 30px rgba(0,0,0,.35);
 }
 
 
@@ -44,7 +44,6 @@ body.dark-theme {
 
 html,
 body {
-  width: 100%;
   min-height: 100%;
 }
 
@@ -65,8 +64,8 @@ body {
   overflow-x: hidden;
 
   transition:
-    background-color .25s ease,
-    color .25s ease;
+    background .35s ease,
+    color .35s ease;
 }
 
 button,
@@ -81,9 +80,67 @@ input {
 
 .app {
   min-height: 100vh;
-  width: 100%;
+
+  position: relative;
+
+  overflow: hidden;
 
   background: var(--bg);
+}
+
+
+/* =====================================================
+   AMBIENT BACKGROUND
+===================================================== */
+
+.ambient {
+  position: absolute;
+
+  width: 280px;
+  height: 280px;
+
+  border-radius: 50%;
+
+  filter: blur(90px);
+
+  opacity: .08;
+
+  pointer-events: none;
+
+  animation:
+    float 12s ease-in-out infinite alternate;
+}
+
+.ambient-one {
+  top: 12%;
+  left: -100px;
+
+  background: #1769ff;
+}
+
+.ambient-two {
+  right: -120px;
+  bottom: 10%;
+
+  background: #7a35ff;
+
+  animation-delay: -5s;
+}
+
+@keyframes float {
+
+  from {
+    transform:
+      translate3d(0,0,0)
+      scale(1);
+  }
+
+  to {
+    transform:
+      translate3d(35px,-25px,0)
+      scale(1.15);
+  }
+
 }
 
 
@@ -92,8 +149,6 @@ input {
 ===================================================== */
 
 .topbar {
-  width: 100%;
-
   height: 64px;
 
   padding: 10px 14px;
@@ -101,15 +156,30 @@ input {
   display: flex;
   align-items: center;
   justify-content: space-between;
+
+  position: relative;
+  z-index: 10;
+
+  animation:
+    topbarIn .7s ease both;
 }
 
-.topbar-spacer {
-  flex: 1;
+@keyframes topbarIn {
+
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
 }
 
 .top-actions {
   display: flex;
-  align-items: center;
   gap: 4px;
 }
 
@@ -135,8 +205,8 @@ input {
   cursor: pointer;
 
   transition:
-    background .18s ease,
-    transform .18s ease;
+    background .2s ease,
+    transform .2s ease;
 }
 
 .top-btn svg {
@@ -151,7 +221,7 @@ input {
 }
 
 .top-btn:active {
-  transform: scale(.9);
+  transform: scale(.88);
 }
 
 
@@ -160,36 +230,139 @@ input {
 ===================================================== */
 
 .main {
-  min-height: calc(100vh - 64px);
+  min-height:
+    calc(100vh - 64px);
+
+  display: flex;
+  justify-content: center;
+
+  padding:
+    15vh
+    18px
+    30px;
+
+  position: relative;
+  z-index: 2;
+}
+
+.search-section {
+  width: 100%;
+  max-width: 620px;
 
   display: flex;
   flex-direction: column;
-
   align-items: center;
-
-  padding:
-    18vh
-    18px
-    30px;
 }
 
 
 /* =====================================================
-   LOGO
+   BRAND
 ===================================================== */
 
-.logo {
-  margin-bottom: 24px;
+.brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 
-  font-size: clamp(38px, 10vw, 52px);
+  margin-bottom: 25px;
+
+  animation:
+    brandIn .8s
+    cubic-bezier(.2,.8,.2,1)
+    both;
+}
+
+@keyframes brandIn {
+
+  from {
+    opacity: 0;
+    transform:
+      translateY(20px)
+      scale(.96);
+  }
+
+  to {
+    opacity: 1;
+    transform:
+      translateY(0)
+      scale(1);
+  }
+
+}
+
+
+/* =====================================================
+   BRAND MARK
+===================================================== */
+
+.brand-mark {
+  height: 30px;
+
+  display: flex;
+  align-items: flex-end;
+
+  gap: 4px;
+
+  margin-bottom: 9px;
+}
+
+.brand-mark span {
+  width: 6px;
+
+  border-radius: 10px;
+
+  background:
+    linear-gradient(
+      180deg,
+      #00b8ff,
+      #1769ff,
+      #7a35ff
+    );
+
+  animation:
+    barPulse 2.2s
+    ease-in-out
+    infinite;
+}
+
+.brand-mark span:nth-child(1) {
+  height: 16px;
+  animation-delay: 0s;
+}
+
+.brand-mark span:nth-child(2) {
+  height: 29px;
+  animation-delay: .15s;
+}
+
+.brand-mark span:nth-child(3) {
+  height: 22px;
+  animation-delay: .3s;
+}
+
+@keyframes barPulse {
+
+  0%,
+  100% {
+    transform: scaleY(.85);
+  }
+
+  50% {
+    transform: scaleY(1);
+  }
+
+}
+
+
+.brand h1 {
+  font-size:
+    clamp(40px, 10vw, 54px);
 
   line-height: 1;
 
   font-weight: 800;
 
-  letter-spacing: -2px;
-
-  user-select: none;
+  letter-spacing: -2.5px;
 
   background:
     linear-gradient(
@@ -203,10 +376,6 @@ input {
   background-clip: text;
 
   -webkit-text-fill-color: transparent;
-
-  transition:
-    opacity .2s ease,
-    transform .2s ease;
 }
 
 
@@ -216,39 +385,72 @@ input {
 
 .search-box {
   width: 100%;
-  max-width: 590px;
 
-  height: 54px;
+  height: 56px;
 
   display: flex;
   align-items: center;
 
-  padding: 0 13px;
+  padding:
+    0 14px;
 
   gap: 10px;
 
-  background: var(--search);
+  background:
+    var(--surface);
 
   border:
     1px solid var(--border);
 
-  border-radius: 27px;
+  border-radius: 28px;
 
-  box-shadow: var(--shadow);
+  box-shadow:
+    var(--shadow);
+
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+
+  animation:
+    searchIn .9s
+    .1s
+    cubic-bezier(.2,.8,.2,1)
+    both;
 
   transition:
-    max-width .25s ease,
-    height .25s ease,
-    border-radius .25s ease,
-    box-shadow .25s ease;
+    border .25s ease,
+    box-shadow .25s ease,
+    border-radius .3s ease,
+    transform .25s ease;
+}
+
+@keyframes searchIn {
+
+  from {
+    opacity: 0;
+    transform:
+      translateY(20px)
+      scale(.97);
+  }
+
+  to {
+    opacity: 1;
+    transform:
+      translateY(0)
+      scale(1);
+  }
+
 }
 
 .search-box:focus-within {
   border-color:
-    rgba(23, 105, 255, .35);
+    rgba(23,105,255,.4);
 
   box-shadow:
-    0 5px 25px rgba(23, 105, 255, .10);
+    0 10px 38px
+    rgba(23,105,255,.12);
+
+  transform:
+    translateY(-1px);
 }
 
 
@@ -271,10 +473,9 @@ input {
 ===================================================== */
 
 .search-box input {
-  width: 100%;
-  min-width: 0;
-
   flex: 1;
+
+  min-width: 0;
 
   border: 0;
   outline: 0;
@@ -301,13 +502,13 @@ input {
 
   flex-shrink: 0;
 
-  display: none;
-  place-items: center;
-
   border: 0;
   background: transparent;
 
   color: var(--text);
+
+  display: none;
+  place-items: center;
 
   cursor: pointer;
 }
@@ -328,18 +529,16 @@ input {
   width: 28px;
   height: 28px;
 
-  flex-shrink: 0;
-
-  display: none;
-  place-items: center;
-
   border: 0;
   background: transparent;
 
   color: var(--muted);
 
-  font-size: 24px;
+  font-size: 23px;
   font-weight: 300;
+
+  display: none;
+  place-items: center;
 
   cursor: pointer;
 }
@@ -368,9 +567,9 @@ input {
   cursor: pointer;
 
   transition:
-    background .18s ease,
-    color .18s ease,
-    transform .18s ease;
+    color .2s ease,
+    background .2s ease,
+    transform .2s ease;
 }
 
 .ai-btn svg {
@@ -378,6 +577,24 @@ input {
   height: 19px;
 
   fill: currentColor;
+
+  animation:
+    sparkle 3s
+    ease-in-out
+    infinite;
+}
+
+@keyframes sparkle {
+
+  0%,
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+
+  50% {
+    transform: rotate(8deg) scale(1.08);
+  }
+
 }
 
 .ai-btn:hover {
@@ -387,6 +604,169 @@ input {
 
 .ai-btn:active {
   transform: scale(.88);
+}
+
+
+/* =====================================================
+   TRENDING
+===================================================== */
+
+.trending {
+  width: 100%;
+
+  margin-top: 17px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 11px;
+
+  animation:
+    trendingIn .8s
+    .35s
+    ease
+    both;
+}
+
+@keyframes trendingIn {
+
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+}
+
+
+/* Trending title */
+
+.trending-head {
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+
+  gap: 6px;
+
+  color: var(--muted);
+
+  font-size: 11px;
+  font-weight: 600;
+
+  text-transform: uppercase;
+
+  letter-spacing: .5px;
+}
+
+.trend-dot {
+  width: 6px;
+  height: 6px;
+
+  border-radius: 50%;
+
+  background: #22c55e;
+
+  box-shadow:
+    0 0 0 4px
+    rgba(34,197,94,.10);
+
+  animation:
+    livePulse 1.8s
+    infinite;
+}
+
+@keyframes livePulse {
+
+  0%,
+  100% {
+    opacity: .55;
+    transform: scale(.85);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+}
+
+
+/* Trending scroll */
+
+.trend-scroll {
+  min-width: 0;
+
+  display: flex;
+
+  gap: 7px;
+
+  overflow-x: auto;
+
+  scrollbar-width: none;
+
+  mask-image:
+    linear-gradient(
+      90deg,
+      transparent 0,
+      #000 4%,
+      #000 96%,
+      transparent 100%
+    );
+}
+
+.trend-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+
+/* Trend item */
+
+.trend-item {
+  flex-shrink: 0;
+
+  padding:
+    7px 12px;
+
+  border:
+    1px solid var(--border);
+
+  border-radius: 18px;
+
+  background: var(--surface);
+
+  color: var(--muted);
+
+  font-size: 11px;
+
+  cursor: pointer;
+
+  transition:
+    color .2s ease,
+    background .2s ease,
+    border .2s ease,
+    transform .2s ease;
+}
+
+.trend-item:hover {
+  color: var(--primary);
+
+  border-color:
+    rgba(23,105,255,.3);
+
+  background:
+    rgba(23,105,255,.05);
+
+  transform:
+    translateY(-1px);
+}
+
+.trend-item:active {
+  transform: scale(.95);
 }
 
 
@@ -409,26 +789,32 @@ body.search-focused .main {
   align-items: stretch;
 }
 
-body.search-focused .logo {
+body.search-focused .search-section {
+  max-width: none;
+}
+
+body.search-focused .brand {
+  display: none;
+}
+
+body.search-focused .trending {
   display: none;
 }
 
 body.search-focused .search-box {
-  max-width: none;
-
   height: 52px;
 
   border-radius:
     0
     0
-    13px
-    13px;
+    14px
+    14px;
 
   border-top: 0;
 
-  padding:
-    0
-    11px;
+  box-shadow:
+    0 5px 20px
+    rgba(0,0,0,.08);
 }
 
 body.search-focused .search-icon {
@@ -441,7 +827,7 @@ body.search-focused .back-btn {
 
 
 /* =====================================================
-   SETTINGS MODAL
+   SETTINGS
 ===================================================== */
 
 .menu-modal {
@@ -453,13 +839,18 @@ body.search-focused .back-btn {
   display: flex;
   justify-content: flex-end;
 
-  background: rgba(0, 0, 0, .25);
+  background:
+    rgba(0,0,0,.25);
+
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
 
   opacity: 0;
+
   pointer-events: none;
 
   transition:
-    opacity .2s ease;
+    opacity .25s ease;
 }
 
 .menu-modal.open {
@@ -467,41 +858,37 @@ body.search-focused .back-btn {
   pointer-events: auto;
 }
 
-
-/* =====================================================
-   SETTINGS PANEL
-===================================================== */
-
 .menu {
-  width: min(300px, 86vw);
+  width:
+    min(300px, 86vw);
+
   height: 100%;
 
-  padding: 22px 18px;
+  padding:
+    22px 18px;
 
   background: var(--bg);
 
   border-left:
     1px solid var(--border);
 
-  transform: translateX(100%);
+  transform:
+    translateX(100%);
 
   transition:
-    transform .25s cubic-bezier(.16, 1, .3, 1);
+    transform .3s
+    cubic-bezier(.16,1,.3,1);
 }
 
 .menu-modal.open .menu {
-  transform: translateX(0);
+  transform:
+    translateX(0);
 }
 
-
-/* =====================================================
-   MENU TOP
-===================================================== */
-
-.menu-top {
+.menu-header {
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
 
   margin-bottom: 25px;
 
@@ -509,7 +896,7 @@ body.search-focused .back-btn {
   font-weight: 700;
 }
 
-.menu-top button {
+.menu-header button {
   width: 34px;
   height: 34px;
 
@@ -525,21 +912,13 @@ body.search-focused .back-btn {
   cursor: pointer;
 }
 
-
-/* =====================================================
-   SETTING
-===================================================== */
-
 .setting {
   width: 100%;
-
   min-height: 52px;
 
   margin-bottom: 8px;
 
-  padding:
-    0
-    13px;
+  padding: 0 13px;
 
   display: flex;
   align-items: center;
@@ -556,19 +935,22 @@ body.search-focused .back-btn {
 
   text-decoration: none;
 
+  font-size: 14px;
+
   cursor: pointer;
 
-  font-size: 14px;
+  transition:
+    transform .2s ease,
+    border .2s ease;
 }
 
-.setting:hover {
-  border-color:
-    rgba(23, 105, 255, .3);
+.setting:active {
+  transform: scale(.98);
 }
 
 
 /* =====================================================
-   FIRE EFFECT
+   FIRE
 ===================================================== */
 
 .fire-overlay {
@@ -584,20 +966,22 @@ body.search-focused .back-btn {
   background:
     radial-gradient(
       circle,
-      rgba(255, 120, 20, .65),
+      rgba(255,120,20,.55),
       transparent 65%
     );
 
   transform: scale(.7);
 
   transition:
-    opacity .18s ease,
-    transform .3s ease;
+    opacity .2s ease,
+    transform .35s ease;
 }
 
 .fire-overlay.active {
   opacity: 1;
-  transform: scale(1.15);
+
+  transform:
+    scale(1.15);
 }
 
 
@@ -608,28 +992,23 @@ body.search-focused .back-btn {
 @media (max-width: 480px) {
 
   .main {
-    padding-top: 17vh;
+    padding-top: 15vh;
   }
 
-  .logo {
-    margin-bottom: 21px;
+  .brand h1 {
+    font-size: 42px;
   }
 
   .search-box {
-    height: 53px;
+    height: 54px;
   }
 
-}
+  .trending {
+    gap: 8px;
+  }
 
-
-/* =====================================================
-   DESKTOP
-===================================================== */
-
-@media (min-width: 700px) {
-
-  .main {
-    padding-top: 19vh;
+  .trending-head {
+    font-size: 10px;
   }
 
 }
@@ -644,8 +1023,8 @@ body.search-focused .back-btn {
   *,
   *::before,
   *::after {
-    transition: none !important;
     animation: none !important;
+    transition: none !important;
   }
 
 }
