@@ -1,5 +1,5 @@
 /* ====================================
-   Wareligent - DuckDuckGo Clean UI
+   Wareligent - Minimal Centered UI
 ==================================== */
 
 :root {
@@ -7,9 +7,9 @@
   --header-bg: #ffffff;
   --text: #222222;
   --muted: #757575;
-  --border: #e0e0e0;
-  --search-bg: #f1f3f4;
-  --brand-orange: #de5833;
+  --border: #dadce0;
+  --search-bg: #ffffff;
+  --shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
 
 body.dark-theme {
@@ -19,6 +19,7 @@ body.dark-theme {
   --muted: #aaaaaa;
   --border: #333333;
   --search-bg: #2d2d2d;
+  --shadow: 0 2px 8px rgba(0,0,0,0.4);
 }
 
 * {
@@ -46,61 +47,15 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 14px;
-  background: var(--bg);
-  gap: 12px;
-}
-
-/* Search Box (Top Left) */
-.search-box {
-  flex: 1;
-  max-width: 280px;
-  height: 42px;
-  background: var(--header-bg);
-  border-radius: 21px;
-  display: flex;
-  align-items: center;
-  padding: 0 12px;
-  gap: 8px;
-  border: 1px solid var(--border);
-  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-}
-
-.arrow-icon {
-  width: 18px;
-  height: 18px;
-  fill: var(--muted);
-  flex-shrink: 0;
-}
-
-.search-box input {
-  width: 100%;
-  border: none;
-  outline: none;
+  padding: 14px 16px;
   background: transparent;
-  color: var(--text);
-  font-size: 15px;
 }
 
-.ai-spark-btn {
-  border: none;
-  background: none;
-  cursor: pointer;
-  display: grid;
-  place-items: center;
-}
-
-.ai-spark-btn svg {
-  width: 18px;
-  height: 18px;
-  fill: var(--muted);
-}
-
-/* Header Action Icons (Top Right) */
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
+  margin-left: auto;
 }
 
 .action-btn {
@@ -132,44 +87,82 @@ body {
 /* Main Content Center */
 .ddg-main {
   flex: 1;
-  display: grid;
-  place-items: center;
-  margin-top: -60px; /* Slight optical lift */
-}
-
-.brand-wrapper {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
+  justify-content: center;
+  padding: 0 16px;
+  margin-top: -80px; /* Positions it nicely slightly above absolute center */
 }
 
-.brand-icon {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  background: var(--brand-orange);
-  border: 4px solid #ffffff;
-  box-shadow: 0 4px 15px rgba(222, 88, 51, 0.3);
+.center-content {
+  width: 100%;
+  max-width: 580px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+/* Brand Title (No Logo) */
+.brand-title {
+  font-size: clamp(38px, 8vw, 48px);
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -1px;
+  font-family: 'Product Sans', -apple-system, sans-serif;
+}
+
+/* Google-Style Search Bar */
+.google-search-bar {
+  width: 100%;
+  height: 50px;
+  border-radius: 25px;
+  background: var(--search-bg);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 12px;
+  box-shadow: var(--shadow);
+  transition: all 0.2s ease;
+}
+
+.google-search-bar:focus-within {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.search-icon {
+  width: 20px;
+  height: 20px;
+  fill: var(--muted);
+  flex-shrink: 0;
+}
+
+.google-search-bar input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 16px;
+}
+
+.ai-spark-btn {
+  border: none;
+  background: none;
+  cursor: pointer;
   display: grid;
   place-items: center;
 }
 
-.brand-icon span {
-  font-size: 58px;
-  font-weight: 900;
-  color: #ffffff;
-  font-family: Arial, sans-serif;
+.ai-spark-btn svg {
+  width: 20px;
+  height: 20px;
+  fill: var(--muted);
 }
 
-.brand-title {
-  font-size: 32px;
-  font-weight: 700;
-  color: var(--text);
-  letter-spacing: -0.5px;
-}
-
-/* Settings Modal */
+/* Menu Modal */
 .menu-modal {
   position: fixed;
   inset: 0;
@@ -217,7 +210,7 @@ body {
   align-items: center;
   padding: 12px;
   border-radius: 8px;
-  background: var(--search-bg);
+  background: var(--bg);
   color: var(--text);
   text-decoration: none;
   border: none;
