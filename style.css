@@ -1,5 +1,5 @@
 /* ====================================
-   Wareligent - Focus/Transition UI
+   Wareligent - Animated Focus UI
 ==================================== */
 
 :root {
@@ -57,14 +57,16 @@ body {
 
 .fire-overlay.active { opacity: 1; }
 
-/* Header Bar */
+/* Header Bar Animation Settings */
 .ddg-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 16px;
   background: transparent;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition: opacity 0.3s ease, transform 0.3s ease, max-height 0.3s ease, padding 0.3s ease;
+  max-height: 80px;
+  opacity: 1;
 }
 
 .header-actions {
@@ -83,6 +85,15 @@ body {
   color: var(--text);
   padding: 6px;
   border-radius: 50%;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.action-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.action-btn:active {
+  transform: scale(0.9);
 }
 
 .action-btn svg { width: 22px; height: 22px; fill: var(--text); }
@@ -105,6 +116,7 @@ body {
   flex-direction: column;
   align-items: center;
   padding: 40px 16px 0;
+  transition: padding 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .brand-search-wrapper {
@@ -114,7 +126,7 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 20px;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: max-width 0.35s cubic-bezier(0.4, 0, 0.2, 1), transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Cyan to Violet Gradient Title */
@@ -126,7 +138,9 @@ body {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   user-select: none;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition: opacity 0.25s ease, transform 0.25s ease, max-height 0.3s ease, margin 0.3s ease;
+  max-height: 60px;
+  opacity: 1;
 }
 
 /* Google Style Search Bar */
@@ -141,7 +155,7 @@ body {
   padding: 0 16px;
   gap: 12px;
   box-shadow: var(--shadow);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: border-radius 0.3s ease, height 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
 }
 
 .search-icon {
@@ -149,6 +163,7 @@ body {
   height: 20px;
   fill: var(--muted);
   flex-shrink: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
 .back-btn {
@@ -158,6 +173,9 @@ body {
   display: none;
   place-items: center;
   padding: 4px;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: opacity 0.25s ease, transform 0.25s ease;
 }
 
 .back-btn svg {
@@ -190,47 +208,60 @@ body {
 }
 
 /* ====================================
-   SEARCH FOCUS MODE (Absolute Top Fixed)
+   SEARCH FOCUS MODE (Smooth Animations)
 ==================================== */
 
-/* ১. সার্চ ফোকাস হলে হেডার পুরো গায়েব হয়ে যাবে */
+/* ১. হেডারটি স্মুথলি ঢেকে যাবে ও উপরে সরে যাবে */
 body.search-focused #mainHeader {
-  display: none !important;
+  opacity: 0;
+  transform: translateY(-20px);
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  pointer-events: none;
+  overflow: hidden;
 }
 
-/* ২. মেন কন্টেইনারের প্যাডিং বাদ */
+/* ২. মেইন কন্টেইনারের মার্জিন কমে টপে উঠে আসবে */
 body.search-focused .ddg-main {
-  padding-top: 8px !important;
-  padding-left: 8px !important;
-  padding-right: 8px !important;
+  padding-top: 8px;
+  padding-left: 8px;
+  padding-right: 8px;
 }
 
-/* ৩. টাইটেল হাইড */
+/* ৩. ব্র্যান্ড টাইটেলটি স্মুথলি ছোট হয়ে মুছে যাবে */
 body.search-focused #brandTitle {
-  display: none !important;
+  opacity: 0;
+  transform: scale(0.8) translateY(-10px);
+  max-height: 0;
+  margin: 0;
+  overflow: hidden;
 }
 
-/* ৪. সার্চ বার পজিশনিং (একদম উপরে টপে পজিশন হবে) */
+/* ৪. সার্চ বার ফুল-উইডথ হয়ে টপে চলে যাবে */
 body.search-focused .brand-search-wrapper {
-  max-width: 100% !important;
-  width: 100% !important;
-  margin: 0 !important;
+  max-width: 100%;
+  width: 100%;
+  margin: 0;
 }
 
 body.search-focused .google-search-bar {
-  border-radius: 12px; /* অ্যাপের মতো হালকা রাউন্ডেড */
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   height: 48px;
   padding: 0 12px;
 }
 
-/* ৫. ব্যাক বাটন ও আইকন দৃশ্যমানতা */
+/* ৫. লেন্স আইকন গায়েব এবং ব্যাক বাটন ভেসে উঠবে */
 body.search-focused .search-icon {
-  display: none !important;
+  display: none;
+  opacity: 0;
 }
 
 body.search-focused .back-btn {
-  display: grid !important;
+  display: grid;
+  opacity: 1;
+  transform: scale(1);
 }
 
 /* Menu Modal Styles */
