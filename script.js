@@ -1,5 +1,5 @@
 /* ====================================
-   Wareligent Core Logic
+   Wareligent Animated Logic
 ==================================== */
 
 (() => {
@@ -12,8 +12,9 @@
   const themeToggleBtn = document.getElementById("themeToggleBtn");
   const themeStatus = document.getElementById("themeStatus");
   const fireBtn = document.getElementById("fireBtn");
+  const fireOverlay = document.getElementById("fireOverlay");
 
-  /* Theme Control */
+  /* Theme Toggle Logic */
   function setTheme(theme) {
     const isDark = theme === "dark";
     document.body.classList.toggle("dark-theme", isDark);
@@ -31,7 +32,7 @@
     setTheme(isDark ? "light" : "dark");
   });
 
-  /* Search Handler */
+  /* Search Execute Function */
   function executeSearch() {
     const query = searchInput.value.trim();
     if (query) {
@@ -43,19 +44,24 @@
     if (e.key === "Enter") executeSearch();
   });
 
-  /* DuckDuckGo Fire Button Effect */
+  /* DuckDuckGo Animated Fire Button Effect */
   fireBtn?.addEventListener("click", () => {
-    if (searchInput) searchInput.value = "";
-    alert("Tabs and search history cleared!");
+    fireBtn.classList.add("burning");
+    fireOverlay.classList.add("active");
+
+    setTimeout(() => {
+      if (searchInput) searchInput.value = "";
+      fireOverlay.classList.remove("active");
+      fireBtn.classList.remove("burning");
+    }, 600);
   });
 
-  /* Settings Modal Handler */
-  menuBtn?.addEventListener("click", () => menuModal.classList.remove("hidden"));
-  closeMenuBtn?.addEventListener("click", () => menuModal.classList.add("hidden"));
+  /* Smooth Menu Drawer Controls */
+  menuBtn?.addEventListener("click", () => menuModal.classList.add("open"));
+  closeMenuBtn?.addEventListener("click", () => menuModal.classList.remove("open"));
 
-  // Close menu on clicking outside
   menuModal?.addEventListener("click", (e) => {
-    if (e.target === menuModal) menuModal.classList.add("hidden");
+    if (e.target === menuModal) menuModal.classList.remove("open");
   });
 
   initTheme();
