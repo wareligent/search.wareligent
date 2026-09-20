@@ -2,177 +2,338 @@
 <html lang="bn">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
   <title>Wareligent Search</title>
+
   <link rel="stylesheet" href="/style.css" />
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <script src="/script.js" defer></script>
 </head>
 
 <body>
+
   <div class="app">
 
-    <!-- Header -->
-    <header class="top-header">
-      <button class="profile-btn" id="profileBtn" aria-label="Profile">
-        <span>👤</span>
-      </button>
+    <!-- =========================
+         HOME HEADER
+    ========================== -->
+
+    <header class="home-header">
 
       <div class="brand">
-        <div class="brand-logo">W</div>
-        <div class="brand-name">Wareligent</div>
+        <div class="brand-logo">
+          W
+        </div>
+
+        <div class="brand-name">
+          Wareligent
+        </div>
       </div>
 
-      <button class="icon-btn" id="themeToggleBtn" aria-label="Theme">
+      <button
+        id="themeToggleBtn"
+        class="theme-btn"
+        type="button"
+        aria-label="Toggle theme"
+      >
         <span id="themeIcon">☼</span>
       </button>
+
     </header>
 
-    <!-- Main Content -->
-    <main>
-      <!-- Search Section -->
-      <section class="search-section">
-        <form id="searchForm" class="search-bar">
-          <button type="submit" class="search-icon-btn" aria-label="Search">
-            <svg viewBox="0 0 24 24">
-              <circle cx="11" cy="11" r="7"></circle>
-              <path d="M20 20l-4-4"></path>
+
+    <!-- =========================
+         HOME CONTENT
+    ========================== -->
+
+    <main class="home-content">
+
+
+      <!-- Wareligent Title -->
+
+      <section class="hero">
+
+        <div class="hero-logo">
+          W
+        </div>
+
+        <h1>
+          Wareligent
+        </h1>
+
+        <p>
+          Search smarter. Discover more.
+        </p>
+
+      </section>
+
+
+      <!-- =========================
+           SEARCH
+      ========================== -->
+
+      <section class="home-search-section">
+
+        <form
+          id="searchForm"
+          class="home-search"
+        >
+
+          <button
+            type="submit"
+            class="search-icon-btn"
+            aria-label="Search"
+          >
+
+            <svg
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <circle
+                cx="11"
+                cy="11"
+                r="7"
+              ></circle>
+
+              <path
+                d="M20 20l-4-4"
+              ></path>
             </svg>
+
           </button>
+
 
           <input
             id="searchInput"
             type="search"
+            placeholder="Search the web..."
             autocomplete="off"
-            placeholder="Search or type URL"
+            spellcheck="false"
           />
 
-          <button type="button" id="clearBtn" class="search-action hidden" aria-label="Clear">×</button>
 
-          <button type="button" id="imageBtn" class="search-action" aria-label="Image search">
-            <svg viewBox="0 0 24 24">
-              <rect x="3" y="5" width="18" height="15" rx="3"></rect>
-              <circle cx="8.5" cy="10" r="1.5"></circle>
-              <path d="M5 17l5-5 3 3 2-2 4 4"></path>
-            </svg>
+          <button
+            type="button"
+            id="clearBtn"
+            class="search-action hidden"
+            aria-label="Clear search"
+          >
+            ×
           </button>
 
-          <button type="button" id="voiceBtn" class="search-action" aria-label="Voice search">
-            <svg viewBox="0 0 24 24">
-              <rect x="9" y="3" width="6" height="12" rx="3"></rect>
-              <path d="M5 11a7 7 0 0 0 14 0"></path>
-              <path d="M12 18v3"></path>
-              <path d="M8 21h8"></path>
+
+          <button
+            type="button"
+            id="voiceBtn"
+            class="search-action"
+            aria-label="Voice search"
+          >
+
+            <svg
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+
+              <rect
+                x="9"
+                y="3"
+                width="6"
+                height="12"
+                rx="3"
+              ></rect>
+
+              <path
+                d="M5 11a7 7 0 0 0 14 0"
+              ></path>
+
+              <path
+                d="M12 18v3"
+              ></path>
+
+              <path
+                d="M8 21h8"
+              ></path>
+
             </svg>
+
           </button>
 
-          <input type="file" id="imageInput" accept="image/*" hidden />
+
+          <button
+            type="button"
+            id="imageBtn"
+            class="search-action"
+            aria-label="Search by image"
+          >
+
+            <svg
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+
+              <rect
+                x="3"
+                y="5"
+                width="18"
+                height="15"
+                rx="3"
+              ></rect>
+
+              <circle
+                cx="8.5"
+                cy="10"
+                r="1.5"
+              ></circle>
+
+              <path
+                d="M5 17l5-5 3 3 2-2 4 4"
+              ></path>
+
+            </svg>
+
+          </button>
+
+
+          <input
+            type="file"
+            id="imageInput"
+            accept="image/*"
+            hidden
+          />
+
         </form>
 
-        <ul id="suggestionsList" class="suggestions" hidden></ul>
+
+        <!-- Search Suggestions -->
+
+        <ul
+          id="suggestionsList"
+          class="suggestions"
+          hidden
+        ></ul>
+
       </section>
 
-      <!-- Quick Features Carousel -->
-      <section class="quick-grid">
-        <button class="quick-card" data-action="rewards">
-          <div class="quick-card-top">
-            <strong>Rewards</strong>
-            <span class="badge">🎖️</span>
-          </div>
-          <div class="quick-card-val">3/75</div>
-        </button>
 
-        <button class="quick-card" data-action="images">
-          <div class="quick-card-top">
-            <strong>Image Creator</strong>
-            <span class="badge spark">✨</span>
-          </div>
-          <small>Create stunning AI images</small>
-        </button>
+      <!-- =========================
+           WEATHER
+      ========================== -->
 
-        <button class="quick-card" data-action="news">
-          <div class="quick-card-top">
-            <strong>AI Writer</strong>
-            <span class="badge">📝</span>
-          </div>
-          <small>Draft essays & posts</small>
-        </button>
+      <section class="info-card weather-card">
 
-        <button class="quick-card" data-action="trending">
-          <div class="quick-card-top">
-            <strong>Translator</strong>
-            <span class="badge">🌐</span>
-          </div>
-          <small>Instant translation</small>
-        </button>
-      </section>
+        <div class="info-card-header">
 
-      <!-- Category Filter Pills -->
-      <nav class="category-tabs" id="categoryTabs">
-        <button class="tab active" data-mode="all">All</button>
-        <button class="tab" data-mode="news">News</button>
-        <button class="tab" data-mode="images">Images</button>
-        <button class="tab" data-mode="videos">Videos</button>
-        <button class="tab" data-mode="web">Web</button>
-      </nav>
-
-      <!-- Trending & Discover Feed (Edge/Start Style) -->
-      <section class="content-card" id="trendingBox">
-        <div class="section-heading">
           <div>
-            <span class="section-icon">🔥</span>
-            <h2>Trending News</h2>
+            <span class="info-label">
+              Weather
+            </span>
+
+            <h2 id="weatherLocation">
+              Your location
+            </h2>
           </div>
-          <button id="seeTrendingBtn" class="see-all">See all →</button>
+
+          <span
+            id="weatherIcon"
+            class="weather-icon"
+          >
+            ☀️
+          </span>
+
         </div>
 
-        <div id="trendingGrid" class="trending-list">
-          <!-- Sample Trending Feed Card -->
-          <article class="feed-card">
-            <img src="https://picsum.photos/600/320?random=1" class="feed-img" alt="News Image" />
-            <div class="feed-content">
-              <h3 class="feed-title">Global Technology Merges and Innovation Milestones Achieved</h3>
-              <div class="feed-meta">
-                <span class="feed-source"><strong>K</strong> Tuko • 10h</span>
-                <span class="feed-actions">👍 29 &nbsp; 💬 4</span>
-              </div>
-            </div>
-          </article>
+
+        <div
+          id="weatherContent"
+          class="weather-content"
+        >
+
+          <div class="weather-loading">
+            Loading weather...
+          </div>
+
         </div>
+
       </section>
 
-      <!-- Search Results Container -->
-      <section class="results-section">
-        <div id="searchPerfMeta" class="search-meta" hidden></div>
-        <div id="resultsWrapper"></div>
+
+      <!-- =========================
+           NEWS
+      ========================== -->
+
+      <section class="info-card news-card">
+
+        <div class="info-card-header">
+
+          <div>
+            <span class="info-label">
+              Latest News
+            </span>
+
+            <h2>
+              News for you
+            </h2>
+          </div>
+
+
+          <button
+            id="newsRefresh"
+            class="refresh-btn"
+            type="button"
+            aria-label="Refresh news"
+          >
+            ↻
+          </button>
+
+        </div>
+
+
+        <div
+          id="newsContent"
+          class="news-content"
+        >
+
+          <div class="news-loading">
+            Loading latest news...
+          </div>
+
+        </div>
+
       </section>
+
+
     </main>
 
-    <!-- Bottom Navigation Bar -->
-    <nav class="bottom-nav">
-      <button class="bottom-item active" data-nav="home">
-        <span class="bottom-icon">⌂</span>
-      </button>
 
-      <button class="bottom-item" data-nav="images">
-        <span class="bottom-icon">📷</span>
-      </button>
+    <!-- =========================
+         FOOTER
+    ========================== -->
 
-      <button class="bottom-item copilot-btn" data-nav="copilot">
-        <div class="copilot-icon">🎨</div>
-      </button>
+    <footer class="home-footer">
 
-      <button class="bottom-item" data-nav="tabs">
-        <span class="bottom-icon">2</span>
-      </button>
+      <span>
+        Wareligent Search
+      </span>
 
-      <button class="bottom-item" data-nav="more">
-        <span class="bottom-icon">⊞</span>
-      </button>
-    </nav>
+    </footer>
 
-    <!-- Toast Notification -->
-    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Toast -->
+
+    <div
+      id="toastContainer"
+      class="toast-container"
+      aria-live="polite"
+    ></div>
+
   </div>
+
 </body>
 </html>
