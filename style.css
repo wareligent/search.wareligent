@@ -146,7 +146,6 @@ body {
 
 /* Wareligent Animated Title */
 .brand-title {
-.brand-title {
   font-size: clamp(38px, 8vw, 48px);
   font-weight: 800;
   letter-spacing: -1px;
