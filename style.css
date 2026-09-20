@@ -208,62 +208,51 @@ body {
 }
 
 /* ====================================
-   SEARCH FOCUS MODE (Smooth Animations)
+   SEARCH FOCUS MODE (Zero Top Gap)
 ==================================== */
 
-/* ১. হেডারটি স্মুথলি ঢেকে যাবে ও উপরে সরে যাবে */
+/* ১. হেডার সম্পূর্ণ হাইড */
 body.search-focused #mainHeader {
-  opacity: 0;
-  transform: translateY(-20px);
-  max-height: 0;
-  padding-top: 0;
-  padding-bottom: 0;
-  pointer-events: none;
-  overflow: hidden;
+  display: none !important;
 }
 
-/* ২. মেইন কন্টেইনারের মার্জিন কমে টপে উঠে আসবে */
+/* ২. মেইন কন্টেইনারের টপ প্যাডিং শূন্য */
 body.search-focused .ddg-main {
-  padding-top: 8px;
-  padding-left: 8px;
-  padding-right: 8px;
+  padding-top: 0 !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
 }
 
-/* ৩. ব্র্যান্ড টাইটেলটি স্মুথলি ছোট হয়ে মুছে যাবে */
+/* ৩. ব্র্যান্ড টাইটেল হাইড */
 body.search-focused #brandTitle {
-  opacity: 0;
-  transform: scale(0.8) translateY(-10px);
-  max-height: 0;
-  margin: 0;
-  overflow: hidden;
+  display: none !important;
 }
 
-/* ৪. সার্চ বার ফুল-উইডথ হয়ে টপে চলে যাবে */
+/* ৪. সার্চ বার একদম টপে ফিক্সড */
 body.search-focused .brand-search-wrapper {
-  max-width: 100%;
-  width: 100%;
-  margin: 0;
+  max-width: 100% !important;
+  width: 100% !important;
+  margin: 0 !important;
 }
 
 body.search-focused .google-search-bar {
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  height: 48px;
+  border-radius: 0 0 12px 12px; /* নিচের দিকে হালকা রাউন্ডেড, টপে ফ্ল্যাট */
+  border-top: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  height: 50px;
   padding: 0 12px;
 }
 
-/* ৫. লেন্স আইকন গায়েব এবং ব্যাক বাটন ভেসে উঠবে */
+/* ৫. ব্যাক বাটন দৃশ্যমান */
 body.search-focused .search-icon {
-  display: none;
-  opacity: 0;
+  display: none !important;
 }
 
 body.search-focused .back-btn {
-  display: grid;
-  opacity: 1;
-  transform: scale(1);
+  display: grid !important;
+  opacity: 1 !important;
+  transform: scale(1) !important;
 }
-
 /* Menu Modal Styles */
 .menu-modal {
   position: fixed;
