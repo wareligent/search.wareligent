@@ -148,10 +148,8 @@ body {
 .brand-title {
   font-size: clamp(38px, 8vw, 48px);
   font-weight: 800;
-  letter-spacing: -1px;
-  background: linear-gradient(135deg, #00C6FF 0%, #0072FF 50%, #7F00FF 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.8px;
+  color: #1a237e; /* Deep Royal Navy Blue */
   user-select: none;
 }
 
