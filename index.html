@@ -9,15 +9,18 @@
 </head>
 <body>
 
+  <!-- Screen Flash Overlay for Fire Effect -->
+  <div id="fireOverlay" class="fire-overlay"></div>
+
   <div class="ddg-container">
 
-    <!-- Top DuckDuckGo Style Header Bar -->
-    <header class="ddg-header">
+    <!-- Top Action Header Bar -->
+    <header class="ddg-header animate-header">
       <div class="header-left"></div>
 
       <div class="header-actions">
-        <!-- DuckDuckGo Fire Icon -->
-        <button class="action-btn" id="fireBtn" title="Clear Tabs & Data">
+        <!-- DuckDuckGo Animated Fire Icon -->
+        <button class="action-btn fire-btn" id="fireBtn" title="Clear Tabs & Data">
           <svg viewBox="0 0 24 24"><path d="M13.5 0.67c0 0-2.58 2.22-2.58 4.77 0 1.25.5 2.39 1.32 3.23 -1.82 0-3.29 1.47-3.29 3.29 0 .28.04.55.11.81 -1.02-.68-1.7-1.84-1.7-3.16 0-.25.02-.49.07-.73 -2.25 1.58-3.73 4.14-3.73 7.05 0 4.8 3.89 8.69 8.69 8.69s8.69-3.89 8.69-8.69c0-5.83-4.38-10.63-7.58-15.26z"/></svg>
         </button>
         <!-- Tab Counter Badge -->
@@ -29,18 +32,18 @@
       </div>
     </header>
 
-    <!-- Main Section (Google Style Top-Center Placement) -->
+    <!-- Main Section (Top-Center Placement with Animations) -->
     <main class="ddg-main">
       <div class="brand-search-wrapper">
-        <!-- Simple Text Brand (No Logo Image) -->
-        <h1 class="brand-title">Wareligent</h1>
+        <!-- Animated Wareligent Text -->
+        <h1 class="brand-title animate-title">Wareligent</h1>
 
-        <!-- Google Style Search Bar -->
-        <div class="google-search-bar">
+        <!-- Google Style Animated Search Bar -->
+        <div class="google-search-bar animate-search">
           <svg class="search-icon" viewBox="0 0 24 24">
             <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
           </svg>
-          <input type="text" id="searchInput" placeholder="Search Wareligent or type a URL" />
+          <input type="text" id="searchInput" placeholder="Search Wareligent or type a URL" autocomplete="off" />
           <button class="ai-spark-btn" id="aiSparkBtn" title="AI Search">
             <svg viewBox="0 0 24 24"><path d="M12 2L9.19 8.63 2 12l7.19 3.37L12 22l2.81-6.63L22 12l-7.19-3.37z"/></svg>
           </button>
@@ -50,8 +53,8 @@
 
   </div>
 
-  <!-- Settings Slide Menu -->
-  <div id="menuModal" class="menu-modal hidden">
+  <!-- Settings Smooth Animated Slide Menu -->
+  <div id="menuModal" class="menu-modal">
     <div class="menu-content">
       <div class="menu-header">
         <h3>Settings</h3>
