@@ -46,11 +46,11 @@ body {
     Arial,
     sans-serif;
 
-  overflow-x: hidden;
-
   transition:
     background .3s ease,
     color .3s ease;
+
+  overflow-x: hidden;
 }
 
 
@@ -128,9 +128,7 @@ body.page-leave .page-transition {
 
 .search-header {
   position: sticky;
-
   top: 0;
-
   z-index: 100;
 
   height: var(--header-height);
@@ -143,7 +141,6 @@ body.page-leave .page-transition {
     240px;
 
   align-items: center;
-
   justify-content: center;
 
   gap: 25px;
@@ -151,19 +148,21 @@ body.page-leave .page-transition {
   padding: 0 28px;
 
   background:
-    rgba(255, 255, 255, .94);
+    rgba(255,255,255,.88);
 
   border-bottom:
     1px solid var(--border);
 
   backdrop-filter: blur(18px);
-
   -webkit-backdrop-filter: blur(18px);
+
+  transition:
+    background .3s ease;
 }
 
 .dark-theme .search-header {
   background:
-    rgba(13, 16, 20, .94);
+    rgba(13,16,20,.88);
 }
 
 
@@ -173,7 +172,6 @@ body.page-leave .page-transition {
 
 .mini-brand {
   display: inline-flex;
-
   align-items: center;
 
   width: max-content;
@@ -185,7 +183,6 @@ body.page-leave .page-transition {
   text-decoration: none;
 
   font-size: 18px;
-
   font-weight: 800;
 
   letter-spacing: -.5px;
@@ -196,9 +193,7 @@ body.page-leave .page-transition {
   height: 28px;
 
   display: flex;
-
   align-items: center;
-
   justify-content: center;
 
   gap: 3px;
@@ -254,30 +249,21 @@ body.page-leave .page-transition {
 
 
 /* =========================================
-   HEADER CENTER
+   SEARCH FORM
 ========================================= */
 
 .header-center {
   width: 100%;
 }
 
-
-/* =========================================
-   SEARCH FORM
-   DESKTOP
-========================================= */
-
 .search-form {
   width: 100%;
-
   height: 50px;
 
   display: flex;
-
   align-items: center;
 
-  padding:
-    0 7px 0 17px;
+  padding: 0 7px 0 17px;
 
   background: var(--card);
 
@@ -287,57 +273,45 @@ body.page-leave .page-transition {
   border-radius: 16px;
 
   box-shadow:
-    0 2px 8px rgba(0, 0, 0, .025);
+    0 2px 8px rgba(0,0,0,.025);
 
-  transition: none;
+  transition:
+    border-color .22s ease,
+    box-shadow .22s ease,
+    transform .22s ease;
 }
 
+.search-form:focus-within {
+  border-color:
+    rgba(23,105,255,.45);
 
-/*
-   Desktop focus also stays stable.
-*/
-.search-form:focus-within,
-.search-form:focus,
-.search-form:hover,
-.search-form:active {
-  transform: none;
+  box-shadow:
+    0 0 0 4px
+    rgba(23,105,255,.08),
+    var(--shadow);
 
-  outline: none;
+  transform:
+    translateY(-1px);
 }
-
-
-/* =========================================
-   SEARCH ICON
-========================================= */
 
 .search-icon {
   width: 19px;
-
   height: 19px;
 
-  flex:
-    0 0 auto;
+  flex: 0 0 auto;
 
   fill: var(--muted);
 }
 
-
-/* =========================================
-   INPUT
-========================================= */
-
 .search-form input {
   min-width: 0;
-
   flex: 1;
 
   height: 100%;
 
-  padding:
-    0 12px;
+  padding: 0 12px;
 
   border: 0;
-
   outline: 0;
 
   background: transparent;
@@ -345,29 +319,11 @@ body.page-leave .page-transition {
   color: var(--text);
 
   font-size: 15px;
-
   font-weight: 500;
-
-  box-shadow: none;
-
-  -webkit-appearance: none;
-
-  appearance: none;
-}
-
-.search-form input:focus,
-.search-form input:active {
-  border: 0;
-
-  outline: 0;
-
-  box-shadow: none;
 }
 
 .search-form input::placeholder {
   color: var(--muted);
-
-  opacity: 1;
 }
 
 .search-form input::-webkit-search-cancel-button {
@@ -376,14 +332,13 @@ body.page-leave .page-transition {
 
 
 /* =========================================
-   MOBILE HOME / BACK
+   MOBILE HOME
 ========================================= */
 
 .mobile-home-btn {
   display: none;
 
   width: 32px;
-
   height: 34px;
 
   border: 0;
@@ -393,13 +348,10 @@ body.page-leave .page-transition {
   color: var(--muted);
 
   cursor: pointer;
-
-  outline: none;
 }
 
 .mobile-home-btn svg {
   width: 20px;
-
   height: 20px;
 
   fill: currentColor;
@@ -412,7 +364,6 @@ body.page-leave .page-transition {
 
 .clear-btn {
   width: 34px;
-
   height: 34px;
 
   display: none;
@@ -420,7 +371,6 @@ body.page-leave .page-transition {
   place-items: center;
 
   border: 0;
-
   border-radius: 9px;
 
   background: transparent;
@@ -428,14 +378,22 @@ body.page-leave .page-transition {
   color: var(--muted);
 
   cursor: pointer;
+
+  transition:
+    background .2s ease,
+    color .2s ease;
 }
 
 .clear-btn svg {
   width: 16px;
-
   height: 16px;
 
   fill: currentColor;
+}
+
+.clear-btn:hover {
+  background: var(--primary-soft);
+  color: var(--primary);
 }
 
 
@@ -445,86 +403,80 @@ body.page-leave .page-transition {
 
 .search-submit {
   width: 38px;
-
   height: 38px;
 
   display: grid;
-
   place-items: center;
 
   border: 0;
-
   border-radius: 12px;
 
   background: var(--primary);
 
-  color: #ffffff;
-
   cursor: pointer;
 
-  outline: none;
-
-  box-shadow: none;
-
-  transition: none;
+  transition:
+    transform .18s ease,
+    filter .18s ease;
 }
 
-.search-submit:hover,
-.search-submit:focus,
+.search-submit:hover {
+  filter: brightness(1.07);
+
+  transform:
+    scale(1.04);
+}
+
 .search-submit:active {
-  background: var(--primary);
-
-  transform: none;
-
-  filter: none;
-
-  box-shadow: none;
-
-  outline: none;
+  transform:
+    scale(.94);
 }
 
 .search-submit svg {
   width: 18px;
-
   height: 18px;
 
-  fill: #ffffff;
-
-  stroke: #ffffff;
+  fill: #fff;
 }
 
 
 /* =========================================
-   SETTINGS
+   SETTINGS BUTTON
 ========================================= */
 
 .header-right {
   display: flex;
-
   justify-content: flex-end;
 }
 
 .settings-btn {
   width: 42px;
-
   height: 42px;
 
   display: grid;
-
   place-items: center;
 
   border: 1px solid transparent;
-
   border-radius: 12px;
 
   background: transparent;
 
   cursor: pointer;
+
+  transition:
+    background .2s ease,
+    transform .2s ease;
+}
+
+.settings-btn:hover {
+  background: var(--primary-soft);
+
+  transform:
+    rotate(7deg);
 }
 
 .settings-btn svg {
   width: 21px;
-
   height: 21px;
 
   fill: var(--muted);
@@ -558,7 +510,6 @@ body.page-leave .page-transition {
   display: flex;
 
   align-items: flex-end;
-
   justify-content: space-between;
 
   gap: 20px;
@@ -572,7 +523,6 @@ body.page-leave .page-transition {
   color: var(--muted);
 
   font-size: 12px;
-
   font-weight: 700;
 
   letter-spacing: .07em;
@@ -582,7 +532,6 @@ body.page-leave .page-transition {
 
 #queryTitle {
   font-size: 25px;
-
   line-height: 1.25;
 
   font-weight: 750;
@@ -621,8 +570,7 @@ body.page-leave .page-transition {
 .result-card {
   display: block;
 
-  padding:
-    20px 22px;
+  padding: 20px 22px;
 
   border:
     1px solid var(--border);
@@ -648,6 +596,11 @@ body.page-leave .page-transition {
     resultIn .42s
     cubic-bezier(.2,.8,.2,1)
     forwards;
+
+  transition:
+    border-color .22s ease,
+    box-shadow .22s ease,
+    transform .22s ease;
 }
 
 .result-card:hover {
@@ -688,16 +641,16 @@ body.page-leave .page-transition {
   margin-bottom: 8px;
 }
 
+
+/* WEBSITE LOGO */
+
 .source-icon {
   width: 30px;
-
   height: 30px;
 
-  flex:
-    0 0 30px;
+  flex: 0 0 30px;
 
   display: grid;
-
   place-items: center;
 
   overflow: hidden;
@@ -707,23 +660,23 @@ body.page-leave .page-transition {
 
   border-radius: 9px;
 
-  background:
-    var(--primary-soft);
+  background: var(--primary-soft);
 
   color: var(--primary);
 
   font-size: 12px;
-
   font-weight: 800;
 }
 
 .source-icon svg {
   width: 20px;
-
   height: 20px;
 
   display: block;
 }
+
+
+/* SOURCE NAME */
 
 .source-name {
   min-width: 0;
@@ -733,11 +686,9 @@ body.page-leave .page-transition {
   color: var(--text);
 
   font-size: 13px;
-
   font-weight: 650;
 
   text-overflow: ellipsis;
-
   white-space: nowrap;
 }
 
@@ -751,7 +702,6 @@ body.page-leave .page-transition {
   font-size: 12px;
 
   text-overflow: ellipsis;
-
   white-space: nowrap;
 }
 
@@ -764,7 +714,6 @@ body.page-leave .page-transition {
   color: var(--primary);
 
   font-size: 19px;
-
   line-height: 1.35;
 
   font-weight: 700;
@@ -785,7 +734,6 @@ body.page-leave .page-transition {
   color: var(--muted);
 
   font-size: 14px;
-
   line-height: 1.65;
 }
 
@@ -816,7 +764,6 @@ body.page-leave .page-transition {
   display: flex;
 
   align-items: center;
-
   justify-content: center;
 
   gap: 4px;
@@ -827,8 +774,7 @@ body.page-leave .page-transition {
 
   border-radius: 8px;
 
-  background:
-    var(--primary);
+  background: var(--primary);
 
   animation:
     loaderBars .9s
@@ -857,13 +803,11 @@ body.page-leave .page-transition {
   0%,
   100% {
     transform: scaleY(.65);
-
     opacity: .55;
   }
 
   50% {
     transform: scaleY(1);
-
     opacity: 1;
   }
 }
@@ -883,11 +827,9 @@ body.page-leave .page-transition {
 
 .state-icon {
   width: 58px;
-
   height: 58px;
 
   display: grid;
-
   place-items: center;
 
   margin:
@@ -906,18 +848,15 @@ body.page-leave .page-transition {
 
 .state-icon svg {
   width: 27px;
-
   height: 27px;
 
   fill: currentColor;
 }
 
 .error-state-icon {
-  background:
-    var(--danger-soft);
+  background: var(--danger-soft);
 
-  color:
-    var(--danger);
+  color: var(--danger);
 }
 
 
@@ -929,7 +868,6 @@ body.page-leave .page-transition {
   margin-bottom: 8px;
 
   font-size: 21px;
-
   line-height: 1.3;
 
   font-weight: 700;
@@ -946,7 +884,6 @@ body.page-leave .page-transition {
   color: var(--muted);
 
   font-size: 14px;
-
   line-height: 1.6;
 }
 
@@ -963,23 +900,30 @@ body.page-leave .page-transition {
 
   border-radius: 10px;
 
-  background:
-    var(--primary);
+  background: var(--primary);
 
   color: #fff;
 
   font-size: 13px;
-
   font-weight: 650;
 
   cursor: pointer;
+
+  transition:
+    transform .18s ease,
+    filter .18s ease;
 }
 
-.state button:hover,
-.state button:active {
-  transform: none;
+.state button:hover {
+  filter: brightness(1.06);
 
-  filter: none;
+  transform:
+    translateY(-1px);
+}
+
+.state button:active {
+  transform:
+    translateY(0);
 }
 
 
@@ -989,7 +933,6 @@ body.page-leave .page-transition {
 
 .settings-overlay {
   position: fixed;
-
   inset: 0;
 
   z-index: 500;
@@ -1005,7 +948,6 @@ body.page-leave .page-transition {
     rgba(0,0,0,.12);
 
   opacity: 0;
-
   visibility: hidden;
 
   transition:
@@ -1013,7 +955,6 @@ body.page-leave .page-transition {
     visibility .22s ease;
 
   backdrop-filter: blur(4px);
-
   -webkit-backdrop-filter: blur(4px);
 }
 
@@ -1036,16 +977,14 @@ body.page-leave .page-transition {
 
   padding: 10px;
 
-  background:
-    var(--card);
+  background: var(--card);
 
   border:
     1px solid var(--border);
 
   border-radius: 16px;
 
-  box-shadow:
-    var(--shadow);
+  box-shadow: var(--shadow);
 
   transform:
     translateY(-8px)
@@ -1072,7 +1011,6 @@ body.page-leave .page-transition {
   display: flex;
 
   align-items: center;
-
   justify-content: space-between;
 
   padding:
@@ -1085,11 +1023,9 @@ body.page-leave .page-transition {
 
 .settings-title button {
   width: 32px;
-
   height: 32px;
 
   display: grid;
-
   place-items: center;
 
   border: 0;
@@ -1104,13 +1040,11 @@ body.page-leave .page-transition {
 }
 
 .settings-title button:hover {
-  background:
-    var(--primary-soft);
+  background: var(--primary-soft);
 }
 
 .settings-title svg {
   width: 16px;
-
   height: 16px;
 
   fill: currentColor;
@@ -1129,7 +1063,6 @@ body.page-leave .page-transition {
   display: flex;
 
   align-items: center;
-
   justify-content: space-between;
 
   padding:
@@ -1166,20 +1099,16 @@ body.page-leave .page-transition {
 
 .route-loader {
   position: fixed;
-
   inset: 0;
 
   z-index: 9998;
 
   display: grid;
-
   place-items: center;
 
-  background:
-    var(--bg);
+  background: var(--bg);
 
   opacity: 0;
-
   visibility: hidden;
 
   transition:
@@ -1193,845 +1122,140 @@ body.page-leave .page-transition {
 }
 
 
-/* =========================================================
-   MOBILE
-   SEARCH BAR = RESULT SEARCH BAR
-========================================================= */
+/* =========================================
+   RESPONSIVE
+========================================= */
 
 @media (max-width: 850px) {
 
   .search-header {
-    position: sticky;
+    grid-template-columns: 1fr;
 
-    top: 0;
-
-    z-index: 100;
-
-    width: 100%;
-
-    height: 82px;
-
-    display: flex;
-
-    align-items: center;
+    height: 70px;
 
     padding:
-      10px 14px;
-
-    background:
-      #ffffff;
-
-    border-bottom:
-      1px solid #edf0f4;
-
-    backdrop-filter: none;
-
-    -webkit-backdrop-filter: none;
+      0 16px;
   }
-
-
-  .dark-theme .search-header {
-    background:
-      #0d1014;
-
-    border-bottom-color:
-      #20252c;
-  }
-
-
-  /* Hide desktop sections */
 
   .header-left,
   .header-right {
     display: none;
   }
 
-
   .header-center {
     width: 100%;
-
-    height: 100%;
-
-    display: flex;
-
-    align-items: center;
   }
-
-
-  /* =====================================================
-     FINAL MOBILE SEARCH BAR
-  ===================================================== */
-
-  .search-form {
-
-    width: 100%;
-
-    height: 58px;
-
-    min-height: 58px;
-
-    display: flex;
-
-    align-items: center;
-
-    padding:
-      0 6px 0 7px;
-
-    background:
-      #ffffff;
-
-    border:
-      2px solid #a9c8ff;
-
-    border-radius:
-      30px;
-
-    box-shadow:
-      0 2px 10px
-      rgba(23,105,255,.07);
-
-    transform: none;
-
-    outline: none;
-
-    transition: none;
-  }
-
-
-  /*
-     IMPORTANT:
-     Focus / typing / hover = SAME DESIGN
-  */
-
-  .search-form:hover,
-  .search-form:focus,
-  .search-form:active,
-  .search-form:focus-within {
-
-    width: 100%;
-
-    height: 58px;
-
-    min-height: 58px;
-
-    background:
-      #ffffff;
-
-    border:
-      2px solid #a9c8ff;
-
-    border-radius:
-      30px;
-
-    box-shadow:
-      0 2px 10px
-      rgba(23,105,255,.07);
-
-    transform: none;
-
-    outline: none;
-  }
-
-
-  /* Dark */
-
-  .dark-theme .search-form,
-  .dark-theme .search-form:hover,
-  .dark-theme .search-form:focus,
-  .dark-theme .search-form:active,
-  .dark-theme .search-form:focus-within {
-
-    background:
-      #15191f;
-
-    border-color:
-      #315fa8;
-
-    box-shadow:
-      0 2px 12px
-      rgba(0,0,0,.22);
-
-    transform: none;
-  }
-
-
-  /* =====================================================
-     BACK ARROW
-  ===================================================== */
 
   .mobile-home-btn {
-
-    width: 42px;
-
-    height: 48px;
-
-    min-width: 42px;
-
-    flex:
-      0 0 42px;
-
     display: grid;
 
     place-items: center;
-
-    border: 0;
-
-    border-radius: 50%;
-
-    background:
-      transparent;
-
-    color:
-      #66707c;
-
-    cursor: pointer;
-
-    outline: none;
-
-    box-shadow: none;
-
-    transform: none;
   }
 
+  .search-form {
+    height: 48px;
 
-  .mobile-home-btn:hover,
-  .mobile-home-btn:focus,
-  .mobile-home-btn:active {
-
-    background:
-      transparent;
-
-    color:
-      #66707c;
-
-    outline: none;
-
-    box-shadow: none;
-
-    transform: none;
+    padding-left: 9px;
   }
-
-
-  .mobile-home-btn svg {
-
-    width: 27px;
-
-    height: 27px;
-
-    fill:
-      currentColor;
-  }
-
-
-  /* =====================================================
-     SEARCH ICON
-  ===================================================== */
-
-  .search-icon {
-
-    width: 23px;
-
-    height: 23px;
-
-    min-width: 23px;
-
-    flex:
-      0 0 23px;
-
-    margin-left: 1px;
-
-    fill:
-      #69727e;
-
-    color:
-      #69727e;
-  }
-
-
-  /* =====================================================
-     INPUT
-  ===================================================== */
-
-  .search-form input {
-
-    min-width: 0;
-
-    flex: 1;
-
-    height: 100%;
-
-    padding:
-      0 8px;
-
-    border: 0;
-
-    outline: none;
-
-    background:
-      transparent;
-
-    color:
-      #15181c;
-
-    font-size:
-      17px;
-
-    font-weight:
-      500;
-
-    box-shadow:
-      none;
-
-    -webkit-appearance:
-      none;
-
-    appearance:
-      none;
-  }
-
-
-  .search-form input:hover,
-  .search-form input:focus,
-  .search-form input:active {
-
-    border: 0;
-
-    outline: none;
-
-    box-shadow: none;
-
-    background: transparent;
-  }
-
-
-  .search-form input::placeholder {
-
-    color:
-      #69727e;
-
-    opacity:
-      1;
-  }
-
-
-  /* =====================================================
-     CLEAR BUTTON HIDDEN
-  ===================================================== */
-
-  .clear-btn {
-
-    display:
-      none !important;
-  }
-
-
-  /* =====================================================
-     BLUE ROUND SEARCH BUTTON
-  ===================================================== */
-
-  .search-submit {
-
-    width:
-      44px;
-
-    height:
-      44px;
-
-    min-width:
-      44px;
-
-    min-height:
-      44px;
-
-    flex:
-      0 0 44px;
-
-    display:
-      grid;
-
-    place-items:
-      center;
-
-    padding:
-      0;
-
-    border:
-      0;
-
-    border-radius:
-      50%;
-
-    background:
-      #1769ff;
-
-    color:
-      #ffffff;
-
-    box-shadow:
-      0 3px 8px
-      rgba(23,105,255,.22);
-
-    outline:
-      none;
-
-    transform:
-      none;
-
-    transition:
-      none;
-  }
-
-
-  .search-submit:hover,
-  .search-submit:focus,
-  .search-submit:active {
-
-    background:
-      #1769ff;
-
-    box-shadow:
-      0 3px 8px
-      rgba(23,105,255,.22);
-
-    transform:
-      none;
-
-    filter:
-      none;
-
-    outline:
-      none;
-  }
-
-
-  .search-submit svg {
-
-    width:
-      22px;
-
-    height:
-      22px;
-
-    fill:
-      #ffffff;
-
-    stroke:
-      #ffffff;
-  }
-
-
-  /* =====================================================
-     RESULTS
-  ===================================================== */
 
   .results-page {
-
     width:
-      calc(100% - 28px);
+      min(
+        calc(100% - 28px),
+        720px
+      );
 
-    margin:
-      0 auto;
-
-    padding:
-      28px 0 90px;
+    padding-top: 28px;
   }
 
-
   .results-top {
-
-    align-items:
-      flex-start;
+    align-items: flex-start;
   }
 }
 
 
-/* =========================================================
-   SMALL PHONE
-========================================================= */
-
 @media (max-width: 520px) {
 
-  .search-header {
-
-    height:
-      78px;
-
-    padding:
-      9px 10px;
-  }
-
-
-  .search-form,
-  .search-form:hover,
-  .search-form:focus,
-  .search-form:active,
-  .search-form:focus-within {
-
-    height:
-      58px;
-
-    min-height:
-      58px;
-
-    padding-left:
-      5px;
-
-    padding-right:
-      6px;
-
-    border:
-      2px solid #a9c8ff;
-
-    border-radius:
-      30px;
-
-    transform:
-      none;
-  }
-
-
-  .mobile-home-btn {
-
-    width:
-      40px;
-
-    height:
-      46px;
-
-    min-width:
-      40px;
-
-    flex-basis:
-      40px;
-  }
-
-
-  .mobile-home-btn svg {
-
-    width:
-      26px;
-
-    height:
-      26px;
-  }
-
-
-  .search-icon {
-
-    width:
-      21px;
-
-    height:
-      21px;
-
-    min-width:
-      21px;
-
-    flex-basis:
-      21px;
-  }
-
-
-  .search-form input {
-
-    font-size:
-      16px;
-
-    padding-left:
-      7px;
-
-    padding-right:
-      6px;
-  }
-
-
-  .search-submit {
-
-    width:
-      42px;
-
-    height:
-      42px;
-
-    min-width:
-      42px;
-
-    min-height:
-      42px;
-
-    flex-basis:
-      42px;
-  }
-
-
-  .search-submit svg {
-
-    width:
-      21px;
-
-    height:
-      21px;
-  }
-
-
-  /* Results */
-
   .results-page {
-
     width:
       calc(100% - 22px);
   }
 
-
   .results-top {
-
-    margin-bottom:
-      21px;
+    margin-bottom: 21px;
   }
-
 
   #queryTitle {
-
-    font-size:
-      21px;
+    font-size: 21px;
   }
-
 
   .result-label {
-
-    font-size:
-      11px;
+    font-size: 11px;
   }
-
 
   .result-card {
+    padding: 17px;
 
-    padding:
-      17px;
-
-    border-radius:
-      14px;
+    border-radius: 14px;
   }
-
 
   .result-title {
-
-    font-size:
-      17px;
+    font-size: 17px;
   }
-
 
   .result-description {
+    font-size: 13px;
 
-    font-size:
-      13px;
-
-    line-height:
-      1.6;
+    line-height: 1.6;
   }
-
 
   .source-icon {
+    width: 28px;
+    height: 28px;
 
-    width:
-      28px;
-
-    height:
-      28px;
-
-    flex-basis:
-      28px;
+    flex-basis: 28px;
   }
-
 
   .source-icon svg {
-
-    width:
-      18px;
-
-    height:
-      18px;
+    width: 18px;
+    height: 18px;
   }
-
 
   .source-url {
-
-    display:
-      none;
+    display: none;
   }
 
-
   .settings-overlay {
-
     padding:
       75px 10px 10px;
   }
 
-
   .settings-panel {
-
-    width:
-      100%;
+    width: 100%;
   }
 
-
   .state {
-
     padding:
       62px 16px;
   }
 }
 
 
-/* =========================================================
-   VERY SMALL PHONE
-========================================================= */
-
-@media (max-width: 380px) {
-
-  .search-header {
-
-    padding-left:
-      7px;
-
-    padding-right:
-      7px;
-  }
-
-
-  .search-form {
-
-    padding-left:
-      3px;
-
-    padding-right:
-      4px;
-  }
-
-
-  .mobile-home-btn {
-
-    width:
-      36px;
-
-    min-width:
-      36px;
-
-    flex-basis:
-      36px;
-  }
-
-
-  .mobile-home-btn svg {
-
-    width:
-      24px;
-
-    height:
-      24px;
-  }
-
-
-  .search-icon {
-
-    width:
-      20px;
-
-    height:
-      20px;
-
-    min-width:
-      20px;
-
-    flex-basis:
-      20px;
-  }
-
-
-  .search-form input {
-
-    font-size:
-      15px;
-
-    padding-left:
-      5px;
-
-    padding-right:
-      4px;
-  }
-
-
-  .search-submit {
-
-    width:
-      40px;
-
-    height:
-      40px;
-
-    min-width:
-      40px;
-
-    flex-basis:
-      40px;
-  }
-
-
-  .search-submit svg {
-
-    width:
-      20px;
-
-    height:
-      20px;
-  }
-}
-
-
-/* =========================================================
-   REMOVE FOCUS RINGS FROM SEARCH UI
-========================================================= */
-
-.search-form,
-.search-form *,
-.search-form *::before,
-.search-form *::after {
-
-  -webkit-tap-highlight-color:
-    transparent;
-}
-
-.search-form:focus,
-.search-form:focus-within,
-.search-form input:focus,
-.search-submit:focus,
-.mobile-home-btn:focus {
-
-  outline:
-    none !important;
-}
-
-
-/* =========================================================
+/* =========================================
    REDUCED MOTION
-========================================================= */
+========================================= */
 
 @media (prefers-reduced-motion: reduce) {
 
   *,
   *::before,
   *::after {
+    animation-duration: .01ms !important;
 
-    animation-duration:
-      .01ms !important;
+    animation-iteration-count: 1 !important;
 
-    animation-iteration-count:
-      1 !important;
+    transition-duration: .01ms !important;
 
-    transition-duration:
-      .01ms !important;
-
-    scroll-behavior:
-      auto !important;
+    scroll-behavior: auto !important;
   }
-}
+  }
