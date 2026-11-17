@@ -3,391 +3,348 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#ffffff">
-<meta name="description" content="Wareligent Search — Discover the web.">
+<meta name="theme-color" content="#f8faff">
+<meta name="description" content="Wareligent Search — a smarter way to discover the web.">
 <title>Wareligent Search</title>
 <link rel="icon" href="logo.png" type="image/png">
-
 <style>
 :root{
---blue:#2868e8;--ink:#202124;--muted:#70757a;
---line:#e5e8ee;--bg:#fff;--soft:#f5f8ff;--card:#fff;
+  --bg:#f8faff;--surface:#fff;--surface-2:#f2f5fb;--ink:#172033;
+  --muted:#758096;--line:#e6eaf2;--blue:#3268e9;--blue2:#6c91ff;
+  --shadow:0 18px 55px rgba(37,67,130,.09);--radius:22px;
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,sans-serif;min-height:100vh}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh}
 button,input{font:inherit}
-a{text-decoration:none;color:inherit}
-.topbar{height:68px;display:flex;align-items:center;justify-content:space-between;padding:0 5%;border-bottom:1px solid #f0f1f4}
-.brand{display:flex;align-items:center;gap:10px;font-size:21px;font-weight:800}
-.brand img{width:34px;height:34px;object-fit:contain}
-.brand span span,.logo-word span{color:var(--blue)}
-.top-actions{display:flex;gap:10px}
-.icon-btn{width:40px;height:40px;border:1px solid var(--line);border-radius:50%;background:var(--card);cursor:pointer;transition:.25s}
-.icon-btn:hover{border-color:var(--blue);color:var(--blue);transform:translateY(-2px)}
-.main{max-width:980px;margin:auto;padding:90px 22px 55px}
-.hero{text-align:center}
-.logo-large{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:22px}
-.logo-large img{width:56px;height:56px;object-fit:contain}
-.logo-word{font-size:clamp(38px,7vw,60px);font-weight:800;letter-spacing:-3px}
-.tagline{font-size:14px;color:var(--muted);margin-bottom:30px}
-.search-wrap{max-width:690px;margin:auto;position:relative}
-.search-box{height:58px;border:1px solid #dfe3eb;border-radius:40px;display:flex;align-items:center;padding:0 17px 0 21px;gap:13px;background:var(--card);box-shadow:0 3px 14px #1e32500b;transition:.25s}
-.search-box:focus-within{border-color:#a9c3fa;box-shadow:0 5px 24px #2868e822}
-.search-icon{color:#8b929e;font-size:22px}
-.search-box input{border:0;outline:0;flex:1;min-width:0;background:transparent;color:var(--ink);font-size:16px}
-.clear-btn{border:0;background:none;color:#8b929e;font-size:22px;cursor:pointer;display:none}
-.search-actions{display:flex;justify-content:center;gap:12px;margin:24px 0 15px}
-.outline-btn{border:1px solid #dce2ed;background:var(--card);color:#394150;padding:11px 19px;border-radius:8px;cursor:pointer;font-size:13px;transition:.25s}
-.outline-btn:hover{border-color:var(--blue);color:var(--blue);transform:translateY(-3px)}
-.quick-links{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:30px auto}
-.quick-link{border:1px solid var(--line);border-radius:30px;padding:9px 15px;color:#626b79;font-size:12px;cursor:pointer;background:var(--card)}
-.quick-link:hover{color:var(--blue);border-color:#b8cdf9}
-.suggestions{display:none;position:absolute;top:64px;left:0;right:0;background:var(--card);border:1px solid var(--line);border-radius:15px;box-shadow:0 12px 40px #20376417;z-index:20;padding:8px;text-align:left}
-.suggestions.show{display:block}
-.suggestion{display:flex;gap:12px;padding:11px 13px;border-radius:9px;cursor:pointer;color:var(--muted);font-size:14px}
-.suggestion:hover{background:var(--soft)}
-.results-area{display:none;max-width:850px;margin:42px auto 0}
-.results-area.show{display:block}
-.results-top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:15px;margin-bottom:22px}
-.result-tabs{display:flex;gap:7px;overflow-x:auto}
-.tab{border:0;background:transparent;color:var(--muted);padding:9px 13px;border-radius:22px;cursor:pointer;font-size:13px;white-space:nowrap}
-.tab.active,.tab:hover{background:#edf3ff;color:var(--blue)}
-.result-meta{font-size:12px;color:var(--muted)}
-.result{padding:15px 0 20px;max-width:690px}
-.result-url{font-size:12px;color:#5d6878;margin-bottom:7px;overflow-wrap:anywhere}
-.result h3{font-size:20px;font-weight:500;color:#1558c9;margin:0 0 7px;line-height:1.35}
-.result h3 a:hover{text-decoration:underline}
-.result p{font-size:14px;line-height:1.65;color:#5c626c;margin:0}
-.result-label{display:inline-block;margin-top:9px;color:#778196;font-size:11px;background:#f3f5f8;padding:4px 8px;border-radius:5px}
-.empty{text-align:center;padding:55px 15px;color:var(--muted)}
-.empty strong{display:block;color:var(--ink);font-size:19px;margin-bottom:9px}
-.loader{display:none;text-align:center;padding:30px;color:var(--muted);font-size:13px}
-.loader.show{display:block}
-.spinner{width:25px;height:25px;border:3px solid #e5ecfb;border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
+button,a{-webkit-tap-highlight-color:transparent}
+a{color:inherit;text-decoration:none}
+button{cursor:pointer}
+.topbar{height:76px;padding:0 clamp(18px,5vw,70px);display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(224,230,241,.75);background:rgba(255,255,255,.72);backdrop-filter:blur(18px);position:relative;z-index:5}
+.brand{display:flex;align-items:center;gap:11px;font-weight:800;letter-spacing:-.7px;font-size:21px}
+.brand img{width:35px;height:35px;object-fit:contain}
+.brand-name span{color:var(--blue)}
+.top-right{display:flex;align-items:center;gap:10px}
+.top-link{font-size:13px;color:#59657b;padding:10px 13px;border-radius:12px;transition:.2s}
+.top-link:hover{background:#eef3ff;color:var(--blue)}
+.round-btn{width:42px;height:42px;border:1px solid var(--line);border-radius:50%;background:white;color:#58647a;font-size:18px;transition:.2s}
+.round-btn:hover{border-color:#b9cafa;color:var(--blue);transform:translateY(-2px)}
+main{width:min(100% - 36px,1050px);margin:auto}
+.home{min-height:calc(100svh - 150px);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:55px 0 75px;position:relative}
+.home:before{content:"";position:absolute;width:min(750px,95vw);height:420px;top:12%;left:50%;transform:translateX(-50%);background:radial-gradient(ellipse,rgba(80,128,255,.11),rgba(80,128,255,0) 68%);pointer-events:none;z-index:-1}
+.hero{text-align:center;width:100%;position:relative}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;padding:8px 13px;border:1px solid #e1e8f8;border-radius:99px;background:rgba(255,255,255,.75);color:#61708c;font-size:11px;font-weight:700;letter-spacing:1.25px;text-transform:uppercase;margin-bottom:24px}
+.live-dot{width:7px;height:7px;background:#35bd83;border-radius:50%;box-shadow:0 0 0 4px #35bd831b}
+.hero-logo{display:flex;align-items:center;justify-content:center;gap:15px;margin-bottom:10px}
+.hero-logo img{width:clamp(48px,7vw,68px);height:clamp(48px,7vw,68px);object-fit:contain}
+.wordmark{font-size:clamp(43px,8vw,76px);font-weight:850;letter-spacing:-5px;line-height:1.05}
+.wordmark span{color:var(--blue)}
+.tagline{font-size:15px;color:var(--muted);margin:16px 0 34px;letter-spacing:.15px}
+.search-shell{width:min(100%,720px);margin:0 auto;position:relative}
+.searchbox{height:66px;display:flex;align-items:center;gap:14px;padding:0 10px 0 22px;border:1px solid #dfe5f0;border-radius:20px;background:var(--surface);box-shadow:0 8px 28px rgba(35,62,115,.07);transition:border .2s,box-shadow .2s,transform .2s}
+.searchbox:focus-within{border-color:#a9c1fb;box-shadow:0 12px 36px rgba(50,104,233,.14);transform:translateY(-1px)}
+.search-symbol{font-size:23px;color:#8b96aa;line-height:1}
+.searchbox input{flex:1;min-width:0;border:0;outline:0;background:transparent;color:var(--ink);font-size:16px}
+.searchbox input::placeholder{color:#9aa4b6}
+.clear{border:0;background:transparent;color:#8a94a6;font-size:22px;padding:7px;display:none}
+.submit{height:46px;width:48px;border:0;border-radius:14px;background:var(--blue);color:white;font-size:22px;box-shadow:0 5px 14px #3268e936;transition:.2s}
+.submit:hover{background:#2458d2;transform:translateY(-2px);box-shadow:0 8px 18px #3268e94a}
+.suggestions{display:none;position:absolute;top:74px;left:0;right:0;background:white;border:1px solid var(--line);border-radius:17px;padding:8px;box-shadow:var(--shadow);z-index:10;text-align:left}
+.suggestions.open{display:block}
+.suggestion{padding:12px 14px;border-radius:10px;color:#647087;font-size:14px;cursor:pointer;display:flex;gap:12px;align-items:center}
+.suggestion:hover{background:#f2f6ff;color:var(--blue)}
+.actions{display:flex;justify-content:center;gap:12px;margin:22px 0 0}
+.action-btn{border:1px solid #dfe5ef;background:rgba(255,255,255,.8);color:#46536b;border-radius:12px;padding:11px 17px;font-size:12px;font-weight:650;transition:.2s}
+.action-btn:hover{border-color:#b7cafa;color:var(--blue);background:#fff;transform:translateY(-2px)}
+.shortcuts{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:48px}
+.shortcut{display:flex;align-items:center;gap:9px;border:1px solid #e6eaf2;background:rgba(255,255,255,.72);padding:10px 14px;border-radius:14px;color:#65718a;font-size:12px;transition:.2s}
+.shortcut:hover{border-color:#c2d2f7;background:#fff;color:var(--blue);transform:translateY(-3px)}
+.shortcut i{font-style:normal;width:24px;height:24px;display:grid;place-items:center;border-radius:8px;background:#edf3ff;color:var(--blue);font-size:13px}
+.results{display:none;width:min(100%,850px);margin:0 auto 70px}
+.results.show{display:block;animation:appear .35s ease}
+@keyframes appear{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.result-head{display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding:0 0 15px;margin-bottom:15px}
+.tabs{display:flex;gap:5px;overflow-x:auto}
+.tab{border:0;background:transparent;color:#7a8497;border-radius:10px;padding:10px 13px;font-size:13px;white-space:nowrap}
+.tab.active{background:#eaf0ff;color:var(--blue);font-weight:700}
+.meta{font-size:12px;color:#8993a5}
+.result-item{padding:17px 0 20px;max-width:690px;border-bottom:1px solid #edf0f5}
+.result-url{font-size:12px;color:#738098;margin-bottom:8px;overflow-wrap:anywhere}
+.result-title{font-size:20px;line-height:1.35;font-weight:600;color:#205acb;margin:0 0 7px}
+.result-title a:hover{text-decoration:underline}
+.result-desc{font-size:14px;line-height:1.7;color:#626e82;margin:0}
+.result-label{display:inline-block;margin-top:10px;background:#f0f4fb;color:#748099;padding:5px 9px;border-radius:7px;font-size:11px}
+.loading,.empty{padding:48px 15px;text-align:center;color:var(--muted)}
+.spinner{width:27px;height:27px;border:3px solid #e6edfc;border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
 @keyframes spin{to{transform:rotate(360deg)}}
-.pagination{display:flex;justify-content:center;gap:8px;margin:25px}
-.page-btn{border:1px solid var(--line);background:var(--card);padding:9px 14px;border-radius:8px;cursor:pointer}
-.page-btn.active{background:var(--blue);color:white}
-.footer{padding:25px 5%;border-top:1px solid #f0f1f4;color:#858b96;font-size:12px;display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap}
-.footer-links{display:flex;gap:18px;flex-wrap:wrap}
+.empty strong{display:block;color:var(--ink);font-size:18px;margin-bottom:8px}
+.pages{display:flex;justify-content:center;gap:8px;padding:25px}
+.page{border:1px solid var(--line);background:white;border-radius:10px;padding:9px 14px;color:#647087}
+.page.active{background:var(--blue);border-color:var(--blue);color:white}
+.footer{border-top:1px solid #e9edf4;padding:22px clamp(18px,5vw,70px);display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap;color:#8a94a6;font-size:12px;background:rgba(255,255,255,.5)}
+.footer-links{display:flex;gap:20px;flex-wrap:wrap}
 .footer a:hover{color:var(--blue)}
-.toast{position:fixed;bottom:25px;left:50%;transform:translate(-50%,20px);background:#202938;color:white;padding:11px 17px;border-radius:30px;font-size:12px;opacity:0;pointer-events:none;transition:.3s;z-index:50}
+.toast{position:fixed;left:50%;bottom:25px;transform:translate(-50%,15px);background:#172033;color:white;padding:12px 18px;border-radius:30px;font-size:12px;opacity:0;pointer-events:none;transition:.25s;z-index:30;max-width:90vw;text-align:center}
 .toast.show{opacity:1;transform:translate(-50%,0)}
-body.dark{--ink:#eef2f9;--muted:#a1aabb;--line:#303a4b;--bg:#111722;--card:#192231;--soft:#202e45}
-body.dark .topbar,body.dark .footer{border-color:#263142}
-body.dark .result h3{color:#82adff}
-body.dark .result p{color:#b2bdcc}
-body.dark .outline-btn{color:#d4dceb}
-body.dark .result-label{background:#263247;color:#aab9d0}
-body.dark .search-box{border-color:#364357}
-
+body.dark{--bg:#101725;--surface:#192437;--surface-2:#202d43;--ink:#eef3ff;--muted:#a4b0c5;--line:#303d52;--shadow:0 18px 55px #0005}
+body.dark .topbar,body.dark .footer{background:rgba(16,23,37,.85);border-color:#273348}
+body.dark .top-link,body.dark .round-btn,body.dark .action-btn,body.dark .shortcut{color:#bdc9dd;background:#192437;border-color:#303d52}
+body.dark .searchbox,body.dark .suggestions{background:#192437;border-color:#34435b}
+body.dark .suggestion:hover{background:#243651}
+body.dark .result-item{border-color:#29364a}
+body.dark .result-title{color:#91b5ff}
+body.dark .result-desc{color:#b5c1d3}
+body.dark .result-label{background:#26354b;color:#bfcee3}
+body.dark .page{background:#192437;color:#c7d2e4;border-color:#303d52}
+body.dark .page.active{background:var(--blue);color:#fff}
 @media(max-width:600px){
-.topbar{height:60px;padding:0 17px}
-.brand{font-size:18px}
-.brand img{width:30px;height:30px}
-.main{padding:95px 17px 45px}
-.logo-large img{width:45px;height:45px}
-.logo-word{letter-spacing:-2px}
-.tagline{font-size:13px}
-.search-box{height:54px;padding:0 14px}
-.search-box input{font-size:15px}
-.search-actions{margin-top:19px}
-.outline-btn{padding:10px 15px}
-.results-area{margin-top:30px}
-.result h3{font-size:18px}
-.footer{padding:22px 18px}
+ .topbar{height:65px;padding:0 17px}.brand{font-size:18px}.brand img{width:31px;height:31px}
+ .top-link{display:none}.round-btn{width:39px;height:39px}
+ main{width:calc(100% - 30px)}.home{min-height:calc(100svh - 130px);padding:38px 0 55px}
+ .wordmark{letter-spacing:-3px}.tagline{font-size:13px;margin-bottom:28px}
+ .searchbox{height:60px;border-radius:17px;padding-left:16px;gap:9px}
+ .searchbox input{font-size:15px}.submit{height:43px;width:44px}
+ .shortcuts{margin-top:37px;gap:8px}.shortcut{padding:9px 11px}
+ .actions{gap:8px}.action-btn{padding:10px 12px}
+ .result-title{font-size:18px}.footer{padding:20px 17px}
 }
-
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
 </style>
 </head>
 <body>
-
 <header class="topbar">
-<a class="brand" href="./">
-<img src="logo.png" alt="Wareligent logo">
-<span>wareligent<span>.</span></span>
-</a>
-<div class="top-actions">
-<button class="icon-btn" id="historyBtn" title="Recent searches">◷</button>
-<button class="icon-btn" id="themeBtn" title="Toggle theme">☾</button>
-</div>
+  <a class="brand" href="./" aria-label="Wareligent home">
+    <img src="logo.png" alt="Wareligent">
+    <span class="brand-name">wareligent<span>.</span></span>
+  </a>
+  <div class="top-right">
+    <a class="top-link" href="https://wareligent.vercel.app" target="_blank" rel="noopener">About Wareligent ↗</a>
+    <button class="round-btn" id="historyBtn" aria-label="Search history" title="Search history">◷</button>
+    <button class="round-btn" id="themeBtn" aria-label="Toggle theme" title="Toggle theme">☾</button>
+  </div>
 </header>
 
-<main class="main">
-<section class="hero" id="home">
+<main>
+<section class="home" id="home">
+  <div class="hero">
+    <div class="eyebrow"><span class="live-dot"></span> YOUR GATEWAY TO THE WEB</div>
+    <div class="hero-logo">
+      <img src="logo.png" alt="">
+      <div class="wordmark">wareligent<span>.</span></div>
+    </div>
+    <p class="tagline">A clearer way to search the world.</p>
 
-<div class="logo-large">
-<img src="logo.png" alt="">
-<div class="logo-word">wareligent<span>.</span></div>
-</div>
+    <div class="search-shell">
+      <form class="searchbox" id="searchForm" autocomplete="off">
+        <span class="search-symbol">⌕</span>
+        <input id="searchInput" type="search" placeholder="What are you looking for?" aria-label="Search the web">
+        <button class="clear" id="clearBtn" type="button" aria-label="Clear search">×</button>
+        <button class="submit" type="submit" aria-label="Search">→</button>
+      </form>
+      <div class="suggestions" id="suggestions"></div>
+    </div>
 
-<p class="tagline">Search. Discover. Explore.</p>
+    <div class="actions">
+      <button class="action-btn" id="searchBtn">Search Wareligent</button>
+      <button class="action-btn" id="luckyBtn">Surprise me ↗</button>
+    </div>
 
-<div class="search-wrap">
-<form class="search-box" id="searchForm" autocomplete="off">
-<span class="search-icon">⌕</span>
-<input id="searchInput" type="search" placeholder="Search the web..." aria-label="Search the web">
-<button type="button" class="clear-btn" id="clearBtn">×</button>
-<button type="submit" class="icon-btn" style="color:var(--blue)">→</button>
-</form>
-<div class="suggestions" id="suggestions"></div>
-</div>
-
-<div class="search-actions">
-<button class="outline-btn" id="searchBtn">Wareligent Search</button>
-<button class="outline-btn" id="luckyBtn">I'm Feeling Curious</button>
-</div>
-
-<div class="quick-links">
-<button class="quick-link" data-query="Latest technology news">✦ Technology</button>
-<button class="quick-link" data-query="World news today">▤ News</button>
-<button class="quick-link" data-query="Science and innovation">◎ Science</button>
-<button class="quick-link" data-query="Learn programming">⌘ Programming</button>
-</div>
-
+    <div class="shortcuts">
+      <button class="shortcut" data-query="Technology"><i>✦</i>Technology</button>
+      <button class="shortcut" data-query="World news"><i>▤</i>News</button>
+      <button class="shortcut" data-query="Science"><i>◎</i>Science</button>
+      <button class="shortcut" data-query="Learn programming"><i>{ }</i>Programming</button>
+    </div>
+  </div>
 </section>
 
-<section class="results-area" id="resultsArea">
-<div class="results-top">
-<div class="result-tabs">
-<button class="tab active" data-type="web">All</button>
-<button class="tab" data-type="images">Images</button>
-<button class="tab" data-type="news">News</button>
-<button class="tab" data-type="videos">Videos</button>
-<button class="tab" data-type="maps">Maps</button>
-</div>
-<div class="result-meta" id="resultMeta"></div>
-</div>
-<div class="loader" id="loader">
-<div class="spinner"></div>Searching Wareligent...
-</div>
-<div id="resultsList"></div>
-<div class="pagination" id="pagination"></div>
+<section class="results" id="results">
+  <div class="result-head">
+    <div class="tabs">
+      <button class="tab active" data-type="web">All</button>
+      <button class="tab" data-type="images">Images</button>
+      <button class="tab" data-type="news">News</button>
+      <button class="tab" data-type="videos">Videos</button>
+      <button class="tab" data-type="maps">Maps</button>
+      <button class="tab" data-type="shopping">Shopping</button>
+    </div>
+    <span class="meta" id="meta"></span>
+  </div>
+  <div class="loading" id="loading"><div class="spinner"></div>Searching the web...</div>
+  <div id="resultList"></div>
+  <div class="pages" id="pages"></div>
 </section>
 </main>
 
 <footer class="footer">
-<span>© <span id="year"></span> Wareligent. All rights reserved.</span>
-<div class="footer-links">
-<a href="https://wareligent.vercel.app" target="_blank">About Wareligent</a>
-<a href="mailto:wareligent@gmail.com">Feedback</a>
-<a href="mailto:wareligent@gmail.com">Contact</a>
-</div>
+  <span>© <span id="year"></span> Wareligent</span>
+  <div class="footer-links">
+    <a href="https://wareligent.vercel.app" target="_blank" rel="noopener">About</a>
+    <a href="mailto:wareligent@gmail.com">Feedback</a>
+    <a href="mailto:wareligent@gmail.com">Contact</a>
+  </div>
 </footer>
-
 <div class="toast" id="toast"></div>
 
 <script>
-/* API CONFIGURATION */
-const CONFIG={
-mode:"demo",
-apiEndpoint:"https://YOUR-BACKEND.example.com/search",
-resultsPerPage:8,
-historyLimit:8
+/* =========================================================
+   WARELIGENT SEARCH CONFIG
+   Set mode to "api" after connecting your own backend.
+   Never put private API keys in this frontend file.
+========================================================= */
+const CONFIG = {
+  mode: "demo",
+  apiEndpoint: "https://YOUR-BACKEND.example.com/search",
+  resultsPerPage: 8,
+  historyLimit: 8
 };
 
-const $=id=>document.getElementById(id);
-const input=$('searchInput');
-const suggestions=$('suggestions');
-const resultsArea=$('resultsArea');
-const resultsList=$('resultsList');
-const loader=$('loader');
-const meta=$('resultMeta');
-const pagination=$('pagination');
+const $ = id => document.getElementById(id);
+const input = $("searchInput");
+let currentQuery = "";
+let currentType = "web";
+let currentPage = 1;
 
-let currentQuery='';
-let currentType='web';
-let currentPage=1;
-
-function demoResults(q){
-return [
-{title:q+" — Overview and Information",url:"https://en.wikipedia.org/wiki/"+encodeURIComponent(q.replace(/\s+/g,"_")),description:"Explore an overview of "+q+", including background information, useful facts and related topics.",label:"Reference"},
-{title:"Learn more about "+q,url:"https://www.google.com/search?q="+encodeURIComponent(q),description:"Discover useful resources, guides and information related to "+q+". This is a sample result.",label:"Web resource"},
-{title:q+" — Latest Updates",url:"https://www.bing.com/search?q="+encodeURIComponent(q),description:"Find recent updates, articles and discussions about "+q+" from across the web.",label:"Discover"},
-{title:"A beginner's guide to "+q,url:"https://duckduckgo.com/?q="+encodeURIComponent(q),description:"A starting point for learning about "+q+". Connect your own search provider for live results.",label:"Guide"},
-{title:q+": Resources and helpful links",url:"https://search.brave.com/search?q="+encodeURIComponent(q),description:"Browse more resources and related websites about "+q+".",label:"Resources"}
-];
+function notify(message) {
+  const toast = $("toast");
+  toast.textContent = message;
+  toast.classList.add("show");
+  setTimeout(() => toast.classList.remove("show"), 2400);
 }
-
-function toast(message){
-const t=$('toast');
-t.textContent=message;
-t.classList.add('show');
-setTimeout(()=>t.classList.remove('show'),2400);
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, c => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  })[c]);
 }
-
-function getHistory(){
-try{return JSON.parse(localStorage.getItem('wareligent_history')||'[]')}
-catch(e){return []}
+function safeURL(value) {
+  try {
+    const u = new URL(value);
+    return ["http:","https:"].includes(u.protocol) ? u.href : "#";
+  } catch { return "#"; }
 }
-
-function saveHistory(q){
-let h=getHistory().filter(x=>x.toLowerCase()!==q.toLowerCase());
-h.unshift(q);
-localStorage.setItem('wareligent_history',JSON.stringify(h.slice(0,CONFIG.historyLimit)));
+function getHistory() {
+  try { return JSON.parse(localStorage.getItem("wareligent_history") || "[]"); }
+  catch { return []; }
 }
-
-function escapeHTML(s){
-return String(s).replace(/[&<>"']/g,c=>({
-'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-}[c]));
+function saveHistory(query) {
+  const list = getHistory().filter(x => x.toLowerCase() !== query.toLowerCase());
+  list.unshift(query);
+  localStorage.setItem("wareligent_history", JSON.stringify(list.slice(0, CONFIG.historyLimit)));
 }
-
-function safeURL(url){
-try{
-const u=new URL(url);
-return ['http:','https:'].includes(u.protocol)?u.href:'#';
-}catch(e){return '#'}
+function demoResults(query) {
+  const q = encodeURIComponent(query);
+  return [
+    {title:`${query} — Overview`,url:`https://en.wikipedia.org/wiki/${q}`,description:`Explore background information, useful facts and related topics about ${query}.`,label:"Reference"},
+    {title:`Search the web for ${query}`,url:`https://www.google.com/search?q=${q}`,description:`Discover websites, guides and resources related to ${query}. Demo preview — connect a search API for real results.`,label:"Web"},
+    {title:`${query} — Latest information`,url:`https://www.bing.com/search?q=${q}`,description:`Explore more information and current resources about ${query}.`,label:"Explore"},
+    {title:`Learn about ${query}`,url:`https://duckduckgo.com/?q=${q}`,description:`Find helpful learning resources and related websites.`,label:"Learning"}
+  ];
 }
-
-function showSuggestions(){
-let items=getHistory();
-const q=input.value.trim();
-if(q)items=[q,...items.filter(x=>x.toLowerCase().includes(q.toLowerCase()))];
-items=[...new Set(items)].slice(0,6);
-if(!items.length){suggestions.classList.remove('show');return}
-suggestions.innerHTML=items.map(x=>
-`<div class="suggestion" data-value="${escapeHTML(x)}">⌕ &nbsp; ${escapeHTML(x)}</div>`
-).join('');
-suggestions.classList.add('show');
+async function getResults(query, type, page) {
+  if (CONFIG.mode === "demo") return demoResults(query);
+  if (CONFIG.apiEndpoint.includes("YOUR-BACKEND")) throw new Error("Add your backend API URL in CONFIG first.");
+  const response = await fetch(CONFIG.apiEndpoint, {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({query,type,page,limit:CONFIG.resultsPerPage})
+  });
+  if (!response.ok) throw new Error(`API error (${response.status})`);
+  const data = await response.json();
+  return Array.isArray(data) ? data : (data.results || []);
 }
-
-async function fetchResults(q,type,page){
-if(CONFIG.mode!=="api")return demoResults(q);
-if(CONFIG.apiEndpoint.includes("YOUR-BACKEND"))throw new Error("Configure your API endpoint first.");
-const response=await fetch(CONFIG.apiEndpoint,{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify({query:q,type,page,limit:CONFIG.resultsPerPage})
+function renderResults(items) {
+  const list = $("resultList");
+  if (!items.length) {
+    list.innerHTML = '<div class="empty"><strong>No results found</strong>Try another search phrase.</div>';
+    return;
+  }
+  list.innerHTML = items.map(item => {
+    const url = safeURL(item.url || item.link || "#");
+    let host = "Website";
+    try { host = new URL(url).hostname; } catch {}
+    return `<article class="result-item">
+      <div class="result-url">◉ &nbsp;${escapeHTML(item.displayUrl || host)}</div>
+      <h2 class="result-title"><a href="${url}" target="_blank" rel="noopener noreferrer">${escapeHTML(item.title || "Untitled result")}</a></h2>
+      <p class="result-desc">${escapeHTML(item.description || item.snippet || "No description available.")}</p>
+      ${item.label ? `<span class="result-label">${escapeHTML(item.label)}</span>` : ""}
+    </article>`;
+  }).join("");
+  $("pages").innerHTML = CONFIG.mode === "demo"
+    ? '<button class="page active">1</button>'
+    : `<button class="page" id="prevPage" ${currentPage<=1?"disabled":""}>←</button><button class="page active">${currentPage}</button><button class="page" id="nextPage">→</button>`;
+  if ($("prevPage")) $("prevPage").onclick = () => search(currentQuery,currentType,currentPage-1);
+  if ($("nextPage")) $("nextPage").onclick = () => search(currentQuery,currentType,currentPage+1);
+}
+async function search(query, type="web", page=1) {
+  query = query.trim();
+  if (!query) { input.focus(); notify("Type something to search"); return; }
+  currentQuery=query; currentType=type; currentPage=page;
+  input.value=query;
+  $("clearBtn").style.display="block";
+  $("suggestions").classList.remove("open");
+  saveHistory(query);
+  $("results").classList.add("show");
+  $("loading").style.display="block";
+  $("resultList").innerHTML="";
+  $("pages").innerHTML="";
+  $("meta").textContent="";
+  document.querySelectorAll(".tab").forEach(tab => tab.classList.toggle("active",tab.dataset.type===type));
+  try {
+    const items=await getResults(query,type,page);
+    renderResults(items);
+    $("meta").textContent=CONFIG.mode==="demo" ? "Demo preview · Not live search results" : `${items.length} results`;
+    $("results").scrollIntoView({behavior:"smooth",block:"start"});
+  } catch(error) {
+    $("resultList").innerHTML=`<div class="empty"><strong>Search unavailable</strong>${escapeHTML(error.message)}</div>`;
+  } finally {
+    $("loading").style.display="none";
+  }
+}
+function showSuggestions() {
+  const query=input.value.trim().toLowerCase();
+  let values=getHistory();
+  if(query) values=[input.value.trim(),...values.filter(x=>x.toLowerCase().includes(query))];
+  values=[...new Set(values)].slice(0,6);
+  const box=$("suggestions");
+  if(!values.length){box.classList.remove("open");return;}
+  box.innerHTML=values.map(value=>`<div class="suggestion" data-query="${escapeHTML(value)}">⌕ <span>${escapeHTML(value)}</span></div>`).join("");
+  box.classList.add("open");
+}
+$("searchForm").addEventListener("submit",e=>{e.preventDefault();search(input.value);});
+$("searchBtn").onclick=()=>search(input.value);
+$("luckyBtn").onclick=()=>input.value.trim()?search(input.value):notify("Enter a search first");
+input.addEventListener("input",()=>{
+  $("clearBtn").style.display=input.value?"block":"none";
+  showSuggestions();
 });
-if(!response.ok)throw new Error("Search API error: "+response.status);
-const data=await response.json();
-return Array.isArray(data)?data:(data.results||[]);
-}
-
-async function runSearch(q,type="web",page=1){
-q=q.trim();
-if(!q){input.focus();toast("Type something to search");return}
-currentQuery=q;
-currentType=type;
-currentPage=page;
-input.value=q;
-$('clearBtn').style.display="block";
-suggestions.classList.remove('show');
-saveHistory(q);
-resultsArea.classList.add('show');
-loader.classList.add('show');
-resultsList.innerHTML="";
-pagination.innerHTML="";
-meta.textContent="";
-document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.type===type));
-
-try{
-const items=await fetchResults(q,type,page);
-renderResults(items);
-meta.textContent=CONFIG.mode==="demo"?"Demo results · API not connected":items.length+" results";
-resultsArea.scrollIntoView({behavior:"smooth",block:"start"});
-}catch(err){
-resultsList.innerHTML=`<div class="empty"><strong>Search could not be completed</strong>${escapeHTML(err.message)}</div>`;
-}finally{
-loader.classList.remove('show');
-}
-}
-
-function renderResults(items){
-if(!items.length){
-resultsList.innerHTML='<div class="empty"><strong>No results found</strong>Try different keywords.</div>';
-return;
-}
-resultsList.innerHTML=items.map(r=>{
-const title=escapeHTML(r.title||r.name||"Untitled result");
-const url=safeURL(r.url||r.link||"#");
-let host="Search result";
-try{host=new URL(url).hostname}catch(e){}
-const description=escapeHTML(r.description||r.snippet||"No description available.");
-return `<article class="result">
-<div class="result-url">🌐 ${escapeHTML(r.displayUrl||host)}</div>
-<h3><a href="${url}" target="_blank" rel="noopener noreferrer">${title}</a></h3>
-<p>${description}</p>
-${r.label?`<span class="result-label">${escapeHTML(r.label)}</span>`:""}
-</article>`;
-}).join('');
-
-if(CONFIG.mode==="demo"){
-pagination.innerHTML='<button class="page-btn active">1</button>';
-}else if(items.length>=CONFIG.resultsPerPage){
-pagination.innerHTML=`<button class="page-btn" id="prevPage">←</button><button class="page-btn active">${currentPage}</button><button class="page-btn" id="nextPage">→</button>`;
-if($('prevPage'))$('prevPage').onclick=()=>runSearch(currentQuery,currentType,currentPage-1);
-if($('nextPage'))$('nextPage').onclick=()=>runSearch(currentQuery,currentType,currentPage+1);
-}
-}
-
-$('searchForm').addEventListener('submit',e=>{
-e.preventDefault();
-runSearch(input.value);
+input.addEventListener("focus",showSuggestions);
+$("clearBtn").onclick=()=>{input.value="";$("clearBtn").style.display="none";$("suggestions").classList.remove("open");input.focus();};
+$("suggestions").onclick=e=>{
+  const row=e.target.closest(".suggestion");
+  if(row)search(row.dataset.query);
+};
+document.addEventListener("click",e=>{
+  if(!e.target.closest(".search-shell"))$("suggestions").classList.remove("open");
 });
-
-$('searchBtn').onclick=()=>runSearch(input.value);
-$('luckyBtn').onclick=()=>{
-if(!input.value.trim()){toast("Enter a search first");return}
-runSearch(input.value);
-};
-
-input.addEventListener('input',()=>{
-$('clearBtn').style.display=input.value?"block":"none";
-showSuggestions();
+document.querySelectorAll(".shortcut").forEach(button=>{
+  button.onclick=()=>search(button.dataset.query);
 });
-
-input.addEventListener('focus',showSuggestions);
-
-$('clearBtn').onclick=()=>{
-input.value="";
-$('clearBtn').style.display="none";
-suggestions.classList.remove('show');
-input.focus();
-};
-
-suggestions.onclick=e=>{
-const row=e.target.closest('.suggestion');
-if(row)runSearch(row.dataset.value);
-};
-
-document.addEventListener('click',e=>{
-if(!e.target.closest('.search-wrap'))suggestions.classList.remove('show');
+document.querySelectorAll(".tab").forEach(button=>{
+  button.onclick=()=>currentQuery?search(currentQuery,button.dataset.type):notify("Search something first");
 });
-
-document.querySelectorAll('.quick-link').forEach(b=>{
-b.onclick=()=>runSearch(b.dataset.query);
-});
-
-document.querySelectorAll('.tab').forEach(b=>{
-b.onclick=()=>{
-if(currentQuery)runSearch(currentQuery,b.dataset.type);
-else toast("Enter a search query first");
+$("historyBtn").onclick=()=>{
+  const history=getHistory();
+  if(!history.length){notify("No recent searches yet");return;}
+  input.value=history[0];showSuggestions();input.focus();
 };
-});
-
-$('historyBtn').onclick=()=>{
-const h=getHistory();
-if(!h.length){toast("No recent searches yet");return}
-input.value=h[0];
-showSuggestions();
-input.focus();
-};
-
-$('themeBtn').onclick=()=>{
-document.body.classList.toggle('dark');
-const dark=document.body.classList.contains('dark');
-localStorage.setItem('wareligent_theme',dark?'dark':'light');
-$('themeBtn').textContent=dark?'☀':'☾';
-};
-
-if(localStorage.getItem('wareligent_theme')==='dark'){
-document.body.classList.add('dark');
-$('themeBtn').textContent='☀';
+function applyTheme(dark) {
+  document.body.classList.toggle("dark",dark);
+  $("themeBtn").textContent=dark?"☀":"☾";
+  localStorage.setItem("wareligent_theme",dark?"dark":"light");
 }
-
-$('year').textContent=new Date().getFullYear();
+$("themeBtn").onclick=()=>applyTheme(!document.body.classList.contains("dark"));
+applyTheme(localStorage.getItem("wareligent_theme")==="dark");
+$("year").textContent=new Date().getFullYear();
 </script>
 </body>
 </html>
